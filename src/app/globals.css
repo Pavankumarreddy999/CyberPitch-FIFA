@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+@theme {
+  /* You can define custom theme variables here if needed */
+}
+
+/*
+  You can use @apply in regular CSS rules, 
+  but it's recommended to use utility classes directly in your JSX instead.
+*/
+
+/* If you need to add custom global styles: */
+body {
+  @apply bg-white dark:bg-gray-950 text-gray-900 dark:text-white;
+}
+
+/* Or use plain CSS: */
+/* body {
+  background-color: white;
+  color: #111827;
+} */
+
+/* For dark mode, you can use media query or class-based dark mode */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #030712;
+    color: #f9fafb;
+  }
+}
