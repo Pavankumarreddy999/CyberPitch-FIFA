@@ -78,3 +78,7 @@ AttributeError: 'coroutine' object has no attribute 'get'
 2026-07-06 15:05:56,494 INFO Scanning domain: google.com
 2026-07-06 15:06:44,485 INFO Scanning domain: fifa.com
 2026-07-06 15:07:26,828 INFO Scanning domain: google.com
+2026-07-06 16:09:58,279 INFO Scanning domain: fifa.com
+2026-07-06 16:15:07,724 INFO Scanning domain: fifa.com
+2026-07-06 16:28:08,681 INFO Scanning domain: fifa.com
+2026-07-06 16:30:55,839 INFO Scanning domain: fifa.com

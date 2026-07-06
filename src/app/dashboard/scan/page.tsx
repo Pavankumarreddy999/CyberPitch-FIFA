@@ -251,19 +251,26 @@ export default function ScanPage() {
                     </div>
                   </div>
 
-                  {/* Meta stats */}
-                  <div className="pt-4 border-t border-gray-100 dark:border-gray-800 grid grid-cols-2 gap-4 text-center">
-                    <div className="bg-gray-50 dark:bg-gray-950 p-2.5 rounded-xl border border-gray-200/60 dark:border-gray-800">
-                      <span className="block text-[10px] uppercase font-bold text-gray-400">WHOIS Age</span>
-                      <span className="text-xs font-semibold text-gray-900 dark:text-white mt-0.5 block">
-                        {result["WHOIS Age Days"]} Days
-                      </span>
-                    </div>
-                    <div className="bg-gray-50 dark:bg-gray-950 p-2.5 rounded-xl border border-gray-200/60 dark:border-gray-800">
-                      <span className="block text-[10px] uppercase font-bold text-gray-400">SSL Status</span>
-                      <span className="text-xs font-semibold text-green-600 dark:text-green-400 mt-0.5 block">
-                        {result["SSL Status"]}
-                      </span>
+                  {/* Detailed Threat Calculations */}
+                  <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
+                    <h4 className="text-xs font-bold uppercase text-gray-400 tracking-wider mb-3">Engine Calculations & Features</h4>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-center">
+                      {[
+                        { label: "Phishing Prob.", val: typeof result["Phishing Probability"] === "number" ? (result["Phishing Probability"] * 100).toFixed(1) + "%" : "N/A" },
+                        { label: "Visual Match", val: typeof result["Visual Similarity Score"] === "number" ? (result["Visual Similarity Score"] * 100).toFixed(1) + "%" : "N/A" },
+                        { label: "WHOIS Age", val: result["WHOIS Age Days"] !== undefined ? `${result["WHOIS Age Days"]} Days` : "Unknown" },
+                        { label: "SSL Status", val: result["SSL Status"] || "Unknown" },
+                        { label: "Hosting", val: result["Hosting Country"] || "Unknown" },
+                        { label: "Domain Len", val: result["Domain Length"] ?? 0 },
+                        { label: "Subdomains", val: result["Subdomain Count"] ?? 0 },
+                        { label: "Typosquat Dist", val: result["Typosquat Distance to FIFA"] ?? "N/A" },
+                        { label: "Malware Match", val: result["Malware Signature Match"] ? "Yes" : "No" }
+                      ].map((stat, i) => (
+                        <div key={i} className="bg-gray-50 dark:bg-gray-950 p-2.5 rounded-xl border border-gray-200/60 dark:border-gray-800 flex flex-col justify-center">
+                          <span className="block text-[9px] uppercase font-bold text-gray-400">{stat.label}</span>
+                          <span className="text-xs font-semibold text-gray-900 dark:text-white mt-0.5 block">{stat.val}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
 
