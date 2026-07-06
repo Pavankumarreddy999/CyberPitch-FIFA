@@ -59,13 +59,19 @@ def get_whois(domain: str):
 
         w = whois.whois(domain)
 
+        def _first_date(val):
+            """Unwrap a list to its first element before stringifying."""
+            if isinstance(val, list):
+                val = val[0] if val else None
+            return str(val) if val is not None else None
+
         return {
             "source": "python-whois",
             "registrar": w.registrar,
             "country": getattr(w, "country", None),
-            "creation_date": str(w.creation_date),
-            "expiration_date": str(w.expiration_date),
-            "updated_date": str(w.updated_date),
+            "creation_date": _first_date(w.creation_date),
+            "expiration_date": _first_date(w.expiration_date),
+            "updated_date": _first_date(w.updated_date),
             "nameservers": list(w.name_servers) if w.name_servers else [],
             "status": w.status,
             "raw": dict(w),
