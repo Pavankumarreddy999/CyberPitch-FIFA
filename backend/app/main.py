@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from app.database.database import engine
+from app.database.database import engine, run_migrations
 from app.models import ScanHistory
 from app.database.database import Base
 from app.api.whois import router as whois_router
@@ -11,6 +11,8 @@ from app.api import url_features
 from app.api.threat import router as threat_router
 from app.api.scan import router as scan_router
 Base.metadata.create_all(bind=engine)
+run_migrations()
+
 
 app = FastAPI(
     title="CyberPitch FIFA API",

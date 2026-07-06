@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, Integer, String
+from sqlalchemy import Column, DateTime, Float, Integer, String
 
 from app.database.database import Base
 
@@ -16,4 +16,6 @@ class ScanHistory(Base):
 
     risk_score = Column(Integer)
 
-    created_at = Column(DateTime, default=datetime.utcnow)
+    confidence_score = Column(Float, nullable=True)
+
+    created_at = Column(DateTime, default=datetime.utcnow)

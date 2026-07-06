@@ -24,3 +24,12 @@ Traceback (most recent call last):
            ~~~~^^^^^^^^^^
 KeyError: 'domain'
 2026-07-06 10:13:00,168 INFO Scanning domain: google.com
+2026-07-06 10:54:26,841 INFO Scanning domain: worldcup2026-rewards.site
+2026-07-06 11:17:37,150 INFO Scanning domain: fifa2026-rewards-tix.xyz
+2026-07-06 11:30:14,785 INFO Scanning domain: heelllo.com
+2026-07-06 11:32:48,109 INFO Scanning domain: fifaworld.com
+2026-07-06 11:34:45,307 INFO Scanning domain: google.com
+2026-07-06 11:36:35,811 INFO WHOIS lookup started for google.com
+2026-07-06 11:36:35,815 INFO Cache hit for google.com
+2026-07-06 11:45:39,658 INFO Scanning domain: santhosh.com
+2026-07-06 11:46:29,863 INFO Scanning domain: fifa-rewards-official.com

@@ -7,6 +7,7 @@ from app.config import CACHE_TTL_DAYS
 from app.models.whois_cache import WhoisCache
 from app.models.dns_cache import DNSCache
 from app.models.ssl_cache import SSLCache
+from app.models.asn_cache import AsnCache
 
 
 def get_cached_whois(db: Session, domain: str):
@@ -30,6 +31,12 @@ def get_cached_whois(db: Session, domain: str):
 
 
 def save_cached_whois(db: Session, data: dict):
+    # Remove old cached entry if exists
+    existing = db.query(WhoisCache).filter(WhoisCache.domain == data["domain"]).first()
+    if existing:
+        db.delete(existing)
+        db.commit()
+
     row = WhoisCache(
         domain=data["domain"],
         registrar=data.get("registrar"),
@@ -166,4 +173,47 @@ def save_cached_ssl(db: Session, domain: str, data: dict):
     db.add(row)
     db.commit()
     db.refresh(row)
-    return row
+    return row
+
+
+# ──────────────────────────────────────────────────
+# ASN Cache
+# ──────────────────────────────────────────────────
+
+def get_cached_asn(db: Session, ip: str):
+    row = (
+        db.query(AsnCache)
+        .filter(AsnCache.ip == ip)
+        .first()
+    )
+
+    if row is None:
+        return None
+
+    age = datetime.utcnow() - row.created_at
+
+    if age > timedelta(days=CACHE_TTL_DAYS):
+        db.delete(row)
+        db.commit()
+        return None
+
+    return row
+
+
+def save_cached_asn(db: Session, ip: str, asn: str, asn_description: str):
+    existing = db.query(AsnCache).filter(AsnCache.ip == ip).first()
+    if existing:
+        db.delete(existing)
+        db.commit()
+
+    row = AsnCache(
+        ip=ip,
+        asn=asn,
+        asn_description=asn_description,
+    )
+
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return row
+

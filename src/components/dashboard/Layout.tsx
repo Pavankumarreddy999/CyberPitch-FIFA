@@ -8,12 +8,15 @@ import {
   Globe, 
   AlertTriangle, 
   Activity, 
-  Settings,
   Shield,
   Menu,
   X,
   Sun,
-  Moon
+  Moon,
+  Search,
+  Flag,
+  BookOpen,
+  Bell
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
@@ -23,10 +26,11 @@ interface LayoutProps {
 
 const navItems = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Domains", href: "/dashboard/domains", icon: Globe },
-  { name: "Threats", href: "/dashboard/threats", icon: AlertTriangle },
+  { name: "Flagged Domains", href: "/dashboard/domains", icon: Flag },
+  { name: "Threat Alerts", href: "/dashboard/alerts", icon: Bell },
+  { name: "Scan URL", href: "/dashboard/scan", icon: Search },
   { name: "Campaigns", href: "/dashboard/campaigns", icon: Activity },
-  { name: "Settings", href: "/dashboard/settings", icon: Settings },
+  { name: "Recommendations", href: "/dashboard/recommendations", icon: BookOpen },
 ];
 
 export function DashboardLayout({ children }: LayoutProps) {
