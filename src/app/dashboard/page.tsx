@@ -548,8 +548,8 @@ function RiskGauge({value}:{value:number}) {
 /* ═══════════════════════════════════════════════════════════════
    SIDEBAR
 ═══════════════════════════════════════════════════════════════ */
-interface SidebarProps { page:string; setPage:(p:string)=>void; collapsed:boolean; setCollapsed:(c:boolean)=>void; }
-function Sidebar({page,setPage,collapsed,setCollapsed}:SidebarProps) {
+interface SidebarProps { page:string; setPage:(p:string)=>void; collapsed:boolean; setCollapsed:(c:boolean)=>void; userName?: string; onLogout?: () => void; }
+function Sidebar({page,setPage,collapsed,setCollapsed,userName,onLogout}:SidebarProps) {
   const items=[
     {key:"dashboard",label:"Dashboard",icon:LayoutDashboard,enabled:true},
     {key:"domains",label:"Domain Intelligence",icon:Globe2,enabled:true,subItems:["Search & Filters","Active Blocks","WHOIS Records"]},
@@ -559,6 +559,9 @@ function Sidebar({page,setPage,collapsed,setCollapsed}:SidebarProps) {
     {key:"alerts",label:"Alerts Center",icon:Bell,enabled:true},
     {key:"settings",label:"Settings",icon:Settings,enabled:true},
   ];
+  const displayName = userName || "Abhinav Kumar";
+  const initials = displayName.split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2)||"AK";
+
   return (
     <div className={`sidebar${collapsed?" collapsed":""}`}>
       <div className="brand" style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"20px 16px"}}>
@@ -596,12 +599,15 @@ function Sidebar({page,setPage,collapsed,setCollapsed}:SidebarProps) {
       </div>
       <div style={{marginTop:"auto",padding:collapsed?"12px 8px":"16px",borderTop:"1px solid var(--border)"}}>
         <div style={{display:"flex",alignItems:"center",gap:10,justifyContent:collapsed?"center":"flex-start"}}>
-          <div style={{width:36,height:36,borderRadius:"50%",background:"linear-gradient(135deg,var(--indigo),var(--violet))",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:700,fontSize:13,flexShrink:0}}>AK</div>
+          <div style={{width:36,height:36,borderRadius:"50%",background:"linear-gradient(135deg,var(--indigo),var(--violet))",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:700,fontSize:13,flexShrink:0}}>{initials}</div>
           {!collapsed&&<div style={{minWidth:0,flex:1}}>
-            <div style={{fontSize:13,fontWeight:600,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>Abhinav Kumar</div>
+            <div style={{fontSize:13,fontWeight:600,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{displayName}</div>
             <div style={{fontSize:11,color:"var(--text-muted)"}}>Analyst Level 3</div>
           </div>}
         </div>
+        {!collapsed && onLogout && (
+          <button onClick={onLogout} style={{marginTop:10,width:"100%",display:"flex",alignItems:"center",justifyContent:"center",gap:6,padding:"7px 0",background:"rgba(244,63,94,0.08)",border:"1px solid rgba(244,63,94,0.2)",borderRadius:8,color:"var(--rose)",fontSize:12,fontWeight:600,cursor:"pointer"}}><LogOut size={13}/>Sign Out</button>
+        )}
       </div>
     </div>
   );
@@ -1035,77 +1041,674 @@ function SettingsPage({isDark}:{isDark:boolean}) {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   AUTH SYSTEM — Login / Sign Up / Forgot Password
+═══════════════════════════════════════════════════════════════ */
+const AUTH_STYLE = `
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  .auth-root {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: #050b16; position: relative; overflow: hidden;
+    font-family: 'Inter', sans-serif;
+  }
+  .auth-bg {
+    position: absolute; inset: 0; z-index: 0;
+    background-image:
+      radial-gradient(circle at 15% 25%, rgba(99,102,241,0.14) 0%, transparent 50%),
+      radial-gradient(circle at 85% 75%, rgba(167,139,250,0.11) 0%, transparent 50%),
+      radial-gradient(circle at 50% 10%, rgba(0,194,255,0.06) 0%, transparent 45%);
+  }
+  .auth-bg::before {
+    content: ''; position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='52'%3E%3Cpolygon points='30,2 58,17 58,35 30,50 2,35 2,17' fill='none' stroke='rgba(99,102,241,0.055)' stroke-width='1'/%3E%3C/svg%3E");
+    background-size: 60px 52px;
+    animation: authHexMove 40s linear infinite;
+  }
+  @keyframes authHexMove { from{background-position:0 0} to{background-position:120px 104px} }
+
+  .auth-orb {
+    position: absolute; border-radius: 50%; filter: blur(90px); pointer-events: none; animation: authOrbFloat 9s ease-in-out infinite;
+  }
+  .auth-orb-1 { width: 450px; height: 450px; top:-120px; left:-120px; background:rgba(99,102,241,0.16); animation-delay:0s; }
+  .auth-orb-2 { width: 320px; height: 320px; bottom:-90px; right:-90px; background:rgba(167,139,250,0.13); animation-delay:-4s; }
+  .auth-orb-3 { width: 220px; height: 220px; top:45%; right:15%; background:rgba(0,255,210,0.07); animation-delay:-7s; }
+  @keyframes authOrbFloat { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-22px) scale(1.06)} }
+
+  /* Scanline overlay */
+  .auth-scanlines {
+    position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+  }
+
+  .auth-card {
+    position: relative; z-index: 2; width: 440px;
+    padding: 40px 40px 32px;
+    background: rgba(8,18,36,0.90);
+    border-radius: 24px;
+    border: 1px solid rgba(0,194,255,0.13);
+    box-shadow: 0 30px 70px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.03), inset 0 1px 0 rgba(255,255,255,0.04);
+    backdrop-filter: blur(24px);
+    animation: authCardIn 0.55s cubic-bezier(0.16,1,0.3,1) forwards;
+  }
+  @keyframes authCardIn { from{opacity:0;transform:translateY(28px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+
+  .auth-input-wrap { position: relative; }
+  .auth-input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #4a5e7a; }
+  .auth-input {
+    width: 100%; padding: 12px 42px 12px 42px; border-radius: 12px; font-size: 14px;
+    background: rgba(255,255,255,0.04); border: 1.5px solid rgba(99,102,241,0.14);
+    color: #f0f5fc; outline: none; transition: all 0.22s ease;
+    font-family: inherit;
+  }
+  .auth-input::placeholder { color: rgba(100,120,150,0.65); }
+  .auth-input:focus { border-color: #6366f1; background: rgba(99,102,241,0.07); box-shadow: 0 0 0 3px rgba(99,102,241,0.13); }
+  .auth-input.error-field { border-color: rgba(255,42,95,0.5); }
+  .auth-input.success-field { border-color: rgba(0,255,210,0.4); }
+
+  .auth-btn-primary {
+    width: 100%; padding: 13px; border-radius: 12px; font-size: 15px; font-weight: 700;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 60%, #a78bfa 100%);
+    color: #fff; border: none; cursor: pointer; letter-spacing: 0.02em;
+    box-shadow: 0 4px 22px rgba(99,102,241,0.42);
+    transition: all 0.22s ease; position: relative; overflow: hidden;
+    font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .auth-btn-primary::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+    transform: translateX(-100%); transition: transform 0.5s ease;
+  }
+  .auth-btn-primary:hover::after { transform: translateX(100%); }
+  .auth-btn-primary:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(99,102,241,0.55); }
+  .auth-btn-primary:active { transform: translateY(0); }
+  .auth-btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .auth-btn-secondary {
+    width: 100%; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 600;
+    background: rgba(99,102,241,0.08); border: 1.5px solid rgba(99,102,241,0.2);
+    color: #a5b7d0; cursor: pointer; transition: all 0.2s ease;
+    font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .auth-btn-secondary:hover { background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.4); color: #f0f5fc; }
+
+  .auth-link {
+    background: none; border: none; cursor: pointer; font-family: inherit;
+    font-size: 13px; font-weight: 600; color: #6366f1; text-decoration: underline;
+    text-underline-offset: 3px; padding: 0; transition: color 0.15s;
+  }
+  .auth-link:hover { color: #a78bfa; }
+
+  .auth-error {
+    background: rgba(255,42,95,0.09); border: 1px solid rgba(255,42,95,0.28);
+    border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #ff5575;
+    display: flex; align-items: center; gap: 8px;
+    animation: authShake 0.38s ease;
+  }
+  @keyframes authShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-7px)} 60%{transform:translateX(7px)} 80%{transform:translateX(-4px)} }
+
+  .auth-success {
+    background: rgba(0,255,210,0.08); border: 1px solid rgba(0,255,210,0.25);
+    border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #00ffd2;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .auth-divider { display:flex; align-items:center; gap:12; margin:18px 0; }
+  .auth-divider-line { flex:1; height:1px; background:rgba(255,255,255,0.07); }
+  .auth-divider-label { font-size:11px; color:#3b4d66; font-weight:600; letter-spacing:0.06em; white-space:nowrap; }
+
+  .strength-bar { height: 4px; border-radius: 4px; transition: width 0.4s ease, background 0.4s ease; }
+
+  .auth-tabs { display:flex; gap:4; background:rgba(255,255,255,0.04); padding:4px; border-radius:12px; margin-bottom:24px; }
+  .auth-tab {
+    flex:1; padding:8px; border-radius:9px; border:none; font-family:inherit;
+    font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s;
+    color:#677b96; background:transparent;
+  }
+  .auth-tab.active { background:rgba(99,102,241,0.18); color:#a5b7d0; box-shadow:0 2px 8px rgba(0,0,0,0.2); }
+
+  .field-label { font-size:12px; font-weight:600; color:#677b96; margin-bottom:6px; letter-spacing:0.04em; text-transform:uppercase; }
+  .field-hint { font-size:11px; color:#3b4d66; margin-top:5px; }
+
+  @keyframes authSpin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+  .spinning { animation: authSpin 1s linear infinite; }
+`;
+
+/* ── helpers ── */
+function pwStrength(pw: string): { score: number; label: string; color: string } {
+  let score = 0;
+  if (pw.length >= 8) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  if (pw.length >= 12) score++;
+  const map: [string, string][] = [
+    ["Too short", "#ff2a5f"], ["Weak", "#ff6b35"], ["Fair", "#f59e0b"],
+    ["Good", "#6366f1"], ["Strong", "#00ffd2"],
+  ];
+  const [label, color] = map[Math.min(score, 4)];
+  return { score, label, color };
+}
+
+interface AuthAccount { name: string; email: string; password: string; }
+interface AuthPageProps { onLogin: (name: string) => void; }
+
+/* ═══════════════════════════════════════════════════════════════
+   AUTH SYSTEM — Fixed Input Handling
+═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   AUTH SYSTEM — COMPLETELY FIXED INPUT HANDLING
+═══════════════════════════════════════════════════════════════ */
+function AuthPage({ onLogin }: AuthPageProps) {
+  /* ─── view: "signin" | "signup" | "forgot" ─── */
+  const [view, setView] = useState<"signin" | "signup" | "forgot">("signin");
+
+  /* ─── shared fields ─── */
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPwd, setShowPwd] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  /* ─── sign-up only fields ─── */
+  const [fullName, setFullName] = useState("");
+  const [confirmPwd, setConfirmPwd] = useState("");
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  /* ─── local account store ─── */
+  const [accounts] = useState<AuthAccount[]>([
+    { name: "Abhinav Kumar", email: "analyst@sentinel7.io", password: "FIFA2026#" },
+  ]);
+
+  const strength = pwStrength(password);
+
+  /* ── clear state on view switch ── */
+  const switchView = (v: "signin" | "signup" | "forgot") => {
+    setView(v); setError(null); setSuccess(null);
+    setEmail(""); setPassword(""); setConfirmPwd(""); setFullName("");
+    setShowPwd(false); setShowConfirm(false);
+  };
+
+  /* ── Sign In ── */
+  const handleSignIn = (e: React.FormEvent) => {
+    e.preventDefault(); setError(null);
+    if (!email.trim()) { setError("Please enter your email address."); return; }
+    if (!password) { setError("Please enter your password."); return; }
+    setLoading(true);
+    setTimeout(() => {
+      const acc = accounts.find(a => a.email.toLowerCase() === email.trim().toLowerCase());
+      if (!acc) { setLoading(false); setError("No account found with that email. Create one below!"); return; }
+      if (acc.password !== password) { setLoading(false); setError("Wrong password. Try again or reset it."); return; }
+      setLoading(false);
+      onLogin(acc.name);
+    }, 900);
+  };
+
+  /* ── Sign Up ── */
+  const handleSignUp = (e: React.FormEvent) => {
+    e.preventDefault(); setError(null);
+    if (!fullName.trim()) { setError("Please enter your full name."); return; }
+    if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) { setError("Please enter a valid email address."); return; }
+    if (password.length < 8) { setError("Password must be at least 8 characters."); return; }
+    if (password !== confirmPwd) { setError("Passwords do not match. Please check and try again."); return; }
+    if (accounts.find(a => a.email.toLowerCase() === email.trim().toLowerCase())) {
+      setError("An account with this email already exists. Sign in instead."); return;
+    }
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      onLogin(fullName.trim());
+    }, 1000);
+  };
+
+  /* ── Forgot Password ── */
+  const handleForgot = (e: React.FormEvent) => {
+    e.preventDefault(); setError(null); setSuccess(null);
+    if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) { setError("Please enter a valid email address."); return; }
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      const acc = accounts.find(a => a.email.toLowerCase() === email.trim().toLowerCase());
+      if (acc) {
+        setSuccess(`Password reset link sent to ${email}.`);
+      } else {
+        setError("No account found with that email address.");
+      }
+    }, 1000);
+  };
+
+  /* ──────── LOGO ──────── */
+  const Logo = () => (
+    <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 28 }}>
+      <div style={{ width: 46, height: 46, borderRadius: 13, background: "linear-gradient(135deg,#6366f1,#a78bfa)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 16px rgba(99,102,241,0.45)", flexShrink: 0 }}>
+        <Shield size={20} color="#fff" strokeWidth={2.5} />
+      </div>
+      <div>
+        <div style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 17, fontWeight: 800, color: "#f0f5fc", letterSpacing: "-0.02em" }}>SENTINEL/7</div>
+        <div style={{ fontSize: 10, color: "#4a5e7a", letterSpacing: "0.1em", fontWeight: 600 }}>FIFA CYBER THREAT INTEL</div>
+      </div>
+    </div>
+  );
+
+  const EyeBtn = ({ show, toggle }: { show: boolean; toggle: () => void }) => (
+    <button type="button" onClick={toggle}
+      style={{ position: "absolute", right: 13, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#4a5e7a", display: "flex", padding: 0, zIndex: 5 }}>
+      <Eye size={15} />
+    </button>
+  );
+
+  return (
+    <div className="auth-root">
+      <style>{AUTH_STYLE}</style>
+      <div className="auth-bg" />
+      <div className="auth-scanlines" />
+      <div className="auth-orb auth-orb-1" />
+      <div className="auth-orb auth-orb-2" />
+      <div className="auth-orb auth-orb-3" />
+
+      <div className="auth-card" key={view}>
+
+        <Logo />
+
+        {/* ═══ SIGN IN VIEW ═══ */}
+        {view === "signin" && (
+          <>
+            <div style={{ marginBottom: 22 }}>
+              <div style={{ fontSize: 20, fontWeight: 800, color: "#f0f5fc", fontFamily: "'Space Grotesk',sans-serif", letterSpacing: "-0.02em", marginBottom: 4 }}>Welcome back</div>
+              <div style={{ fontSize: 13, color: "#677b96" }}>Sign in to your analyst account</div>
+            </div>
+
+            <form onSubmit={handleSignIn} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              {/* Email Field */}
+              <div>
+                <div className="field-label">Email Address</div>
+                <div className="auth-input-wrap">
+                  <span className="auth-input-icon"><Users size={15} /></span>
+                  <input 
+                    type="email" 
+                    className="auth-input" 
+                    placeholder="analyst@sentinel7.io"
+                    value={email} 
+                    onChange={(e) => setEmail(e.target.value)} 
+                    style={{ width: "100%", paddingLeft: "42px" }}
+                  />
+                </div>
+              </div>
+
+              {/* Password Field */}
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                  <div className="field-label" style={{ margin: 0 }}>Password</div>
+                  <button type="button" className="auth-link" style={{ fontSize: 12 }} onClick={() => switchView("forgot")}>Forgot password?</button>
+                </div>
+                <div className="auth-input-wrap">
+                  <span className="auth-input-icon"><Lock size={15} /></span>
+                  <input 
+                    type={showPwd ? "text" : "password"} 
+                    className="auth-input" 
+                    placeholder="Enter your password"
+                    value={password} 
+                    onChange={(e) => setPassword(e.target.value)} 
+                    style={{ width: "100%", paddingLeft: "42px" }}
+                  />
+                  <EyeBtn show={showPwd} toggle={() => setShowPwd(v => !v)} />
+                </div>
+              </div>
+
+              {error && <div className="auth-error"><AlertTriangle size={14} />{error}</div>}
+
+              <button type="submit" className="auth-btn-primary" disabled={loading} style={{ marginTop: 4 }}>
+                {loading ? <><RefreshCw size={15} className="spinning" />Signing in…</> : <><Shield size={15} />Sign In to Dashboard</>}
+              </button>
+            </form>
+
+            <div className="auth-divider"><div className="auth-divider-line" /><span className="auth-divider-label">New to Sentinel/7?</span><div className="auth-divider-line" /></div>
+
+            <button type="button" className="auth-btn-secondary" onClick={() => switchView("signup")}>
+              <Users size={15} />Create a free account
+            </button>
+
+            {/* Demo credentials */}
+            <div style={{ marginTop: 18, padding: "10px 14px", background: "rgba(99,102,241,0.07)", border: "1px solid rgba(99,102,241,0.18)", borderRadius: 10, cursor: "pointer" }}
+              onClick={() => { setEmail("analyst@sentinel7.io"); setPassword("FIFA2026#"); setError(null); }}>
+              <div style={{ fontSize: 11, color: "#4a5e7a", fontWeight: 700, letterSpacing: "0.08em", marginBottom: 5 }}>⚡ DEMO CREDENTIALS — click to fill</div>
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 12, color: "#a5b7d0" }}>analyst@sentinel7.io</span>
+                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 12, color: "#6366f1" }}>FIFA2026#</span>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* ═══ SIGN UP VIEW ═══ */}
+        {view === "signup" && (
+          <>
+            <div style={{ marginBottom: 22 }}>
+              <div style={{ fontSize: 20, fontWeight: 800, color: "#f0f5fc", fontFamily: "'Space Grotesk',sans-serif", letterSpacing: "-0.02em", marginBottom: 4 }}>Create account</div>
+              <div style={{ fontSize: 13, color: "#677b96" }}>Join the FIFA Threat Intelligence platform</div>
+            </div>
+
+            <form onSubmit={handleSignUp} style={{ display: "flex", flexDirection: "column", gap: 13 }}>
+              {/* Full Name */}
+              <div>
+                <div className="field-label">Full Name</div>
+                <div className="auth-input-wrap">
+                  <span className="auth-input-icon"><Users size={15} /></span>
+                  <input 
+                    type="text" 
+                    className="auth-input" 
+                    placeholder="e.g. Abhinav Kumar"
+                    value={fullName} 
+                    onChange={(e) => setFullName(e.target.value)} 
+                    style={{ width: "100%", paddingLeft: "42px" }}
+                  />
+                </div>
+              </div>
+
+              {/* Email */}
+              <div>
+                <div className="field-label">Email Address</div>
+                <div className="auth-input-wrap">
+                  <span className="auth-input-icon"><Activity size={15} /></span>
+                  <input 
+                    type="email" 
+                    className="auth-input" 
+                    placeholder="you@organisation.com"
+                    value={email} 
+                    onChange={(e) => setEmail(e.target.value)} 
+                    style={{ width: "100%", paddingLeft: "42px" }}
+                  />
+                </div>
+              </div>
+
+              {/* Password */}
+              <div>
+                <div className="field-label">Password</div>
+                <div className="auth-input-wrap">
+                  <span className="auth-input-icon"><Lock size={15} /></span>
+                  <input 
+                    type={showPwd ? "text" : "password"} 
+                    className={`auth-input${password && password.length < 8 ? " error-field" : password.length >= 8 ? " success-field" : ""}`}
+                    placeholder="Minimum 8 characters"
+                    value={password} 
+                    onChange={(e) => setPassword(e.target.value)} 
+                    style={{ width: "100%", paddingLeft: "42px" }}
+                  />
+                  <EyeBtn show={showPwd} toggle={() => setShowPwd(v => !v)} />
+                </div>
+                {password.length > 0 && (
+                  <div style={{ marginTop: 8 }}>
+                    <div style={{ display: "flex", gap: 4, marginBottom: 5 }}>
+                      {[0, 1, 2, 3, 4].map(i => (
+                        <div key={i} className="strength-bar" style={{ flex: 1, background: i < strength.score ? strength.color : "rgba(255,255,255,0.08)" }} />
+                      ))}
+                    </div>
+                    <div style={{ fontSize: 11, color: strength.color, fontWeight: 600 }}>Strength: {strength.label}</div>
+                  </div>
+                )}
+              </div>
+
+              {/* Confirm Password */}
+              <div>
+                <div className="field-label">Confirm Password</div>
+                <div className="auth-input-wrap">
+                  <span className="auth-input-icon"><Lock size={15} /></span>
+                  <input 
+                    type={showConfirm ? "text" : "password"} 
+                    className={`auth-input${confirmPwd.length > 0 ? (confirmPwd === password ? " success-field" : " error-field") : ""}`}
+                    placeholder="Repeat your password"
+                    value={confirmPwd} 
+                    onChange={(e) => setConfirmPwd(e.target.value)} 
+                    style={{ width: "100%", paddingLeft: "42px" }}
+                  />
+                  <EyeBtn show={showConfirm} toggle={() => setShowConfirm(v => !v)} />
+                </div>
+                {confirmPwd.length > 0 && confirmPwd !== password && (
+                  <div className="field-hint" style={{ color: "#ff5575" }}>Passwords don't match</div>
+                )}
+                {confirmPwd.length > 0 && confirmPwd === password && (
+                  <div className="field-hint" style={{ color: "#00ffd2" }}>✓ Passwords match</div>
+                )}
+              </div>
+
+              {error && <div className="auth-error"><AlertTriangle size={14} />{error}</div>}
+
+              <button type="submit" className="auth-btn-primary" disabled={loading} style={{ marginTop: 4 }}>
+                {loading ? <><RefreshCw size={15} className="spinning" />Creating account…</> : <><Shield size={15} />Create Account</>}
+              </button>
+            </form>
+
+            <div className="auth-divider"><div className="auth-divider-line" /><span className="auth-divider-label">Already have an account?</span><div className="auth-divider-line" /></div>
+
+            <button type="button" className="auth-btn-secondary" onClick={() => switchView("signin")}>
+              <Lock size={15} />Back to Sign In
+            </button>
+          </>
+        )}
+
+        {/* ═══ FORGOT PASSWORD VIEW ═══ */}
+        {view === "forgot" && (
+          <>
+            <div style={{ marginBottom: 22 }}>
+              <div style={{ fontSize: 20, fontWeight: 800, color: "#f0f5fc", fontFamily: "'Space Grotesk',sans-serif", letterSpacing: "-0.02em", marginBottom: 4 }}>Reset Password</div>
+              <div style={{ fontSize: 13, color: "#677b96" }}>Enter your email and we'll send you a reset link</div>
+            </div>
+
+            <form onSubmit={handleForgot} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              <div>
+                <div className="field-label">Email Address</div>
+                <div className="auth-input-wrap">
+                  <span className="auth-input-icon"><Users size={15} /></span>
+                  <input 
+                    type="email" 
+                    className="auth-input" 
+                    placeholder="your@email.com"
+                    value={email} 
+                    onChange={(e) => setEmail(e.target.value)} 
+                    style={{ width: "100%", paddingLeft: "42px" }}
+                  />
+                </div>
+              </div>
+
+              {error && <div className="auth-error"><AlertTriangle size={14} />{error}</div>}
+              {success && <div className="auth-success"><CheckCircle2 size={14} />{success}</div>}
+
+              <button type="submit" className="auth-btn-primary" disabled={loading || !!success} style={{ marginTop: 4 }}>
+                {loading ? <><RefreshCw size={15} className="spinning" />Sending link…</> : <><Zap size={15} />Send Reset Link</>}
+              </button>
+            </form>
+
+            <div className="auth-divider"><div className="auth-divider-line" /><span className="auth-divider-label">Remember your password?</span><div className="auth-divider-line" /></div>
+
+            <button type="button" className="auth-btn-secondary" onClick={() => switchView("signin")}>
+              <Lock size={15} />Back to Sign In
+            </button>
+
+            <div style={{ marginTop: 12, textAlign: "center" }}>
+              <span style={{ fontSize: 13, color: "#677b96" }}>No account? </span>
+              <button type="button" className="auth-link" onClick={() => switchView("signup")}>Create one now</button>
+            </div>
+          </>
+        )}
+
+        <div style={{ textAlign: "center", marginTop: 22, fontSize: 11, color: "#2a3a52" }}>
+          Protected by SENTINEL/7 · v2.0 · FIFA Threat Intelligence Platform
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
    ROOT APP
 ═══════════════════════════════════════════════════════════════ */
 export default function App() {
-  const [page,setPage]=useState("dashboard");
-  const [data,setData]=useState<ThreatRecord[]>(()=>generateMockData(180));
-  const [dataSource,setDataSource]=useState("Mock dataset · 180 records");
-  const [uploadError,setUploadError]=useState<string|null>(null);
-  const [collapsed,setCollapsed]=useState(false);
-  const [mounted,setMounted]=useState(false);
-  const [isDark,setIsDark]=useState(true); // Default to Dark Theme as per operations preference
+  const [page, setPage] = useState("dashboard");
+  const [data, setData] = useState<ThreatRecord[]>(() => generateMockData(180));
+  const [dataSource, setDataSource] = useState("Mock dataset · 180 records");
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [collapsed, setCollapsed] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [isDark, setIsDark] = useState(true);
+  const [userName, setUserName] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const handleUpload=useCallback((file:File)=>{
+  const handleUpload = useCallback((file: File) => {
     setUploadError(null);
-    Papa.parse<Record<string,string>>(file,{header:true,skipEmptyLines:true,
-      complete:(results)=>{try{const n:ThreatRecord[]=(results.data as Record<string,string>[]).filter(r=>r.domain).map((r,i)=>normalizeCSVRow(r,i));if(!n.length)throw new Error("empty");setData(n);setDataSource(`${file.name} · ${n.length} records`);}catch{setUploadError("Couldn't parse CSV — check it has a header row.");}},
-      error:()=>setUploadError("Failed to read the CSV file."),
+    Papa.parse<Record<string, string>>(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (results) => {
+        try {
+          const n: ThreatRecord[] = (results.data as Record<string, string>[])
+            .filter((r) => r.domain)
+            .map((r, i) => normalizeCSVRow(r, i));
+          if (!n.length) throw new Error("empty");
+          setData(n);
+          setDataSource(`${file.name} · ${n.length} records`);
+        } catch {
+          setUploadError("Couldn't parse CSV — check it has a header row.");
+        }
+      },
+      error: () => setUploadError("Failed to read the CSV file."),
     });
-  },[]);
+  }, []);
 
-  const handleScan=useCallback(()=>alert("Initiating live threat scan across all pipelines…"),[]);
-  const handleExport=useCallback(()=>{
-    const csv=["id,domain,threatType,riskScore,riskLevel,country,status",...data.slice(0,50).map(d=>`${d.id},${d.domain},${d.threatType},${d.riskScore},${d.riskLevel},${d.country},${d.status}`)].join("\n");
-    const a=document.createElement("a");a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv);a.download="sentinel7-export.csv";a.click();
-  },[data]);
+  const handleScan = useCallback(() => alert("Initiating live threat scan across all pipelines…"), []);
+  const handleExport = useCallback(() => {
+    const csv = [
+      "id,domain,threatType,riskScore,riskLevel,country,status",
+      ...data.slice(0, 50).map(
+        (d) =>
+          `${d.id},${d.domain},${d.threatType},${d.riskScore},${d.riskLevel},${d.country},${d.status}`
+      ),
+    ].join("\n");
+    const a = document.createElement("a");
+    a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+    a.download = "sentinel7-export.csv";
+    a.click();
+  }, [data]);
 
-  const toggleTheme=useCallback(()=>{
-    setIsDark(prev=>!prev);
-  },[]);
+  const toggleTheme = useCallback(() => {
+    setIsDark((prev) => !prev);
+  }, []);
 
-  type PK="dashboard"|"domains"|"tickets"|"social"|"streaming"|"alerts"|"settings";
-  const titles:Record<PK,[string,string]>={
-    dashboard:["Threat Overview","Real-time snapshot across all detection pipelines"],
-    domains:["Domain Intelligence","Detect & analyze fraudulent FIFA domains"],
-    tickets:["Ticketing Fraud Monitor","Fake portals, pricing anomalies & victim impact"],
-    social:["Social & OSINT","Social media mentions, sentiment analysis & trending indicators"],
-    streaming:["Streaming Piracy","Illegal stream monitoring, geo-blocking & viewership estimates"],
-    alerts:["Alerts Center","Critical notifications & incident response"],
-    settings:["Settings","System configuration, health monitoring & preferences"],
+  const handleLogout = useCallback(() => {
+    setIsLoggedIn(false);
+    setUserName("");
+  }, []);
+
+  type PK = "dashboard" | "domains" | "tickets" | "social" | "streaming" | "alerts" | "settings";
+  const titles: Record<PK, [string, string]> = {
+    dashboard: ["Threat Overview", "Real-time snapshot across all detection pipelines"],
+    domains: ["Domain Intelligence", "Detect & analyze fraudulent FIFA domains"],
+    tickets: ["Ticketing Fraud Monitor", "Fake portals, pricing anomalies & victim impact"],
+    social: ["Social & OSINT", "Social media mentions, sentiment analysis & trending indicators"],
+    streaming: ["Streaming Piracy", "Illegal stream monitoring, geo-blocking & viewership estimates"],
+    alerts: ["Alerts Center", "Critical notifications & incident response"],
+    settings: ["Settings", "System configuration, health monitoring & preferences"],
   };
-  const [t0,t1]=titles[page as PK]??["Dashboard",""];
+  const [t0, t1] = titles[page as PK] ?? ["Dashboard", ""];
 
   if (!mounted) return null;
+
+  /* ── Auth gate ── */
+  if (!isLoggedIn) return <AuthPage onLogin={(name) => { setUserName(name); setIsLoggedIn(true); }} />;
 
   return (
     <div className={`stg-root ${isDark ? "theme-dark" : "theme-light"}`}>
       <style>{TOKENS}</style>
-      <div className="bg-decor"/>
-      <Sidebar page={page} setPage={setPage} collapsed={collapsed} setCollapsed={setCollapsed}/>
+      <div className="bg-decor" />
+      
+      {/* Sidebar Component */}
+      <Sidebar page={page} setPage={setPage} collapsed={collapsed} setCollapsed={setCollapsed} userName={userName} onLogout={handleLogout} />
+      
       <div className="main">
         <TopBar
-          title={t0} subtitle={t1} onUpload={handleUpload} dataSource={dataSource}
-          onScan={handleScan} onExport={handleExport} isDark={isDark} onToggleTheme={toggleTheme}
+          title={t0}
+          subtitle={t1}
+          onUpload={handleUpload}
+          dataSource={dataSource}
+          onScan={handleScan}
+          onExport={handleExport}
+          isDark={isDark}
+          onToggleTheme={toggleTheme}
         />
-        {uploadError&&(<div style={{margin:"14px 28px 0",padding:"12px 16px",background:"var(--rose-bg)",border:"1px solid rgba(244,63,94,0.2)",borderRadius:10,fontSize:13,color:"var(--rose)",display:"flex",alignItems:"center",gap:8,fontWeight:500}}><AlertTriangle size={14}/>{uploadError}<X size={14} style={{marginLeft:"auto",cursor:"pointer"}} onClick={()=>setUploadError(null)}/></div>)}
+        {uploadError && (
+          <div
+            style={{
+              margin: "14px 28px 0",
+              padding: "12px 16px",
+              background: "var(--rose-bg)",
+              border: "1px solid rgba(244,63,94,0.2)",
+              borderRadius: 10,
+              fontSize: 13,
+              color: "var(--rose)",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              fontWeight: 500,
+            }}
+          >
+            <AlertTriangle size={14} />
+            {uploadError}
+            <X size={14} style={{ marginLeft: "auto", cursor: "pointer" }} onClick={() => setUploadError(null)} />
+          </div>
+        )}
         <div className="content">
-          {page==="dashboard"&&<Dashboard data={data} isDark={isDark}/>}
-          {page==="domains"&&<DomainIntel data={data}/>}
-          {page==="tickets"&&<TicketingFraud data={data} isDark={isDark}/>}
-          {page==="social"&&<SocialOSINT data={data} isDark={isDark}/>}
-          {page==="streaming"&&<StreamingPiracy data={data} isDark={isDark}/>}
-          {page==="alerts"&&<AlertsCenter/>}
-          {page==="settings"&&<SettingsPage isDark={isDark}/>}
+          {page === "dashboard" && <Dashboard data={data} isDark={isDark} />}
+          {page === "domains" && <DomainIntel data={data} />}
+          {page === "tickets" && <TicketingFraud data={data} isDark={isDark} />}
+          {page === "social" && <SocialOSINT data={data} isDark={isDark} />}
+          {page === "streaming" && <StreamingPiracy data={data} isDark={isDark} />}
+          {page === "alerts" && <AlertsCenter />}
+          {page === "settings" && <SettingsPage isDark={isDark} />}
         </div>
-        <div style={{padding:"16px 32px",borderTop:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center",fontSize:12,color:"var(--text-muted)"}}>
-          <span style={{fontFamily:"var(--mono)",fontWeight:500}}>SENTINEL/7 v2.0 · FIFA Cyber Threat Intelligence</span>
-          <span style={{fontFamily:"var(--mono)"}}>{data.length.toLocaleString()} domains · {mounted ? new Date().toLocaleDateString() : ""}</span>
-          <span>© 2026 FIFA Cyber Threat Intelligence</span>
+        
+        {/* Footer */}
+        <div
+          style={{
+            padding: "16px 32px",
+            borderTop: "1px solid var(--border)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            fontSize: 12,
+            color: "var(--text-muted)",
+          }}
+        >
+          <span style={{ fontFamily: "var(--mono)", fontWeight: 500 }}>
+            SENTINEL/7 v2.0 · FIFA Cyber Threat Intelligence
+          </span>
+          <span style={{ fontFamily: "var(--mono)" }}>
+            {data.length.toLocaleString()} domains · {mounted ? new Date().toLocaleDateString() : ""}
+          </span>
+          <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            © 2026 FIFA Threat Intel
+            <button
+              onClick={handleLogout}
+              style={{
+                background: "none",
+                border: "1px solid rgba(244,63,94,0.25)",
+                color: "var(--rose)",
+                borderRadius: 6,
+                padding: "2px 10px",
+                fontSize: 11,
+                cursor: "pointer",
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+              }}
+            >
+              <LogOut size={10} />
+              Logout
+            </button>
+          </span>
         </div>
       </div>
     </div>
