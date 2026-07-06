@@ -1,0 +1,1 @@
+CACHE_TTL_DAYS = 7
