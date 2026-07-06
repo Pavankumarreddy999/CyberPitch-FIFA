@@ -20,7 +20,7 @@ router = APIRouter(
 
 
 @router.post("/scan")
-def scan_domain(request: DomainRequest, db: Session = Depends(get_db)):
+async def scan_domain(request: DomainRequest, db: Session = Depends(get_db)):
     """
     Phishing Threat Scan Pipeline:
     1. Normalize and Validate Domain
@@ -38,7 +38,7 @@ def scan_domain(request: DomainRequest, db: Session = Depends(get_db)):
 
     try:
         # Step 2 & 3: Run Feature Aggregator
-        features = aggregate_features(domain, db)
+        features = await aggregate_features(domain, db)
 
         # Step 4: Run ML Prediction
         prediction_res = make_prediction(features)
@@ -109,6 +109,11 @@ def scan_domain(request: DomainRequest, db: Session = Depends(get_db)):
     except Exception as e:
         logger.exception(f"Scan failed for {domain}")
         raise HTTPException(status_code=500, detail=f"Pipeline error: {str(e)}")
+
+@router.post("/domains/analyze")
+async def analyze_domain(request: DomainRequest, db: Session = Depends(get_db)):
+    """Alias for /scan – runs the full domain analysis pipeline."""
+    return scan_domain(request, db)
 
 
 @router.get("/scan/history")
@@ -387,4 +392,18 @@ def get_scan_detail(scan_id: int, db: Session = Depends(get_db)):
         data["created_at_db"] = row.created_at.isoformat()
         return {"success": True, "data": data}
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/scan/{scan_id}")
+def delete_scan(scan_id: int, db: Session = Depends(get_db)):
+    """Deletes a single scan record."""
+    row = db.query(ScanHistory).filter(ScanHistory.id == scan_id).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Scan not found")
+    try:
+        db.delete(row)
+        db.commit()
+        return {"success": True, "message": f"Scan {scan_id} deleted"}
+    except Exception as e:
+        db.rollback()
         raise HTTPException(status_code=500, detail=str(e))

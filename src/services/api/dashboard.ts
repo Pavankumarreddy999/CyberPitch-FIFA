@@ -17,7 +17,7 @@ export async function fetchThreats() {
 }
 
 export async function analyzeDomain(domain: string) {
-  const response = await fetch("/api/domains/analyze", {
+  const response = await fetch("/api/analyze", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
