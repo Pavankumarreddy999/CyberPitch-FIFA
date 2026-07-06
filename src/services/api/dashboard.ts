@@ -25,7 +25,14 @@ export async function analyzeDomain(domain: string) {
     body: JSON.stringify({ domain }),
   });
   if (!response.ok) {
-    throw new Error("Failed to analyze domain");
+    let message = "Failed to analyze domain";
+    try {
+      const err = await response.json();
+      message = err.error || message;
+    } catch {
+      // ignore parse error, use default message
+    }
+    throw new Error(message);
   }
   return response.json();
 }

@@ -220,3 +220,171 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
         "severityDistribution": severity_dist,
         "recentActivity": recent_activity
     }
+
+
+@router.get("/scan/alerts")
+def get_threat_alerts(limit: int = 20, db: Session = Depends(get_db)):
+    """Returns high-severity (Critical/High) domains as threat alerts."""
+    rows = db.query(ScanHistory).filter(
+        ScanHistory.risk_score >= 70
+    ).order_by(ScanHistory.created_at.desc()).limit(limit).all()
+
+    alerts = []
+    for r in rows:
+        try:
+            p = json.loads(r.prediction)
+            alerts.append({
+                "id": r.id,
+                "domain": r.domain,
+                "riskScore": r.risk_score,
+                "threatType": p.get("Threat Type", "Unknown"),
+                "severity": p.get("Severity", "High"),
+                "recommendedAction": p.get("Recommended Action", "Investigate"),
+                "status": p.get("Status", "Under Review"),
+                "detectedAt": r.created_at.isoformat(),
+                "explanations": p.get("Explanations", []),
+            })
+        except Exception:
+            alerts.append({
+                "id": r.id,
+                "domain": r.domain,
+                "riskScore": r.risk_score,
+                "threatType": "Unknown",
+                "severity": "High",
+                "recommendedAction": "Investigate",
+                "status": "Under Review",
+                "detectedAt": r.created_at.isoformat(),
+                "explanations": [],
+            })
+    return alerts
+
+
+@router.get("/scan/campaigns")
+def get_campaigns(db: Session = Depends(get_db)):
+    """Aggregates active threat campaigns by type with timeline."""
+    rows = db.query(ScanHistory).order_by(ScanHistory.created_at.asc()).all()
+
+    campaigns: dict = {}
+    for r in rows:
+        try:
+            p = json.loads(r.prediction)
+            tt = p.get("Threat Type", "Safe")
+            if tt == "Safe":
+                continue
+            sev = p.get("Severity", "Low").lower()
+            if tt not in campaigns:
+                campaigns[tt] = {
+                    "name": tt,
+                    "count": 0,
+                    "criticalCount": 0,
+                    "highCount": 0,
+                    "mediumCount": 0,
+                    "domains": [],
+                    "timeline": [],
+                }
+            c = campaigns[tt]
+            c["count"] += 1
+            if sev == "critical": c["criticalCount"] += 1
+            elif sev == "high":   c["highCount"] += 1
+            elif sev == "medium": c["mediumCount"] += 1
+            c["domains"].append(r.domain)
+            c["timeline"].append({
+                "domain": r.domain,
+                "date": r.created_at.isoformat(),
+                "riskScore": r.risk_score,
+            })
+        except Exception:
+            pass
+
+    return list(campaigns.values())
+
+
+@router.get("/scan/flagged")
+def get_flagged_domains(
+    severity: str = None,
+    threat_type: str = None,
+    limit: int = 100,
+    db: Session = Depends(get_db)
+):
+    """Returns flagged (malicious) domains with optional filters."""
+    query = db.query(ScanHistory).filter(
+        ScanHistory.risk_score >= 45
+    ).order_by(ScanHistory.created_at.desc()).limit(limit)
+    rows = query.all()
+
+    result = []
+    for r in rows:
+        try:
+            p = json.loads(r.prediction)
+            sev = p.get("Severity", "Low").lower()
+            tt  = p.get("Threat Type", "Unknown")
+            if severity and sev != severity.lower():
+                continue
+            if threat_type and tt.lower() != threat_type.lower():
+                continue
+            result.append({
+                "id": r.id,
+                "domain": r.domain,
+                "threatType": tt,
+                "riskScore": r.risk_score,
+                "severity": sev,
+                "status": p.get("Status", "Under Review").lower(),
+                "detectedAt": r.created_at.isoformat(),
+                "sslStatus": p.get("SSL Status", "Unknown"),
+                "whoisAge": p.get("WHOIS Age Days", 0),
+                "visualSimilarity": p.get("Visual Similarity Score", 0),
+                "phishingProbability": p.get("Phishing Probability", 0),
+                "recommendedAction": p.get("Recommended Action", "Investigate"),
+                "explanations": p.get("Explanations", []),
+            })
+        except Exception:
+            pass
+    return result
+
+
+@router.get("/scan/recommendations")
+def get_recommendations(db: Session = Depends(get_db)):
+    """Returns analyst recommendations grouped by action type."""
+    rows = db.query(ScanHistory).filter(
+        ScanHistory.risk_score >= 45
+    ).order_by(ScanHistory.created_at.desc()).limit(50).all()
+
+    action_groups: dict = {}
+    for r in rows:
+        try:
+            p = json.loads(r.prediction)
+            action = p.get("Recommended Action", "Investigate")
+            if action not in action_groups:
+                action_groups[action] = {
+                    "action": action,
+                    "count": 0,
+                    "severity": p.get("Severity", "Medium"),
+                    "domains": [],
+                }
+            action_groups[action]["count"] += 1
+            action_groups[action]["domains"].append({
+                "domain": r.domain,
+                "riskScore": r.risk_score,
+                "threatType": p.get("Threat Type", "Unknown"),
+                "severity": p.get("Severity", "Medium"),
+                "detectedAt": r.created_at.isoformat(),
+            })
+        except Exception:
+            pass
+
+    return sorted(list(action_groups.values()), key=lambda x: x["count"], reverse=True)
+
+
+@router.get("/scan/{scan_id}")
+def get_scan_detail(scan_id: int, db: Session = Depends(get_db)):
+    """Returns full details for a single scan record."""
+    row = db.query(ScanHistory).filter(ScanHistory.id == scan_id).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Scan not found")
+    try:
+        data = json.loads(row.prediction)
+        data["id"] = row.id
+        data["created_at_db"] = row.created_at.isoformat()
+        return {"success": True, "data": data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
