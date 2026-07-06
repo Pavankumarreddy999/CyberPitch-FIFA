@@ -33,3 +33,48 @@ KeyError: 'domain'
 2026-07-06 11:36:35,815 INFO Cache hit for google.com
 2026-07-06 11:45:39,658 INFO Scanning domain: santhosh.com
 2026-07-06 11:46:29,863 INFO Scanning domain: fifa-rewards-official.com
+2026-07-06 13:50:31,252 INFO Scanning domain: fifa.com
+2026-07-06 13:50:31,258 ERROR Scan failed for fifa.com
+Traceback (most recent call last):
+  File "C:\Users\santh\OneDrive\Desktop\ACM_2026\cyber_pitch\backend\app\api\scan.py", line 44, in scan_domain
+    prediction_res = make_prediction(features)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\santh\OneDrive\Desktop\ACM_2026\cyber_pitch\backend\app\services\ml_service.py", line 310, in make_prediction
+    ssl_str = features.get("SSL Status", "Invalid")
+              ^^^^^^^^^^^^
+AttributeError: 'coroutine' object has no attribute 'get'
+2026-07-06 13:50:43,258 INFO Scanning domain: fifa.com
+2026-07-06 13:50:43,259 ERROR Scan failed for fifa.com
+Traceback (most recent call last):
+  File "C:\Users\santh\OneDrive\Desktop\ACM_2026\cyber_pitch\backend\app\api\scan.py", line 44, in scan_domain
+    prediction_res = make_prediction(features)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\santh\OneDrive\Desktop\ACM_2026\cyber_pitch\backend\app\services\ml_service.py", line 310, in make_prediction
+    ssl_str = features.get("SSL Status", "Invalid")
+              ^^^^^^^^^^^^
+AttributeError: 'coroutine' object has no attribute 'get'
+2026-07-06 14:18:38,202 INFO Scanning domain: f1fa.com
+2026-07-06 14:18:38,203 ERROR Scan failed for f1fa.com
+Traceback (most recent call last):
+  File "C:\Users\santh\OneDrive\Desktop\ACM_2026\cyber_pitch\backend\app\api\scan.py", line 44, in scan_domain
+    prediction_res = make_prediction(features)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\santh\OneDrive\Desktop\ACM_2026\cyber_pitch\backend\app\services\ml_service.py", line 310, in make_prediction
+    ssl_str = features.get("SSL Status", "Invalid")
+              ^^^^^^^^^^^^
+AttributeError: 'coroutine' object has no attribute 'get'
+2026-07-06 14:33:13,311 INFO Scanning domain: example.com
+2026-07-06 14:33:13,311 ERROR Scan failed for example.com
+Traceback (most recent call last):
+  File "C:\Users\santh\OneDrive\Desktop\ACM_2026\cyber_pitch\backend\app\api\scan.py", line 44, in scan_domain
+    prediction_res = make_prediction(features)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\santh\OneDrive\Desktop\ACM_2026\cyber_pitch\backend\app\services\ml_service.py", line 310, in make_prediction
+    ssl_str = features.get("SSL Status", "Invalid")
+              ^^^^^^^^^^^^
+AttributeError: 'coroutine' object has no attribute 'get'
+2026-07-06 14:43:34,057 INFO Scanning domain: fifa.com
+2026-07-06 14:57:56,415 INFO Scanning domain: google.com
+2026-07-06 15:05:56,494 INFO Scanning domain: google.com
+2026-07-06 15:06:44,485 INFO Scanning domain: fifa.com
+2026-07-06 15:07:26,828 INFO Scanning domain: google.com
