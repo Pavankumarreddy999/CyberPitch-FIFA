@@ -1,24 +1,37 @@
 import { NextResponse } from "next/server";
-import { DomainAnalysisRequest, DomainAnalysisResponse } from "@/lib/types";
 
 export async function POST(request: Request) {
-  const body: DomainAnalysisRequest = await request.json();
-  const { domain } = body;
+  try {
+    const { domain } = await request.json();
+    if (!domain) {
+      return NextResponse.json(
+        { error: "Domain name is required" },
+        { status: 400 }
+      );
+    }
 
-  // Mock analysis - replace with actual analysis logic
-  const analysis: DomainAnalysisResponse = {
-    domain,
-    riskScore: Math.floor(Math.random() * 100),
-    threatType: "Fake Ticketing",
-    isMalicious: true,
-    details: {
-      whoisAge: "3 days",
-      sslValid: false,
-      visualSimilarity: 98,
-      phishingProbability: 96,
-      recommendedAction: "Block Domain",
-    },
-  };
+    const backendRes = await fetch("http://localhost:8000/api/scan", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ domain }),
+    });
 
-  return NextResponse.json(analysis);
-}
+    if (!backendRes.ok) {
+      const errText = await backendRes.text();
+      return NextResponse.json(
+        { error: errText || "Failed to scan domain on backend" },
+        { status: backendRes.status }
+      );
+    }
+
+    const result = await backendRes.json();
+    return NextResponse.json(result);
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: error.message || "Failed to connect to backend scanner" },
+      { status: 500 }
+    );
+  }
+}

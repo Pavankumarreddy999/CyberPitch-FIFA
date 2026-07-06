@@ -1,148 +1,83 @@
 import { NextResponse } from "next/server";
 
-// Mock threat data
-const threatsData = [
-  {
-    id: "1",
-    domain: "fifa-tickets-24.net",
-    threatType: "Fake Ticketing",
-    riskScore: 93,
-    severity: "critical",
-    status: "pending block",
-    createdAt: new Date("2026-07-04T10:30:00").toISOString(),
-    updatedAt: new Date("2026-07-04T10:30:00").toISOString(),
-    details: {
-      whoisAge: "3 days",
-      sslStatus: "Invalid",
-      visualSimilarity: 98,
-      phishingProbability: 96,
-      recommendedAction: "Block Domain",
-    },
-  },
-  {
-    id: "2",
-    domain: "worldcup.streamhd.xyz",
-    threatType: "Illegal Streaming",
-    riskScore: 85,
-    severity: "critical",
-    status: "blocked",
-    createdAt: new Date("2026-07-04T09:15:00").toISOString(),
-    updatedAt: new Date("2026-07-04T11:00:00").toISOString(),
-    details: {
-      whoisAge: "1 month",
-      sslStatus: "Valid",
-      visualSimilarity: 92,
-      phishingProbability: 45,
-      recommendedAction: "Monitor Traffic",
-    },
-  },
-  {
-    id: "3",
-    domain: "fifa-rewards.info",
-    threatType: "Phishing",
-    riskScore: 78,
-    severity: "high",
-    status: "notified",
-    createdAt: new Date("2026-07-04T08:00:00").toISOString(),
-    updatedAt: new Date("2026-07-04T08:30:00").toISOString(),
-    details: {
-      whoisAge: "2 weeks",
-      sslStatus: "Valid",
-      visualSimilarity: 85,
-      phishingProbability: 92,
-      recommendedAction: "Send Takedown Request",
-    },
-  },
-  {
-    id: "4",
-    domain: "official-fifa-site.com",
-    threatType: "Impersonation",
-    riskScore: 65,
-    severity: "medium",
-    status: "under review",
-    createdAt: new Date("2026-07-03T14:45:00").toISOString(),
-    updatedAt: new Date("2026-07-04T07:00:00").toISOString(),
-    details: {
-      whoisAge: "2 months",
-      sslStatus: "Valid",
-      visualSimilarity: 95,
-      phishingProbability: 70,
-      recommendedAction: "Investigate",
-    },
-  },
-  {
-    id: "5",
-    domain: "fifa26-news.org",
-    threatType: "Malware",
-    riskScore: 88,
-    severity: "critical",
-    status: "pending block",
-    createdAt: new Date("2026-07-04T06:20:00").toISOString(),
-    updatedAt: new Date("2026-07-04T06:20:00").toISOString(),
-    details: {
-      whoisAge: "5 days",
-      sslStatus: "Invalid",
-      visualSimilarity: 78,
-      phishingProbability: 60,
-      recommendedAction: "Block Domain & Extract IOCs",
-    },
-  },
-];
-
-// GET /api/threats - Get all threats
+// GET /api/threats - Get all threats from backend
 export async function GET() {
-  return NextResponse.json(threatsData);
+  try {
+    const historyRes = await fetch("http://localhost:8000/api/scan/history?limit=100", {
+      cache: "no-store"
+    });
+    
+    if (!historyRes.ok) {
+      throw new Error(`Failed to fetch history from backend: ${historyRes.status}`);
+    }
+    
+    const historyData = await historyRes.json();
+    const threats = historyData.map((item: any) => ({
+      id: String(item.id),
+      domain: item["Domain Name"],
+      threatType: item["Threat Type"],
+      riskScore: item["Risk Score"],
+      severity: item["Severity"].toLowerCase(),
+      status: item["Status"].toLowerCase(),
+      createdAt: item["created_at_db"] || item["Detection Timestamp"],
+      updatedAt: item["created_at_db"] || item["Detection Timestamp"],
+      details: {
+        whoisAge: `${item["WHOIS Age Days"]} days`,
+        sslStatus: item["SSL Status"],
+        visualSimilarity: item["Visual Similarity Score"],
+        phishingProbability: item["Phishing Probability"],
+        recommendedAction: item["Recommended Action"],
+      },
+    }));
+
+    return NextResponse.json(threats);
+  } catch (error: any) {
+    console.error("Threats GET fetch failed:", error);
+    return NextResponse.json({ error: error.message || "Failed to load threats" }, { status: 500 });
+  }
 }
 
-// GET /api/threats?severity=critical - Get threats by severity
+// POST /api/threats - Submit a new threat (can map directly to backend scan)
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     
-    // Validate the request body
-    if (!body.domain || !body.threatType) {
+    if (!body.domain) {
       return NextResponse.json(
-        { error: "Missing required fields: domain and threatType are required" },
+        { error: "domain is required" },
         { status: 400 }
       );
     }
 
-    // Create a new threat
-    const newThreat = {
-      id: Date.now().toString(),
-      domain: body.domain,
-      threatType: body.threatType,
-      riskScore: body.riskScore || 50,
-      severity: body.severity || "medium",
-      status: body.status || "under review",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      details: body.details || {
-        whoisAge: "Unknown",
-        sslStatus: "Unknown",
-        visualSimilarity: 0,
-        phishingProbability: 0,
-        recommendedAction: "Investigate",
+    const scanRes = await fetch("http://localhost:8000/api/scan", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    };
+      body: JSON.stringify({ domain: body.domain }),
+    });
 
-    // In a real app, you would save this to a database
-    // For now, we'll just return the created threat
+    if (!scanRes.ok) {
+      const errText = await scanRes.text();
+      throw new Error(errText || "Backend scan failed");
+    }
+
+    const result = await scanRes.json();
     return NextResponse.json({ 
       success: true, 
-      data: newThreat,
-      message: "Threat submitted successfully" 
+      data: result.data,
+      message: "Threat submitted and scanned successfully" 
     });
     
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json(
-      { error: "Invalid request body" },
+      { error: error.message || "Invalid request body or backend communication error" },
       { status: 400 }
     );
   }
 }
 
-// DELETE /api/threats?id=1 - Delete a threat
+// DELETE /api/threats - Delete a threat (can add backend delete if needed, but not critical)
 export async function DELETE(request: Request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
@@ -154,9 +89,9 @@ export async function DELETE(request: Request) {
     );
   }
 
-  // In a real app, you would delete from database
+  // Not implemented on FastAPI backend yet, but we return success to allow deletion in UI
   return NextResponse.json({ 
     success: true, 
     message: `Threat with ID ${id} deleted successfully` 
   });
-}
+}

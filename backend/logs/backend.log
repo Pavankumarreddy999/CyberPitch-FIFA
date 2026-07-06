@@ -1,0 +1,26 @@
+2026-07-06 09:48:49,316 INFO Scanning domain: fifa-tickets-rewards-2026.net
+2026-07-06 09:53:33,631 INFO Scanning domain: worldcup2026-stream.xyz
+2026-07-06 09:53:42,375 ERROR Scan failed for worldcup2026-stream.xyz
+Traceback (most recent call last):
+  File "C:\Users\santh\OneDrive\Desktop\ACM_2026\cyber_pitch\backend\app\api\scan.py", line 41, in scan_domain
+    features = aggregate_features(domain, db)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\santh\OneDrive\Desktop\ACM_2026\cyber_pitch\backend\app\services\aggregator_service.py", line 120, in aggregate_features
+    save_cached_whois(db, whois_res)
+  File "C:\Users\santh\OneDrive\Desktop\ACM_2026\cyber_pitch\backend\app\services\cache_service.py", line 34, in save_cached_whois
+    domain=data["domain"],
+           ~~~~^^^^^^^^^^
+KeyError: 'domain'
+2026-07-06 09:54:15,087 INFO Scanning domain: worldcup2026-stream.xyz
+2026-07-06 09:54:19,616 ERROR Scan failed for worldcup2026-stream.xyz
+Traceback (most recent call last):
+  File "C:\Users\santh\OneDrive\Desktop\ACM_2026\cyber_pitch\backend\app\api\scan.py", line 41, in scan_domain
+    features = aggregate_features(domain, db)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\santh\OneDrive\Desktop\ACM_2026\cyber_pitch\backend\app\services\aggregator_service.py", line 120, in aggregate_features
+    save_cached_whois(db, whois_res)
+  File "C:\Users\santh\OneDrive\Desktop\ACM_2026\cyber_pitch\backend\app\services\cache_service.py", line 34, in save_cached_whois
+    domain=data["domain"],
+           ~~~~^^^^^^^^^^
+KeyError: 'domain'
+2026-07-06 10:13:00,168 INFO Scanning domain: google.com
