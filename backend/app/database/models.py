@@ -11,3 +11,4 @@ class DiscoveredDomain(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     domain = Column(String, unique=True, nullable=False, index=True)
+
