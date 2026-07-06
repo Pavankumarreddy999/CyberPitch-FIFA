@@ -9,7 +9,7 @@ class ScanHistory(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    domain = Column(String, nullable=False)
+    domain = Column(String, nullable=False, unique=True)
 
     prediction = Column(String)
 

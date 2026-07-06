@@ -89,18 +89,29 @@ async def scan_domain(request: DomainRequest, db: Session = Depends(get_db)):
             "Detection Timestamp": datetime.utcnow().isoformat()
         }
 
-        # Step 6: Save to database
-        history_entry = ScanHistory(
-            domain=domain,
-            prediction=json.dumps(scan_result),
-            risk_score=scan_result["Risk Score"]
-        )
-        db.add(history_entry)
-        db.commit()
-        db.refresh(history_entry)
+        # Step 6: Save to database (upsert — prevent duplicates)
+        existing = db.query(ScanHistory).filter(
+            ScanHistory.domain == domain
+        ).first()
 
-        # Include database ID in response
-        scan_result["id"] = history_entry.id
+        if existing:
+            # Update the existing record with the latest scan result
+            existing.prediction = json.dumps(scan_result)
+            existing.risk_score = scan_result["Risk Score"]
+            existing.created_at = datetime.utcnow()
+            db.commit()
+            db.refresh(existing)
+            scan_result["id"] = existing.id
+        else:
+            history_entry = ScanHistory(
+                domain=domain,
+                prediction=json.dumps(scan_result),
+                risk_score=scan_result["Risk Score"]
+            )
+            db.add(history_entry)
+            db.commit()
+            db.refresh(history_entry)
+            scan_result["id"] = history_entry.id
         return {
             "success": True,
             "data": scan_result
