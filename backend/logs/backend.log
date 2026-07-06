@@ -24,3 +24,4 @@ Traceback (most recent call last):
            ~~~~^^^^^^^^^^
 KeyError: 'domain'
 2026-07-06 10:13:00,168 INFO Scanning domain: google.com
+2026-07-06 11:25:00,572 INFO Scanning domain: fifa.com

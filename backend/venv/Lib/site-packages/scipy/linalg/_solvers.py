@@ -12,7 +12,6 @@ import warnings
 import numpy as np
 from numpy.linalg import inv, LinAlgError, norm, cond, svd
 
-from scipy._lib._util import _apply_over_batch
 from ._basic import solve, solve_triangular, matrix_balance
 from .lapack import get_lapack_funcs
 from ._decomp_schur import schur
@@ -28,7 +27,6 @@ __all__ = ['solve_sylvester',
            'solve_continuous_are', 'solve_discrete_are']
 
 
-@_apply_over_batch(('a', 2), ('b', 2), ('q', 2))
 def solve_sylvester(a, b, q):
     """
     Computes a solution (X) to the Sylvester equation :math:`AX + XB = Q`.
@@ -108,12 +106,12 @@ def solve_sylvester(a, b, q):
     y = scale*y
 
     if info < 0:
-        raise LinAlgError(f"Illegal value encountered in the {-info} term")
+        raise LinAlgError("Illegal value encountered in "
+                          "the %d term" % (-info,))
 
     return np.dot(np.dot(u, y), v.conj().transpose())
 
 
-@_apply_over_batch(('a', 2), ('q', 2))
 def solve_continuous_lyapunov(a, q):
     """
     Solves the continuous Lyapunov equation :math:`AX + XA^H = Q`.
@@ -247,7 +245,6 @@ def _solve_discrete_lyapunov_bilinear(a, q):
     return solve_lyapunov(b.conj().transpose(), -c)
 
 
-@_apply_over_batch(('a', 2), ('q', 2))
 def solve_discrete_lyapunov(a, q, method=None):
     """
     Solves the discrete Lyapunov equation :math:`AXA^H - X + Q = 0`.
@@ -368,11 +365,6 @@ def solve_continuous_are(a, b, q, r, e=None, s=None, balanced=True):
     is assumed to be the zero matrix with sizes compatible with ``a`` and
     ``b``, respectively.
 
-    The documentation is written assuming array arguments are of specified
-    "core" shapes. However, array argument(s) of this function may have additional
-    "batch" dimensions prepended to the core shape. In this case, the array is treated
-    as a batch of lower-dimensional slices; see :ref:`linalg_batch` for details.
-
     Parameters
     ----------
     a : (M, M) array_like
@@ -462,12 +454,7 @@ def solve_continuous_are(a, b, q, r, e=None, s=None, balanced=True):
     True
 
     """
-    # ensure that all arguments are present when using `_apply_over_batch` (gh-23336)
-    return _solve_continuous_are(a, b, q, r, e, s, balanced)
 
-
-@_apply_over_batch(('a', 2), ('b', 2), ('q', 2), ('r', 2), ('e', 2), ('s', 2))
-def _solve_continuous_are(a, b, q, r, e, s, balanced):
     # Validate input arguments
     a, b, q, r, e, s, m, n, r_or_c, gen_are = _are_validate_args(
                                                      a, b, q, r, e, s, 'care')
@@ -582,11 +569,6 @@ def solve_discrete_are(a, b, q, r, e=None, s=None, balanced=True):
     is solved. When omitted, ``e`` is assumed to be the identity and ``s``
     is assumed to be the zero matrix.
 
-    The documentation is written assuming array arguments are of specified
-    "core" shapes. However, array argument(s) of this function may have additional
-    "batch" dimensions prepended to the core shape. In this case, the array is treated
-    as a batch of lower-dimensional slices; see :ref:`linalg_batch` for details.
-
     Parameters
     ----------
     a : (M, M) array_like
@@ -679,12 +661,7 @@ def solve_discrete_are(a, b, q, r, e=None, s=None, balanced=True):
     True
 
     """
-    # ensure that all arguments are present when using `_apply_over_batch` (gh-23336)
-    return _solve_discrete_are(a, b, q, r, e, s, balanced)
 
-
-@_apply_over_batch(('a', 2), ('b', 2), ('q', 2), ('r', 2), ('e', 2), ('s', 2))
-def _solve_discrete_are(a, b, q, r, e, s, balanced):
     # Validate input arguments
     a, b, q, r, e, s, m, n, r_or_c, gen_are = _are_validate_args(
                                                      a, b, q, r, e, s, 'dare')
