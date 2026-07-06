@@ -24,3 +24,12 @@ Traceback (most recent call last):
            ~~~~^^^^^^^^^^
 KeyError: 'domain'
 2026-07-06 10:13:00,168 INFO Scanning domain: google.com
+2026-07-06 19:20:04,456 INFO Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-07-06 19:20:04,478 INFO Added job "run_once" to job store "default"
+2026-07-06 19:20:04,478 INFO Scheduler started
+2026-07-06 19:20:04,485 WARNING Run time of job "run_once (trigger: interval[12:00:00], next run at: 2026-07-06 13:50:04 IST)" was missed by 5:30:00.040288
+2026-07-06 19:39:19,985 INFO Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-07-06 19:39:19,985 INFO Added job "run_once" to job store "default"
+2026-07-06 19:39:19,985 INFO Scheduler started
+2026-07-06 19:39:19,986 INFO Running job "run_once (trigger: interval[12:00:00], next run at: 2026-07-06 14:09:19 IST)" (scheduled at 2026-07-06 14:09:19.984684+05:30)
+2026-07-06 19:49:24,043 INFO Job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 02:09:19 IST)" executed successfully

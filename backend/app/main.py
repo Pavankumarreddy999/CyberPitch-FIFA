@@ -1,16 +1,29 @@
+from datetime import datetime
+from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI
-
-from app.database.database import engine
-from app.models import ScanHistory
-from app.database.database import Base
-from app.api.whois import router as whois_router
+from app.api import html, url_features
 from app.api.dns import router as dns_router
-from app.api.ssl import router as ssl_router
-from app.api import html
-from app.api import url_features
-from app.api.threat import router as threat_router
 from app.api.scan import router as scan_router
+from app.api.ssl import router as ssl_router
+from app.api.threat import router as threat_router
+from app.api.whois import router as whois_router
+from app.database.database import Base, engine
+from scripts.domain_discovery import run_once
+
 Base.metadata.create_all(bind=engine)
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(
+    run_once,
+    "interval",
+    hours=12,
+    next_run_time=datetime.utcnow(),
+    misfire_grace_time=None,  # never treat it as "missed" — always fire
+)
+if not getattr(scheduler, "running", False):
+    scheduler.start()
+
+print(f"[scheduler] jobs scheduled: {scheduler.get_jobs()}")
 
 app = FastAPI(
     title="CyberPitch FIFA API",
