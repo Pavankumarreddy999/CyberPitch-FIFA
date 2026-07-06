@@ -316,7 +316,7 @@ const TOKENS = `
 /* ---------------------------------------------------------------
    MOCK DATA
 ------------------------------------------------------------------*/
-const THREAT_TYPES = ["Ticket Scam", "Phishing", "Malware", "Streaming Piracy"];
+const THREAT_TYPES = ["Ticket Scam", "Phishing", "Malware"];
 const COUNTRIES = ["Russia", "Nigeria", "Vietnam", "Brazil", "India", "Ukraine", "Indonesia", "China", "Philippines", "USA"];
 const REGISTRARS = ["NameCheap Inc.", "GoDaddy.com LLC", "PDR Ltd.", "Alibaba Cloud", "REG.RU", "Dynadot LLC"];
 const SSL_STATES = ["Invalid", "Expired", "None", "Valid"];
@@ -433,8 +433,6 @@ function Sidebar({ page, setPage, collapsed, setCollapsed, onLogout, user, onNav
     { key:"domains",   label:"Domain Intelligence", icon:Globe2, enabled:true },
     { key:"tickets",   label:"Ticketing Fraud",     icon:Ticket, enabled:true },
     { key:"social",    label:"Social & OSINT",      icon:Users,    enabled:true },
-    { key:"streaming", label:"Streaming Piracy",    icon:Radio,    enabled:true },
-    { key:"alerts",    label:"Alerts",              icon:Bell,     enabled:true },
     { key:"settings",  label:"Settings",            icon:Settings, enabled:true },
   ];
   return (
@@ -640,7 +638,6 @@ function Dashboard({ data }: { data: ThreatRecord[] }) {
     {label:"Total threats detected",    value:stats.total,    icon:ShieldAlert,  color:"var(--gold)",      trend:"+12.4%", up:true,  spark:sparklines[0]},
     {label:"Fake ticketing portals",    value:stats.tickets,  icon:Ticket,       color:"var(--red)",       trend:"+8.1%",  up:true,  spark:sparklines[1]},
     {label:"Phishing campaigns",        value:stats.phishing, icon:AlertTriangle,color:"var(--amber)",     trend:"+3.6%",  up:true,  spark:sparklines[2]},
-    {label:"Illegal streaming sites",   value:stats.streaming,icon:Radio,        color:"#4fa3ff",          trend:"-2.0%",  up:false, spark:sparklines[3]},
     {label:"Malware / impersonation",   value:stats.malware,  icon:ShieldCheck,  color:"var(--green)",     trend:"+5.9%",  up:true,  spark:sparklines[4]},
   ];
 
@@ -1120,174 +1117,9 @@ function SocialOSINT({ data }: { data: ThreatRecord[] }) {
   );
 }
 
-/* ---------------------------------------------------------------
-   STREAMING PIRACY PAGE
-------------------------------------------------------------------*/
-function StreamingPiracy({ data }: { data: ThreatRecord[] }) {
-  const streaming = useMemo(() => data.filter(d => d.threatType === "Streaming Piracy"), [data]);
-  const stats = useMemo(() => ({
-    total: streaming.length,
-    avgRisk: streaming.length ? Math.round(streaming.reduce((a,d) => a + d.riskScore, 0) / streaming.length) : 0,
-    countries: [...new Set(streaming.map(d => d.country))].length,
-  }), [streaming]);
 
-  const countryDist = useMemo(() => {
-    const counts: Record<string,number> = {};
-    streaming.forEach(d => counts[d.country] = (counts[d.country] || 0) + 1);
-    return Object.entries(counts).map(([c,count]) => ({ country:c, count })).sort((a,b) => b.count - a.count).slice(0,6);
-  }, [streaming]);
 
-  return (
-    <div>
-      <div className="stat-grid" style={{ gridTemplateColumns: "repeat(3,1fr)" }}>
-        <div className="card stat-card">
-          <div className="stat-icon" style={{ background: "rgba(255,42,95,0.1)", border: "1px solid rgba(255,42,95,0.3)" }}>
-            <Radio size={16} color="var(--red)" />
-          </div>
-          <div className="stat-value">{stats.total}</div>
-          <div className="stat-label">Illegal Streaming Sites</div>
-        </div>
-        <div className="card stat-card">
-          <div className="stat-icon" style={{ background: "rgba(255,215,0,0.1)", border: "1px solid rgba(255,215,0,0.3)" }}>
-            <Shield size={16} color="var(--gold)" />
-          </div>
-          <div className="stat-value">{stats.avgRisk}</div>
-          <div className="stat-label">Average Risk Score</div>
-        </div>
-        <div className="card stat-card">
-          <div className="stat-icon" style={{ background: "rgba(0,255,210,0.1)", border: "1px solid rgba(0,255,210,0.3)" }}>
-            <Globe2 size={16} color="var(--green)" />
-          </div>
-          <div className="stat-value">{stats.countries}</div>
-          <div className="stat-label">Countries Hosting</div>
-        </div>
-      </div>
 
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:16 }}>
-        <div className="card" style={{ padding:20 }}>
-          <div className="section-title">Streaming Sites by Country</div>
-          <div className="section-sub">Top hosting countries</div>
-          <div style={{ height:190 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={countryDist} layout="vertical" margin={{ left:0, right:10 }}>
-                <CartesianGrid stroke="rgba(0,210,255,0.06)" horizontal={false}/>
-                <XAxis type="number" hide/>
-                <YAxis dataKey="country" type="category" width={70} tick={{ fill:"#8ea0bc", fontSize:11 }} axisLine={false} tickLine={false}/>
-                <Tooltip contentStyle={{ background:"rgba(8,17,36,0.95)", border:"1.5px solid var(--blue-neon)", borderRadius:10, fontSize:12 }} cursor={{ fill:"rgba(255,42,95,0.06)" }}/>
-                <Bar dataKey="count" fill="var(--red)" radius={[0,4,4,0]} barSize={11}/>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-        <div className="card" style={{ padding:20 }}>
-          <div className="section-title">Risk Distribution</div>
-          <div className="section-sub">Across streaming sites</div>
-          <div style={{ height:190 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={[
-                  { name:"High", value:streaming.filter(d=>d.riskLevel==="High").length, color:"var(--red)" },
-                  { name:"Medium", value:streaming.filter(d=>d.riskLevel==="Medium").length, color:"var(--amber)" },
-                  { name:"Low", value:streaming.filter(d=>d.riskLevel==="Low").length, color:"var(--green)" },
-                ]} dataKey="value" nameKey="name" innerRadius={40} outerRadius={60} paddingAngle={3}>
-                  {[0,1,2].map(i => <Cell key={i} fill={["var(--red)","var(--amber)","var(--green)"][i]} stroke="none"/>)}
-                </Pie>
-                <Tooltip contentStyle={{ background:"rgba(8,17,36,0.95)", border:"1.5px solid var(--blue-neon)", borderRadius:10, fontSize:12 }}/>
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
-
-      <div className="card">
-        <div style={{ padding:"16px 20px", borderBottom:"1px solid var(--border)" }}>
-          <div className="section-title">Detected Illegal Streaming Sites</div>
-          <div className="section-sub">Sites flagged for piracy</div>
-        </div>
-        <table>
-          <thead><tr><th>Domain</th><th>Risk</th><th>SSL</th><th>Country</th><th>Similarity</th><th>Status</th></tr></thead>
-          <tbody>
-            {streaming.slice(0,20).map(d=>(
-              <tr key={d.id}>
-                <td className="domain-name">{d.domain}</td>
-                <td>{riskBadge(d.riskLevel)}</td>
-                <td>{sslBadge(d.sslStatus)}</td>
-                <td style={{ color:"var(--text-dim)" }}>{d.country}</td>
-                <td className="font-mono">{d.similarityScore}%</td>
-                <td><span className={`badge ${d.status==="Blocked"?"badge-low":d.status==="Active"?"badge-high":"badge-medium"}`}>{d.status}</span></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {streaming.length===0 && <div className="empty-state">No streaming piracy records found.</div>}
-      </div>
-    </div>
-  );
-}
-
-/* ---------------------------------------------------------------
-   ALERTS PAGE
-------------------------------------------------------------------*/
-function AlertsPage({ data }: { data: ThreatRecord[] }) {
-  const [filter, setFilter] = useState("All");
-  const alerts = useMemo(() => {
-    return data
-      .filter(d => d.riskLevel === "High" || d.riskLevel === "Medium")
-      .slice(0,25)
-      .map((d, i) => ({
-        id: d.id,
-        domain: d.domain,
-        threatType: d.threatType,
-        riskScore: d.riskScore,
-        riskLevel: d.riskLevel,
-        timestamp: `2026-0${Math.floor(Math.random()*6)+1}-${String(Math.floor(Math.random()*28)+1).padStart(2,"0")} ${String(Math.floor(Math.random()*24)).padStart(2,"0")}:${String(Math.floor(Math.random()*60)).padStart(2,"0")}`,
-        status: ["Pending", "Acknowledged", "Blocked"][Math.floor(Math.random()*3)],
-      }))
-      .filter(a => filter === "All" ? true : a.riskLevel === filter);
-  }, [data, filter]);
-
-  return (
-    <div>
-      <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:16, flexWrap:"wrap" }}>
-        <h2 className="font-display" style={{ fontSize:20, fontWeight:600 }}>Threat Alerts</h2>
-        <div style={{ display:"flex", gap:8 }}>
-          {["All","High","Medium","Low"].map(l => (
-            <div key={l} className={`btn ${filter === l ? "btn-gold" : ""}`} onClick={() => setFilter(l)} style={{ padding:"4px 14px", fontSize:12 }}>
-              {l}
-            </div>
-          ))}
-        </div>
-        <div style={{ marginLeft:"auto", fontSize:12, color:"var(--text-dim)", fontFamily:"var(--mono)" }}>
-          {alerts.length} alerts
-        </div>
-      </div>
-
-      <div className="card">
-        <table>
-          <thead><tr><th>Domain</th><th>Threat Type</th><th>Risk Score</th><th>Severity</th><th>Timestamp</th><th>Status</th><th>Action</th></tr></thead>
-          <tbody>
-            {alerts.map(a => (
-              <tr key={a.id}>
-                <td className="domain-name">{a.domain}</td>
-                <td>{a.threatType}</td>
-                <td className="font-mono">{a.riskScore}</td>
-                <td>{riskBadge(a.riskLevel)}</td>
-                <td className="font-mono" style={{ color:"var(--text-dim)" }}>{a.timestamp}</td>
-                <td><span className={`badge ${a.status==="Blocked"?"badge-low":a.status==="Acknowledged"?"badge-medium":"badge-high"}`}>{a.status}</span></td>
-                <td>
-                  <div className="btn" style={{ padding:"2px 10px", fontSize:11 }} onClick={() => alert(`Acknowledge ${a.domain}`)}>
-                    Acknowledge
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {alerts.length===0 && <div className="empty-state">No alerts for this filter.</div>}
-      </div>
-    </div>
-  );
-}
 
 /* ---------------------------------------------------------------
    SETTINGS PAGE
@@ -1569,8 +1401,8 @@ export default function App() {
     domains:   ["Domain Threat Intelligence", "Detect & analyze fraudulent FIFA domains"],
     tickets:   ["Ticketing Fraud Monitor", "Fake portals, pricing anomalies & victim impact"],
     social:    ["Social & OSINT Intelligence", "Social mentions, OSINT reports & blacklist feeds"],
-    streaming: ["Streaming Piracy Monitor", "Illegal streaming sites & risk assessment"],
-    alerts:    ["Threat Alerts", "Live feed of critical and high‑risk threats"],
+
+
     settings:  ["Settings", "User preferences, thresholds and API keys"],
   };
 
@@ -1874,8 +1706,8 @@ export default function App() {
           {page === "domains" && <DomainIntel data={data} />}
           {page === "tickets" && <TicketingFraud data={data} />}
           {page === "social" && <SocialOSINT data={data} />}
-          {page === "streaming" && <StreamingPiracy data={data} />}
-          {page === "alerts" && <AlertsPage data={data} />}
+
+
           {page === "settings" && <SettingsPage user={user} />}
         </div>
         <div style={{ padding:"16px 32px", borderTop:"1px solid var(--border)", display:"flex", justifyContent:"space-between", alignItems:"center", fontSize:11, color:"var(--text-faint)", fontFamily:"var(--mono)" }}>
