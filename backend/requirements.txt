@@ -19,3 +19,5 @@ scikit-learn==1.7.1
 joblib==1.5.1
 
 python-multipart==0.0.20
+
+apscheduler>=3.11
