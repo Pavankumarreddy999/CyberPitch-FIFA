@@ -46,6 +46,62 @@ const TOKENS = `
     --shadow-neon: 0 0 15px rgba(0, 210, 255, 0.25);
   }
 
+  .stg-root.light {
+    --void: #f4f7fc;
+    --panel: rgba(255, 255, 255, 0.85);
+    --panel-raised: rgba(240, 244, 250, 0.95);
+    --panel-hair: rgba(0, 102, 255, 0.1);
+    --border: rgba(0, 102, 255, 0.12);
+    --border-strong: rgba(0, 102, 255, 0.25);
+    --text: #0d1b2a;
+    --text-dim: #415a77;
+    --text-faint: #778da9;
+    --shadow-neon: 0 0 15px rgba(0, 102, 255, 0.15);
+  }
+
+  .stg-root.light input.search,
+  .stg-root.light select.filter,
+  .stg-root.light .auth-input {
+    background: rgba(255, 255, 255, 0.95) !important;
+    color: #0d1b2a !important;
+    border-color: rgba(0, 102, 255, 0.25) !important;
+  }
+
+  .stg-root.light input.search:focus,
+  .stg-root.light select.filter:focus,
+  .stg-root.light select.filter:hover,
+  .stg-root.light .auth-input:focus {
+    background: #ffffff !important;
+    border-color: var(--blue-neon) !important;
+    box-shadow: 0 0 10px rgba(0, 102, 255, 0.1) !important;
+  }
+
+  .stg-root.light select.filter option {
+    background-color: #ffffff;
+    color: #0d1b2a;
+  }
+
+  .stg-root.light .hexbg {
+    background-image:
+      linear-gradient(rgba(0, 102, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 102, 255, 0.05) 1px, transparent 1px);
+    opacity: 0.4;
+  }
+
+  .stg-root.light .sidebar {
+    background: rgba(255, 255, 255, 0.95);
+    border-right: 1px solid var(--border-strong);
+  }
+
+  .stg-root.light .topbar {
+    background: rgba(255, 255, 255, 0.8);
+  }
+
+  .stg-root.light thead th {
+    background: rgba(240, 244, 250, 0.95);
+  }
+
+
   .stg-root {
     background:
       radial-gradient(circle at 10% 10%, rgba(0, 102, 255, 0.12), transparent 45%),
@@ -388,7 +444,7 @@ function Sidebar({ page, setPage, collapsed, setCollapsed, onLogout, user, onNav
           <div className="brand-mark"><Shield size={17} color="#030812" strokeWidth={2.5}/></div>
           {!collapsed && (
             <div>
-              <div className="font-display" style={{ fontSize:14.5, fontWeight:700, background:"linear-gradient(135deg,var(--gold),#ff9f1a)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>SENTINEL/7</div>
+              <div className="font-display" style={{ fontSize:14.5, fontWeight:700, background:"linear-gradient(135deg,var(--gold),#ff9f1a)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>CyberPitch-FIFA</div>
               <div style={{ fontSize:9, color:"var(--text-dim)", letterSpacing:"0.08em" }}>FIFA THREAT INTEL</div>
             </div>
           )}
@@ -454,12 +510,13 @@ interface TopBarProps {
   onUpload: (f: File) => void; dataSource: string;
   onScan: () => void; onExport: () => void;
   user: string;
+  dark: boolean;
+  setDark: (val: boolean) => void;
 }
-function TopBar({ title, subtitle, onUpload, dataSource, onScan, onExport, user }: TopBarProps) {
+function TopBar({ title, subtitle, onUpload, dataSource, onScan, onExport, user, dark, setDark }: TopBarProps) {
   const fileRef = React.useRef<HTMLInputElement>(null);
   const [showBell, setShowBell] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
-  const [dark, setDark] = useState(true);
 
   const notifications = [
     { type:"Critical", text:"Fake ticket domain registered: fifa2026-store.xyz", time:"2m ago" },
@@ -490,7 +547,7 @@ function TopBar({ title, subtitle, onUpload, dataSource, onScan, onExport, user 
           {dark ? <Sun size={15}/> : <Moon size={15}/>}
         </button>
 
-        <button onClick={()=>alert("Sentinel/7 Guide: Upload a threat-intel CSV, filter domains using the controls, or monitor fraudulent ticket price drops.")} style={{ background:"none", border:"none", color:"var(--text-dim)", cursor:"pointer" }} title="Help & Guides">
+        <button onClick={()=>alert("CyberPitch-FIFA Guide: Upload a threat-intel CSV, filter domains using the controls, or monitor fraudulent ticket price drops.")} style={{ background:"none", border:"none", color:"var(--text-dim)", cursor:"pointer" }} title="Help & Guides">
           <HelpCircle size={15}/>
         </button>
 
@@ -981,20 +1038,13 @@ function SocialOSINT({ data }: { data: ThreatRecord[] }) {
 
   return (
     <div>
-      <div className="stat-grid" style={{ gridTemplateColumns: "repeat(4,1fr)" }}>
+      <div className="stat-grid" style={{ gridTemplateColumns: "repeat(3,1fr)" }}>
         <div className="card stat-card">
           <div className="stat-icon" style={{ background: "rgba(0,210,255,0.1)", border: "1px solid rgba(0,210,255,0.3)" }}>
             <Database size={16} color="var(--blue-neon)" />
           </div>
           <div className="stat-value">{osintStats.totalReports}</div>
           <div className="stat-label">Total OSINT Reports</div>
-        </div>
-        <div className="card stat-card">
-          <div className="stat-icon" style={{ background: "rgba(0,255,210,0.1)", border: "1px solid rgba(0,255,210,0.3)" }}>
-            <Activity size={16} color="var(--green)" />
-          </div>
-          <div className="stat-value">{osintStats.avgReports}</div>
-          <div className="stat-label">Avg Reports per Domain</div>
         </div>
         <div className="card stat-card">
           <div className="stat-icon" style={{ background: "rgba(255,159,26,0.1)", border: "1px solid rgba(255,159,26,0.3)" }}>
@@ -1310,7 +1360,7 @@ function LoginPage({ onLogin, setShowSignup }: { onLogin: (user: string) => void
         <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:16 }}>
           <div className="brand-mark" style={{ width:40, height:40 }}><Shield size={20} color="#030812" /></div>
           <div>
-            <div className="font-display" style={{ fontSize:18, fontWeight:700, background:"linear-gradient(135deg,var(--gold),#ff9f1a)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>SENTINEL/7</div>
+            <div className="font-display" style={{ fontSize:18, fontWeight:700, background:"linear-gradient(135deg,var(--gold),#ff9f1a)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>CyberPitch-FIFA</div>
             <div style={{ fontSize:10, color:"var(--text-dim)" }}>FIFA THREAT INTEL</div>
           </div>
         </div>
@@ -1365,7 +1415,7 @@ function SignupPage({ onLogin, setShowSignup }: { onLogin: (user: string) => voi
         <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:16 }}>
           <div className="brand-mark" style={{ width:40, height:40 }}><Shield size={20} color="#030812" /></div>
           <div>
-            <div className="font-display" style={{ fontSize:18, fontWeight:700, background:"linear-gradient(135deg,var(--gold),#ff9f1a)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>SENTINEL/7</div>
+            <div className="font-display" style={{ fontSize:18, fontWeight:700, background:"linear-gradient(135deg,var(--gold),#ff9f1a)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>CyberPitch-FIFA</div>
             <div style={{ fontSize:10, color:"var(--text-dim)" }}>FIFA THREAT INTEL</div>
           </div>
         </div>
@@ -1409,12 +1459,17 @@ export default function App() {
   const [user, setUser] = useState("");
   const [showSignup, setShowSignup] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [dark, setDark] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
     setIsMounted(true);
-    setIsLoggedIn(localStorage.getItem('sentinel_isLoggedIn') === 'true');
-    setUser(localStorage.getItem('sentinel_user') || "");
+    setIsLoggedIn(localStorage.getItem('cyberpitch_isLoggedIn') === 'true');
+    setUser(localStorage.getItem('cyberpitch_user') || "");
+    const savedTheme = localStorage.getItem('cyberpitch_theme');
+    if (savedTheme === 'light') {
+      setDark(false);
+    }
   }, []);
 
   const handleLogin = (username: string) => {
@@ -1422,8 +1477,8 @@ export default function App() {
     setIsLoggedIn(true);
     setPage("dashboard");
     if (typeof window !== 'undefined') {
-      localStorage.setItem('sentinel_user', username);
-      localStorage.setItem('sentinel_isLoggedIn', 'true');
+      localStorage.setItem('cyberpitch_user', username);
+      localStorage.setItem('cyberpitch_isLoggedIn', 'true');
     }
   };
 
@@ -1432,8 +1487,8 @@ export default function App() {
     setUser("");
     setPage("dashboard");
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('sentinel_user');
-      localStorage.removeItem('sentinel_isLoggedIn');
+      localStorage.removeItem('cyberpitch_user');
+      localStorage.removeItem('cyberpitch_isLoggedIn');
     }
   };
 
@@ -1505,12 +1560,12 @@ export default function App() {
   }, []);
   const handleExport = useCallback(()=>{
     const csv = ["id,domain,threatType,riskScore,riskLevel,country,status", ...data.slice(0,50).map(d=>`${d.id},${d.domain},${d.threatType},${d.riskScore},${d.riskLevel},${d.country},${d.status}`)].join("\n");
-    const a = document.createElement("a"); a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv); a.download="sentinel7-export.csv"; a.click();
+    const a = document.createElement("a"); a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv); a.download="cyberpitch-fifa-export.csv"; a.click();
   },[data]);
 
   const pageTitles: Record<string, [string,string]> = {
     dashboard: ["Threat Overview", "Real-time snapshot across all detection pipelines"],
-    scan:      ["Real-time Threat Scanner", "Analyze any domain through the Sentinel/7 pipeline"],
+    scan:      ["Real-time Threat Scanner", "Analyze any domain through the CyberPitch-FIFA pipeline"],
     domains:   ["Domain Threat Intelligence", "Detect & analyze fraudulent FIFA domains"],
     tickets:   ["Ticketing Fraud Monitor", "Fake portals, pricing anomalies & victim impact"],
     social:    ["Social & OSINT Intelligence", "Social mentions, OSINT reports & blacklist feeds"],
@@ -1588,7 +1643,7 @@ export default function App() {
             
             if (newRecordsCsv.length > 0) {
               const csv = ["id,domain,threatType,riskScore,riskLevel,country,status", ...newRecordsCsv].join("\n");
-              const a = document.createElement("a"); a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv); a.download="sentinel7-batch-results.csv"; a.click();
+              const a = document.createElement("a"); a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv); a.download="cyberpitch-fifa-batch-results.csv"; a.click();
               setScanError("Batch scan complete. Results downloaded automatically.");
               setBatchResults(newRecordsObj);
             } else {
@@ -1628,7 +1683,7 @@ export default function App() {
             <ShieldAlert size={24} color="var(--blue-neon)"/> 
             <div>
               <div style={{ fontSize:16, fontWeight:600, color:"var(--text)" }}>Domain Scanner Engine</div>
-              <div style={{ fontSize:12, color:"var(--text-dim)" }}>Run a comprehensive analysis through Sentinel/7's ML pipeline</div>
+              <div style={{ fontSize:12, color:"var(--text-dim)" }}>Run a comprehensive analysis through CyberPitch-FIFA's ML pipeline</div>
             </div>
           </div>
             {!scanResult ? (
@@ -1795,13 +1850,18 @@ export default function App() {
 
   const [title, subtitle] = pageTitles[page] || pageTitles.dashboard;
 
+  const toggleTheme = (val: boolean) => {
+    setDark(val);
+    localStorage.setItem('cyberpitch_theme', val ? 'dark' : 'light');
+  };
+
   return (
-    <div className="stg-root">
+    <div className={`stg-root ${dark ? 'dark' : 'light'}`}>
       <style>{TOKENS}</style>
       <div className="hexbg"/>
       <Sidebar page={page} setPage={setPage} collapsed={collapsed} setCollapsed={setCollapsed} onLogout={handleLogout} user={user} onNavigate={(href) => router.push(href)} />
       <div className="main">
-        <TopBar title={title} subtitle={subtitle} onUpload={handleUpload} dataSource={dataSource} onScan={handleScan} onExport={handleExport} user={user} />
+        <TopBar title={title} subtitle={subtitle} onUpload={handleUpload} dataSource={dataSource} onScan={handleScan} onExport={handleExport} user={user} dark={dark} setDark={toggleTheme} />
         {uploadError && (
           <div style={{ margin:"14px 28px 0", padding:"10px 14px", background:"rgba(255,42,95,0.1)", border:"1px solid rgba(255,42,95,0.3)", borderRadius:8, fontSize:12.5, color:"var(--red)", display:"flex", alignItems:"center", gap:8 }}>
             <AlertTriangle size={13}/>{uploadError}
@@ -1819,7 +1879,7 @@ export default function App() {
           {page === "settings" && <SettingsPage user={user} />}
         </div>
         <div style={{ padding:"16px 32px", borderTop:"1px solid var(--border)", display:"flex", justifyContent:"space-between", alignItems:"center", fontSize:11, color:"var(--text-faint)", fontFamily:"var(--mono)" }}>
-          <span>SENTINEL/7 v2.0.0 · FIFA Cyber Threat Intelligence Platform</span>
+          <span>CyberPitch-FIFA v2.0.0 · FIFA Cyber Threat Intelligence Platform</span>
           <span>{data.length.toLocaleString()} domains monitored · {new Date().toLocaleString()}</span>
           <span>© 2026 FIFA Cyber Threat Intelligence</span>
         </div>
