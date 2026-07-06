@@ -89,9 +89,24 @@ export async function DELETE(request: Request) {
     );
   }
 
-  // Not implemented on FastAPI backend yet, but we return success to allow deletion in UI
-  return NextResponse.json({ 
-    success: true, 
-    message: `Threat with ID ${id} deleted successfully` 
-  });
+  try {
+    const backendRes = await fetch(`http://localhost:8000/api/scan/${id}`, {
+      method: "DELETE",
+    });
+
+    if (!backendRes.ok) {
+      const errorText = await backendRes.text();
+      throw new Error(errorText || "Failed to delete from backend");
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      message: `Threat with ID ${id} deleted successfully` 
+    });
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: error.message || "Backend communication error" },
+      { status: 500 }
+    );
+  }
 }

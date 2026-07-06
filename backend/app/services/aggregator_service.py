@@ -77,15 +77,26 @@ def typosquat_distance(domain: str, target: str = "fifa") -> int:
     return min_dist
 
 
+import dateutil.parser
+
 def parse_date(date_str) -> datetime:
     if not date_str:
         return None
     if isinstance(date_str, datetime):
         return date_str
 
+    try:
+        dt = dateutil.parser.parse(str(date_str))
+        if dt.tzinfo is not None:
+            from dateutil import tz
+            dt = dt.astimezone(tz.tzutc()).replace(tzinfo=None)
+        return dt
+    except Exception:
+        pass
+
     for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d", "%d-%b-%Y"):
         try:
-            return datetime.strptime(date_str.split(".")[0].strip(), fmt)
+            return datetime.strptime(str(date_str).split(".")[0].strip(), fmt)
         except Exception:
             continue
     return None
