@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import Papa from "papaparse";
@@ -10,7 +10,7 @@ import {
   MessageSquare, Hash, Eye, Wifi, Server, Cpu, HardDrive,
   Activity, Zap, FileText, Share2, BarChart3, Filter, Calendar,
   CheckCircle2, XCircle, Clock, Star, Target, Flame, Waves, Monitor,
-  Sun, Moon,
+  Sun, Moon, User, ShieldCheck as ShieldCheckIcon, History,
 } from "lucide-react";
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar,
@@ -18,12 +18,11 @@ import {
 } from "recharts";
 
 /* ═══════════════════════════════════════════════════════════════
-   THEME STYLE SYSTEM (SUPPORTING DARK & LIGHT MODES)
+   THEME STYLE SYSTEM (Dark & Light)
 ═══════════════════════════════════════════════════════════════ */
 const TOKENS = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-  /* Light theme: clean light canvas, but cards are gorgeous corporate blue */
   .stg-root.theme-light {
     --bg: #f1f4f9;
     --surface: #ffffff;
@@ -45,7 +44,6 @@ const TOKENS = `
     --shadow-glow: 0 0 20px rgba(79,70,229,0.1);
   }
 
-  /* Dark theme: classic high-tech cyber operations room */
   .stg-root.theme-dark {
     --bg: #050b16;
     --surface: #0a1628;
@@ -72,7 +70,7 @@ const TOKENS = `
   .stg-root {
     background: var(--bg);
     color: var(--text);
-    font-family: var(--body);
+    font-family: 'Inter', sans-serif;
     min-height: 100vh;
     display: flex;
     position: relative;
@@ -80,7 +78,6 @@ const TOKENS = `
     transition: background 0.3s ease, color 0.3s ease;
   }
 
-  /* Decorative bg blobs */
   .bg-decor {
     position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
   }
@@ -90,10 +87,9 @@ const TOKENS = `
     background: radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 70%);
   }
 
-  .font-display { font-family: var(--grotesk); letter-spacing: -0.02em; }
-  .font-mono { font-family: var(--mono); }
+  .font-display { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
 
-  /* ── Sidebar ── */
   .sidebar {
     width: 260px; flex-shrink: 0;
     background: var(--surface);
@@ -124,20 +120,18 @@ const TOKENS = `
   }
   .navitem:hover { background: var(--indigo-bg); color: var(--indigo); }
   .navitem.active {
-    background: linear-gradient(135deg, var(--indigo-bg), rgba(99, 102, 241, 0.08));
+    background: linear-gradient(135deg, var(--indigo-bg), rgba(99,102,241,0.08));
     color: var(--indigo); font-weight: 600;
     border-color: var(--border-strong);
     box-shadow: var(--shadow-glow);
   }
   .navitem.disabled { opacity: 0.45; cursor: default; }
-  .navitem.disabled:hover { background: transparent; color: var(--text-secondary); }
   .soon-badge {
     margin-left: auto; font-size: 9px; font-weight: 700; padding: 2px 7px;
     border-radius: 6px; background: var(--indigo-bg); color: var(--indigo);
     letter-spacing: 0.06em; border: 1px solid var(--border-strong);
   }
 
-  /* ── Layout ── */
   .main { flex: 1; position: relative; z-index: 1; min-width: 0; display: flex; flex-direction: column; }
   .topbar {
     display: flex; align-items: center; justify-content: space-between;
@@ -148,16 +142,8 @@ const TOKENS = `
   }
   .content { padding: 28px 32px; flex: 1; }
 
-  /* ── Live dot ── */
-  .pulse-dot {
-    width: 8px; height: 8px; border-radius: 50%; background: var(--emerald);
-    position: relative; display: inline-block;
-  }
-  .pulse-dot::after {
-    content: ''; position: absolute; inset: -3px; border-radius: 50%;
-    border: 1.5px solid var(--emerald);
-    animation: pulse 2s ease-out infinite;
-  }
+  .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--emerald); position: relative; display: inline-block; }
+  .pulse-dot::after { content: ''; position: absolute; inset: -3px; border-radius: 50%; border: 1.5px solid var(--emerald); animation: pulse 2s ease-out infinite; }
   @keyframes pulse { 0% { transform: scale(0.8); opacity: 0.8; } 100% { transform: scale(2.2); opacity: 0; } }
 
   .status-pill {
@@ -167,7 +153,6 @@ const TOKENS = `
     background: var(--indigo-bg);
   }
 
-  /* ── Buttons ── */
   .btn {
     display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600;
     padding: 8px 16px; border-radius: 10px; cursor: pointer;
@@ -184,14 +169,11 @@ const TOKENS = `
   .btn-danger { color: var(--rose); border-color: rgba(244,63,94,0.3); }
   .btn-danger:hover { background: var(--rose-bg); border-color: var(--rose); }
 
-  /* ── Cards ── */
   .card {
     border-radius: 16px;
     position: relative; overflow: hidden;
     transition: all 0.3s ease;
   }
-
-  /* In Dark Theme, cards are dark */
   .stg-root.theme-dark .card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -202,94 +184,47 @@ const TOKENS = `
     box-shadow: var(--shadow-lg), var(--shadow-glow);
     transform: translateY(-1px);
   }
-
-  /* In Light Theme, cards are gorgeous deep royal/navy blue */
   .stg-root.theme-light .card {
     background: linear-gradient(135deg, #0f1c3f, #182e5c);
-    border: 1px solid rgba(99, 102, 241, 0.2);
-    box-shadow: 0 4px 20px rgba(15, 28, 63, 0.15);
+    border: 1px solid rgba(99,102,241,0.2);
+    box-shadow: 0 4px 20px rgba(15,28,63,0.15);
     color: #ffffff;
   }
   .stg-root.theme-light .card:hover {
-    border-color: rgba(99, 102, 241, 0.45);
-    box-shadow: 0 10px 25px rgba(15, 28, 63, 0.25), var(--shadow-glow);
+    border-color: rgba(99,102,241,0.45);
+    box-shadow: 0 10px 25px rgba(15,28,63,0.25), var(--shadow-glow);
     transform: translateY(-1px);
   }
-
-  /* Text overrides inside Blue Cards for Light Theme */
   .stg-root.theme-light .card .section-title,
-  .stg-root.theme-light .card .stat-value {
-    color: #ffffff !important;
-  }
+  .stg-root.theme-light .card .stat-value { color: #ffffff !important; }
   .stg-root.theme-light .card .section-sub,
-  .stg-root.theme-light .card .stat-label {
-    color: #a5b7d0 !important;
-  }
-  .stg-root.theme-light .card table {
-    color: #ffffff;
-  }
-  .stg-root.theme-light .card thead th {
-    background: #112240;
-    color: #a5b7d0;
-    border-bottom-color: rgba(255,255,255,0.08);
-  }
-  .stg-root.theme-light .card tbody td {
-    border-bottom-color: rgba(255,255,255,0.08);
-  }
-  .stg-root.theme-light .card tbody tr:hover {
-    background: rgba(255,255,255,0.05);
-  }
-  .stg-root.theme-light .card .domain-name {
-    color: #ffffff;
-  }
-  .stg-root.theme-light .card .activity-item {
-    background: #122548;
-    color: #ffffff;
-    border-color: rgba(99,102,241,0.2);
-  }
-  .stg-root.theme-light .card .activity-item:hover {
-    background: #1a3262;
-  }
-  .stg-root.theme-light .card .flag-chip {
-    background: rgba(255,255,255,0.05);
-    border-color: rgba(255,255,255,0.15);
-    color: #a5b7d0;
-  }
-  .stg-root.theme-light .card .flag-chip:hover {
-    border-color: #ffffff;
-    color: #ffffff;
-    background: rgba(255,255,255,0.1);
-  }
-  .stg-root.theme-light .card .pagination-btn {
-    background: rgba(255,255,255,0.05);
-    border-color: rgba(255,255,255,0.15);
-    color: #ffffff;
-  }
-  .stg-root.theme-light .card .pagination-btn:hover {
-    border-color: #ffffff;
-  }
+  .stg-root.theme-light .card .stat-label { color: #a5b7d0 !important; }
+  .stg-root.theme-light .card table { color: #ffffff; }
+  .stg-root.theme-light .card thead th { background: #112240; color: #a5b7d0; border-bottom-color: rgba(255,255,255,0.08); }
+  .stg-root.theme-light .card tbody td { border-bottom-color: rgba(255,255,255,0.08); }
+  .stg-root.theme-light .card tbody tr:hover { background: rgba(255,255,255,0.05); }
+  .stg-root.theme-light .card .domain-name { color: #ffffff; }
+  .stg-root.theme-light .card .activity-item { background: #122548; color: #ffffff; border-color: rgba(99,102,241,0.2); }
+  .stg-root.theme-light .card .activity-item:hover { background: #1a3262; }
+  .stg-root.theme-light .card .flag-chip { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.15); color: #a5b7d0; }
+  .stg-root.theme-light .card .flag-chip:hover { border-color: #ffffff; color: #ffffff; background: rgba(255,255,255,0.1); }
+  .stg-root.theme-light .card .pagination-btn { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.15); color: #ffffff; }
+  .stg-root.theme-light .card .pagination-btn:hover { border-color: #ffffff; }
 
   .accent-line {
     position: absolute; top: 0; left: 0; right: 0; height: 3px;
-    background: linear-gradient(90deg, var(--indigo), var(--violet), var(--sky));
+    background: linear-gradient(90deg, var(--indigo), var(--violet), #00d2ff);
     opacity: 0; transition: opacity 0.3s;
   }
   .card:hover .accent-line { opacity: 1; }
 
-  /* ── Stat grid ── */
   .stat-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
   @media (max-width: 1200px) { .stat-grid { grid-template-columns: repeat(3, 1fr); } }
   @media (max-width: 800px)  { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
   .stat-card { padding: 24px; cursor: default; }
-  .stat-icon {
-    width: 44px; height: 44px; border-radius: 12px;
-    display: flex; align-items: center; justify-content: center; margin-bottom: 16px;
-  }
-  .stat-value {
-    font-family: var(--mono); font-size: 28px; font-weight: 800; line-height: 1;
-  }
+  .stat-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+  .stat-value { font-family: var(--mono); font-size: 28px; font-weight: 800; line-height: 1; }
   .stat-label { font-size: 13px; margin-top: 6px; font-weight: 500; }
-  
   .trend {
     display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600;
     font-family: var(--mono); margin-top: 12px; padding: 4px 10px; border-radius: 8px;
@@ -297,17 +232,12 @@ const TOKENS = `
   }
   .trend-up { color: var(--rose); background: var(--rose-bg); }
   .trend-down { color: var(--emerald); background: var(--emerald-bg); }
-  .stg-root.theme-light .trend-up { color: #ff8a9f; background: rgba(244, 63, 94, 0.15); }
-  .stg-root.theme-light .trend-down { color: #5effc4; background: rgba(16, 185, 129, 0.15); }
+  .stg-root.theme-light .trend-up { color: #ff8a9f; background: rgba(244,63,94,0.15); }
+  .stg-root.theme-light .trend-down { color: #5effc4; background: rgba(16,185,129,0.15); }
 
-  /* ── Section titles ── */
-  .section-title {
-    font-family: var(--grotesk); font-size: 16px; font-weight: 700;
-    display: flex; align-items: center; gap: 10px;
-  }
+  .section-title { font-family: var(--grotesk); font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
   .section-sub { font-size: 13px; margin-top: 2px; }
 
-  /* ── Badges ── */
   .badge {
     font-size: 11px; font-weight: 600; font-family: var(--mono); padding: 3px 10px;
     border-radius: 8px; display: inline-flex; align-items: center; gap: 5px;
@@ -319,7 +249,6 @@ const TOKENS = `
   .badge-neutral { background: var(--indigo-bg); color: var(--indigo); border: 1px solid rgba(99,102,241,0.15); }
   .badge-info   { background: var(--sky-bg);    color: var(--sky);    border: 1px solid rgba(14,165,233,0.2); }
 
-  /* ── Table ── */
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   thead th {
     text-align: left; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
@@ -334,7 +263,6 @@ const TOKENS = `
   tbody tr:hover { background: var(--surface-hover); }
   .domain-name { font-family: var(--mono); font-size: 13px; color: var(--text); font-weight: 600; }
 
-  /* ── Inputs ── */
   input.search {
     background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px;
     padding: 10px 14px 10px 38px; font-size: 14px; color: var(--text); width: 280px; outline: none;
@@ -342,37 +270,26 @@ const TOKENS = `
   }
   input.search::placeholder { color: var(--text-muted); }
   input.search:focus { border-color: var(--indigo); box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
-  
   select.filter {
     background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px;
     padding: 9px 14px; font-size: 13px; color: var(--text-secondary); outline: none; cursor: pointer;
   }
   select.filter:focus, select.filter:hover { border-color: var(--indigo); }
-  select.filter option {
-    background: var(--surface) !important;
-    color: var(--text) !important;
-  }
+  select.filter option { background: var(--surface) !important; color: var(--text) !important; }
 
-  /* Specific overrides when inside the dark-blue cards in Light Theme */
   .stg-root.theme-light .card input.search {
-    background: rgba(255, 255, 255, 0.08) !important;
+    background: rgba(255,255,255,0.08) !important;
     color: #ffffff !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border: 1px solid rgba(255,255,255,0.2) !important;
   }
-  .stg-root.theme-light .card input.search::placeholder {
-    color: rgba(255, 255, 255, 0.55) !important;
-  }
+  .stg-root.theme-light .card input.search::placeholder { color: rgba(255,255,255,0.55) !important; }
   .stg-root.theme-light .card select.filter {
-    background: rgba(255, 255, 255, 0.08) !important;
+    background: rgba(255,255,255,0.08) !important;
     color: #ffffff !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border: 1px solid rgba(255,255,255,0.2) !important;
   }
-  .stg-root.theme-light .card select.filter option {
-    background: #112240 !important;
-    color: #ffffff !important;
-  }
+  .stg-root.theme-light .card select.filter option { background: #112240 !important; color: #ffffff !important; }
 
-  /* ── Risk bar ── */
   .risk-bar-track { width: 70px; height: 6px; border-radius: 4px; background: rgba(255,255,255,0.15); overflow: hidden; }
   .stg-root.theme-dark .risk-bar-track { background: var(--border); }
   .risk-bar-fill { height: 100%; border-radius: 4px; }
@@ -385,7 +302,6 @@ const TOKENS = `
   .flag-chip:hover { border-color: var(--indigo); color: var(--indigo); background: var(--indigo-bg); }
 
   .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
-
   .pagination-btn {
     display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px;
     border-radius: 8px; font-size: 12.5px; font-weight: 600; cursor: pointer;
@@ -395,21 +311,16 @@ const TOKENS = `
   .pagination-btn:hover { border-color: var(--indigo); color: var(--indigo); }
   .pagination-btn:disabled { opacity: 0.35; cursor: default; }
 
-  /* ── Activity item ── */
   .activity-item {
     padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border);
     background: var(--bg); transition: all 0.2s; cursor: pointer;
   }
   .activity-item:hover { background: var(--indigo-bg); border-color: rgba(99,102,241,0.2); transform: translateX(4px); }
 
-  /* ── Health indicator ── */
-  .health-bar {
-    height: 8px; border-radius: 4px; background: rgba(255,255,255,0.12); overflow: hidden;
-  }
+  .health-bar { height: 8px; border-radius: 4px; background: rgba(255,255,255,0.12); overflow: hidden; }
   .stg-root.theme-dark .health-bar { background: var(--border); }
   .health-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
 
-  /* ── Settings toggle ── */
   .toggle {
     width: 44px; height: 24px; border-radius: 12px; background: var(--border);
     position: relative; cursor: pointer; transition: background 0.2s;
@@ -437,7 +348,7 @@ const TOKENS = `
 `;
 
 /* ═══════════════════════════════════════════════════════════════
-   MOCK DATA
+   MOCK DATA & HELPERS
 ═══════════════════════════════════════════════════════════════ */
 const THREAT_TYPES = ["Ticket Scam","Phishing","Malware","Streaming Piracy"];
 const COUNTRIES = ["Russia","Nigeria","Vietnam","Brazil","India","Ukraine","Indonesia","China","Philippines","USA"];
@@ -463,10 +374,13 @@ function generateMockData(count=180) {
     const flagCount=2+Math.floor(rnd()*4);
     const flags=[...RED_FLAG_POOL].sort(()=>rnd()-0.5).slice(0,flagCount);
     rows.push({
-      id:`TH-${1000+i}`, threatType, riskScore, ageDays,
+      id:`TH-${1000+i}`,
       domain:`fifa-${["worldcup","tickets2026","official","matchday","livepass","fanzone","goldpass"][Math.floor(rnd()*7)]}-${Math.floor(rnd()*999)}.${["com","net","info","xyz","ru","top"][Math.floor(rnd()*6)]}`,
+      threatType,
+      riskScore,
       riskLevel:riskScore>=70?"High":riskScore>=40?"Medium":"Low",
       registrationDate:`2025-${String(Math.floor(rnd()*12)+1).padStart(2,"0")}-${String(Math.floor(rnd()*28)+1).padStart(2,"0")}`,
+      ageDays,
       registrar:REGISTRARS[Math.floor(rnd()*REGISTRARS.length)],
       country:COUNTRIES[Math.floor(rnd()*COUNTRIES.length)],
       sslStatus:SSL_STATES[Math.floor(rnd()*SSL_STATES.length)],
@@ -477,7 +391,8 @@ function generateMockData(count=180) {
       affectedUsers:isTicket?Math.floor(rnd()*900):Math.floor(rnd()*200),
       officialPrice:isTicket?officialPrice:null,
       scamPrice:isTicket?Math.round(officialPrice*(0.15+rnd()*0.35)):null,
-      redFlags:flags, source:rnd()>0.4?"Synthetic":"Real (FBI/IC3-linked)",
+      redFlags:flags,
+      source:rnd()>0.4?"Synthetic":"Real (FBI/IC3-linked)",
     });
   }
   return rows;
@@ -500,14 +415,25 @@ function normalizeCSVRow(row:Record<string,string>,idx:number) {
   const rs=Math.min(100,Math.max(0,Number(get("riskScore",String(Math.round(Math.random()*100))))||0));
   const tt=get("threatType","Phishing");
   return {
-    id:`CSV-${1000+idx}`, domain:get("domain","unknown.com"), threatType:THREAT_TYPES.includes(tt)?tt:"Phishing",
-    riskScore:rs, riskLevel:rs>=70?"High":rs>=40?"Medium":"Low", registrationDate:get("registrationDate","—"),
-    ageDays:Number(get("ageDays","0"))||0, registrar:get("registrar","Unknown"), country:get("country","Unknown"),
-    sslStatus:get("sslStatus","Unknown"), similarityScore:Number(get("similarityScore","0"))||0,
-    detectedDate:get("detectedDate","—"), status:get("status","Active"),
-    estimatedLoss:Number(get("estimatedLoss","0"))||0, affectedUsers:Number(get("affectedUsers","0"))||0,
-    officialPrice:null as number|null, scamPrice:null as number|null,
-    redFlags:[] as string[], source:get("source","Uploaded CSV"),
+    id:`CSV-${1000+idx}`,
+    domain:get("domain","unknown.com"),
+    threatType:THREAT_TYPES.includes(tt)?tt:"Phishing",
+    riskScore:rs,
+    riskLevel:rs>=70?"High":rs>=40?"Medium":"Low",
+    registrationDate:get("registrationDate","—"),
+    ageDays:Number(get("ageDays","0"))||0,
+    registrar:get("registrar","Unknown"),
+    country:get("country","Unknown"),
+    sslStatus:get("sslStatus","Unknown"),
+    similarityScore:Number(get("similarityScore","0"))||0,
+    detectedDate:get("detectedDate","—"),
+    status:get("status","Active"),
+    estimatedLoss:Number(get("estimatedLoss","0"))||0,
+    affectedUsers:Number(get("affectedUsers","0"))||0,
+    officialPrice:null as number|null,
+    scamPrice:null as number|null,
+    redFlags:[] as string[],
+    source:get("source","Uploaded CSV"),
   };
 }
 
@@ -527,9 +453,7 @@ function sslBadge(s:string) {
   return <span className="badge badge-high"><Unlock size={10}/>{s}</span>;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   RISK GAUGE SVG
-═══════════════════════════════════════════════════════════════ */
+/* ── RiskGauge ── */
 function RiskGauge({value}:{value:number}) {
   const angle=(value/100)*180;
   const color=value>=70?"var(--rose)":value>=40?"var(--amber)":"var(--emerald)";
@@ -568,7 +492,7 @@ function Sidebar({page,setPage,collapsed,setCollapsed,userName,onLogout}:Sidebar
         <div style={{display:"flex",alignItems:"center",gap:collapsed?0:12}}>
           <div className="brand-mark"><Shield size={18} color="#fff" strokeWidth={2.5}/></div>
           {!collapsed&&<div>
-            <div className="font-display" style={{fontSize:15,fontWeight:800,color:"var(--text)"}}>SENTINEL/7</div>
+            <div className="font-display" style={{fontSize:15,fontWeight:800,color:"var(--text)"}}>CyberPitch-FIFA</div>
             <div style={{fontSize:10,color:"var(--text-muted)",letterSpacing:"0.06em",fontWeight:500}}>FIFA THREAT INTEL</div>
           </div>}
         </div>
@@ -619,8 +543,9 @@ function Sidebar({page,setPage,collapsed,setCollapsed,userName,onLogout}:Sidebar
 interface TopBarProps {
   title:string; subtitle:string; onUpload:(f:File)=>void; dataSource:string;
   onScan:()=>void; onExport:()=>void; isDark:boolean; onToggleTheme:()=>void;
+  onProfile:()=>void; onSecurity:()=>void; onLogout:()=>void;
 }
-function TopBar({title,subtitle,onUpload,dataSource,onScan,onExport,isDark,onToggleTheme}:TopBarProps) {
+function TopBar({ title, subtitle, onUpload, dataSource, onScan, onExport, isDark, onToggleTheme, onProfile, onSecurity, onLogout }:TopBarProps) {
   const fileRef=React.useRef<HTMLInputElement>(null);
   const [showBell,setShowBell]=useState(false);
   const [showProfile,setShowProfile]=useState(false);
@@ -629,6 +554,7 @@ function TopBar({title,subtitle,onUpload,dataSource,onScan,onExport,isDark,onTog
     {type:"Warning",text:"High traffic on pipeline #4",time:"15m ago"},
     {type:"Info",text:"Threat database refreshed",time:"1h ago"},
   ];
+
   return (
     <div className="topbar">
       <div>
@@ -647,14 +573,12 @@ function TopBar({title,subtitle,onUpload,dataSource,onScan,onExport,isDark,onTog
         <button className="btn btn-primary" onClick={()=>fileRef.current?.click()}><Upload size={14}/>Upload CSV</button>
         <div style={{width:1,height:24,background:"var(--border)",margin:"0 2px"}}/>
 
-        {/* Dynamic Dark / Light theme toggle */}
-        <button onClick={onToggleTheme} style={{background:"none",border:"none",color:"var(--text-muted)",cursor:"pointer",padding:6,borderRadius:8,display:"flex",alignItems:"center"}} title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}>
+        <button onClick={onToggleTheme} style={{background:"none",border:"none",color:"var(--text-muted)",cursor:"pointer",padding:6,borderRadius:8,display:"flex",alignItems:"center"}} title={isDark ? "Light Mode" : "Dark Mode"}>
           {isDark ? <Sun size={17} color="var(--amber)" /> : <Moon size={17} />}
         </button>
 
-        <button onClick={()=>alert("Help: Upload a CSV, filter domains, or scan for new threats.")} style={{background:"none",border:"none",color:"var(--text-muted)",cursor:"pointer",padding:4}} title="Help"><HelpCircle size={17}/></button>
-        
-        {/* Bell */}
+        <button onClick={()=>alert("CyberPitch-FIFA Guide: Upload CSV, filter domains, scan for threats.")} style={{background:"none",border:"none",color:"var(--text-muted)",cursor:"pointer",padding:4}} title="Help"><HelpCircle size={17}/></button>
+
         <div style={{position:"relative"}}>
           <button onClick={()=>{setShowBell(!showBell);setShowProfile(false);}} style={{background:"none",border:"none",color:"var(--text-muted)",cursor:"pointer",position:"relative",padding:4}}>
             <Bell size={17}/>
@@ -677,16 +601,15 @@ function TopBar({title,subtitle,onUpload,dataSource,onScan,onExport,isDark,onTog
             </div>
           )}
         </div>
-        {/* Profile */}
+
         <div style={{position:"relative"}}>
           <div onClick={()=>{setShowProfile(!showProfile);setShowBell(false);}} style={{width:32,height:32,borderRadius:"50%",background:"linear-gradient(135deg,var(--indigo),var(--violet))",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,fontSize:12,color:"#fff"}}>AK</div>
           {showProfile&&(
-            <div style={{position:"absolute",top:38,right:0,width:170,background:"var(--surface)",border:"1px solid var(--border)",borderRadius:12,padding:6,zIndex:10,boxShadow:"var(--shadow-xl)"}}>
-              {[{label:"My Profile",action:"Profile"},{label:"Security Log",action:"Security"}].map((m,i)=>(
-                <div key={i} style={{fontSize:13,padding:"8px 12px",cursor:"pointer",color:"var(--text)",borderRadius:8,fontWeight:500}} onClick={()=>alert(m.action)} onMouseEnter={e=>e.currentTarget.style.background="var(--surface-hover)"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>{m.label}</div>
-              ))}
+            <div style={{position:"absolute",top:38,right:0,width:180,background:"var(--surface)",border:"1px solid var(--border)",borderRadius:12,padding:6,zIndex:10,boxShadow:"var(--shadow-xl)"}}>
+              <div style={{fontSize:13,padding:"8px 12px",cursor:"pointer",color:"var(--text)",borderRadius:8,fontWeight:500,display:"flex",alignItems:"center",gap:8}} onClick={()=>{setShowProfile(false);onProfile();}} onMouseEnter={e=>e.currentTarget.style.background="var(--surface-hover)"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}><User size={14}/>My Profile</div>
+              <div style={{fontSize:13,padding:"8px 12px",cursor:"pointer",color:"var(--text)",borderRadius:8,fontWeight:500,display:"flex",alignItems:"center",gap:8}} onClick={()=>{setShowProfile(false);onSecurity();}} onMouseEnter={e=>e.currentTarget.style.background="var(--surface-hover)"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}><History size={14}/>Security Log</div>
               <div style={{borderTop:"1px solid var(--border)",marginTop:4,paddingTop:4}}>
-                <div style={{fontSize:13,padding:"8px 12px",cursor:"pointer",color:"var(--rose)",borderRadius:8,fontWeight:500,display:"flex",alignItems:"center",gap:6}} onClick={()=>alert("Logged Out")} onMouseEnter={e=>e.currentTarget.style.background="var(--rose-bg)"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}><LogOut size={14}/>Log Out</div>
+                <div style={{fontSize:13,padding:"8px 12px",cursor:"pointer",color:"var(--rose)",borderRadius:8,fontWeight:500,display:"flex",alignItems:"center",gap:6}} onClick={()=>{setShowProfile(false);onLogout();}} onMouseEnter={e=>e.currentTarget.style.background="var(--rose-bg)"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}><LogOut size={14}/>Log Out</div>
               </div>
             </div>
           )}
@@ -697,7 +620,7 @@ function TopBar({title,subtitle,onUpload,dataSource,onScan,onExport,isDark,onTog
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   PAGE: DASHBOARD
+   DASHBOARD PAGE
 ═══════════════════════════════════════════════════════════════ */
 function Dashboard({data,isDark}:{data:ThreatRecord[];isDark:boolean}) {
   const stats=useMemo(()=>{const bt=(t:string)=>data.filter(d=>d.threatType===t).length;return{total:data.length,tickets:bt("Ticket Scam"),phishing:bt("Phishing"),streaming:bt("Streaming Piracy"),malware:bt("Malware")};},[data]);
@@ -706,7 +629,6 @@ function Dashboard({data,isDark}:{data:ThreatRecord[];isDark:boolean}) {
   const countryDist=useMemo(()=>{const c:Record<string,number>={};data.forEach(d=>(c[d.country]=(c[d.country]||0)+1));return Object.entries(c).map(([country,count])=>({country,count:count as number})).sort((a,b)=>b.count-a.count).slice(0,6);},[data]);
   const timelineData=useMemo(()=>["06-29","06-30","07-01","07-02","07-03","07-04","07-05","07-06"].map((d,i)=>({date:d,threats:data.filter(item=>item.detectedDate?.endsWith(d)).length||(12+(i*3)%7)})),[data]);
   const recent=useMemo(()=>[...data].sort((a,b)=>(b.detectedDate||"").localeCompare(a.detectedDate||"")).slice(0,6),[data]);
-
   const sparklines=["M0,18 Q15,4 30,14 T60,2 T90,16 L100,8","M0,15 Q15,22 30,5 T60,19 T90,2 L100,12","M0,8 Q15,18 30,3 T60,12 T90,18 L100,5","M0,20 Q15,8 30,16 T60,4 T90,22 L100,15","M0,5 Q15,15 30,8 T60,22 T90,4 L100,18"];
   const statCards=[
     {label:"Total threats detected",value:stats.total,icon:ShieldAlert,color:"var(--indigo)",bg:"var(--indigo-bg)",trend:"+12.4%",up:true,spark:sparklines[0]},
@@ -725,14 +647,8 @@ function Dashboard({data,isDark}:{data:ThreatRecord[];isDark:boolean}) {
             <div className="stat-icon" style={{background:s.bg}}><Icon size={20} color={s.color}/></div>
             <div className="stat-value">{s.value.toLocaleString()}</div>
             <div className="stat-label">{s.label}</div>
-            <div style={{height:26,marginTop:12,marginBottom:4}}>
-              <svg viewBox="0 0 100 25" width="100%" height="100%" preserveAspectRatio="none">
-                <path d={s.spark} fill="none" stroke={s.color} strokeWidth="2.5" strokeLinecap="round" opacity="0.6"/>
-              </svg>
-            </div>
-            <div className={`trend ${s.up?"trend-up":"trend-down"}`}>
-              {s.up?<TrendingUp size={12}/>:<TrendingDown size={12}/>}{s.trend} vs last week
-            </div>
+            <div style={{height:26,marginTop:12,marginBottom:4}}><svg viewBox="0 0 100 25" width="100%" height="100%" preserveAspectRatio="none"><path d={s.spark} fill="none" stroke={s.color} strokeWidth="2.5" strokeLinecap="round" opacity="0.6"/></svg></div>
+            <div className={`trend ${s.up?"trend-up":"trend-down"}`}>{s.up?<TrendingUp size={12}/>:<TrendingDown size={12}/>}{s.trend} vs last week</div>
           </div>
         );})}
       </div>
@@ -895,7 +811,6 @@ function SocialOSINT({data,isDark}:{data:ThreatRecord[];isDark:boolean}) {
     <tbody>{mentions.map((m,i)=>(<tr key={i}><td style={{fontWeight:600,color:"var(--text)"}}>{m.platform}</td><td className="font-mono" style={{fontWeight:600}}>{m.mentions.toLocaleString()}</td><td><span className={`badge ${m.sentiment==="Critical"?"badge-high":m.sentiment==="Negative"?"badge-medium":"badge-neutral"}`}>{m.sentiment}</span></td><td><span className="trend trend-up" style={{fontSize:11}}><TrendingUp size={11}/>{m.change}</span></td></tr>))}</tbody></table></div>
   </div>);
 }
-
 /* ═══════════════════════════════════════════════════════════════
    PAGE: STREAMING PIRACY
 ═══════════════════════════════════════════════════════════════ */
@@ -980,72 +895,164 @@ function AlertsCenter() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   PAGE: SETTINGS
+   SETTINGS PAGE – with Tabs (General, Profile, Security)
 ═══════════════════════════════════════════════════════════════ */
-function SettingsPage({isDark}:{isDark:boolean}) {
-  const [autoRefresh,setAutoRefresh]=useState(true);
-  const [emailAlerts,setEmailAlerts]=useState(true);
-  const [slackAlerts,setSlackAlerts]=useState(false);
-  const [scanInterval,setScanInterval]=useState("10");
+type SettingsTab = "general" | "profile" | "security";
+interface SettingsPageProps { isDark: boolean; tab: SettingsTab; userName: string; }
 
-  const healthItems=useMemo(()=>[
-    {name:"Threat Detection Engine",status:"Healthy",uptime:99.8,color:"var(--emerald)"},
-    {name:"Domain Scanner",status:"Healthy",uptime:98.5,color:"var(--emerald)"},
-    {name:"OSINT Collector",status:"Degraded",uptime:87.2,color:"var(--amber)"},
-    {name:"Streaming Monitor",status:"Healthy",uptime:99.1,color:"var(--emerald)"},
-    {name:"ML Risk Scorer",status:"Healthy",uptime:97.9,color:"var(--emerald)"},
-  ],[]);
+function SettingsPage({ isDark, tab, userName }: SettingsPageProps) {
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [emailAlerts, setEmailAlerts] = useState(true);
+  const [slackAlerts, setSlackAlerts] = useState(false);
+  const [scanInterval, setScanInterval] = useState("10");
 
-  const Toggle=({on,toggle}:{on:boolean;toggle:()=>void})=>(<div className={`toggle${on?" on":""}`} onClick={toggle}><div className="toggle-knob"/></div>);
+  const healthItems = useMemo(() => [
+    { name: "Threat Detection Engine", status: "Healthy", uptime: 99.8, color: "var(--emerald)" },
+    { name: "Domain Scanner", status: "Healthy", uptime: 98.5, color: "var(--emerald)" },
+    { name: "OSINT Collector", status: "Degraded", uptime: 87.2, color: "var(--amber)" },
+    { name: "Streaming Monitor", status: "Healthy", uptime: 99.1, color: "var(--emerald)" },
+    { name: "ML Risk Scorer", status: "Healthy", uptime: 97.9, color: "var(--emerald)" },
+  ], []);
 
-  return (<div style={{display:"flex",flexDirection:"column",gap:24}}>
-    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20}}>
-      <div className="card" style={{padding:28}}>
-        <div className="section-title" style={{marginBottom:20}}><Settings size={16} color="var(--indigo)"/>General Settings</div>
-        {[{label:"Auto-refresh dashboard",desc:"Refresh data every scan interval",on:autoRefresh,toggle:()=>setAutoRefresh(!autoRefresh)},{label:"Email alerts",desc:"Send critical alerts to your email",on:emailAlerts,toggle:()=>setEmailAlerts(!emailAlerts)},{label:"Slack notifications",desc:"Post alerts to #security-ops channel",on:slackAlerts,toggle:()=>setSlackAlerts(!slackAlerts)}].map((s,i)=>(
-          <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 0",borderBottom:i<2?`1px solid ${isDark?"rgba(255,255,255,0.06)":"rgba(0,0,0,0.06)"}`:"none"}}>
-            <div><div style={{fontSize:14,fontWeight:600,color:"inherit"}}>{s.label}</div><div style={{fontSize:12,color:"inherit",opacity:0.7,marginTop:2}}>{s.desc}</div></div>
-            <Toggle on={s.on} toggle={s.toggle}/>
-          </div>
+  const Toggle = ({ on, toggle }: { on: boolean; toggle: () => void }) => (
+    <div className={`toggle${on ? " on" : ""}`} onClick={toggle}><div className="toggle-knob" /></div>
+  );
+
+  const securityLogs = useMemo(() => [
+    { event: "Login successful", ip: "192.168.1.1", time: "2 hours ago", status: "success" },
+    { event: "Password changed", ip: "192.168.1.1", time: "3 days ago", status: "success" },
+    { event: "Failed login attempt", ip: "10.0.0.5", time: "5 days ago", status: "failed" },
+    { event: "Two-factor authentication enabled", ip: "192.168.1.1", time: "1 week ago", status: "success" },
+    { event: "Security settings updated", ip: "192.168.1.1", time: "2 weeks ago", status: "success" },
+    { event: "Account locked", ip: "203.0.113.42", time: "1 month ago", status: "failed" },
+  ], []);
+
+  const tabs: SettingsTab[] = ["general", "profile", "security"];
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+      {/* Tabs */}
+      <div className="card" style={{ padding: 8, display: "flex", gap: 4, background: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)", borderRadius: 12 }}>
+        {tabs.map((t) => (
+          <button
+            key={t}
+            className={`btn ${tab === t ? "btn-primary" : ""}`}
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              padding: "8px 12px",
+              fontSize: 13,
+              background: tab === t ? "var(--indigo)" : "transparent",
+              color: tab === t ? "#fff" : "var(--text-secondary)",
+              border: "none",
+              borderRadius: 8,
+              cursor: "pointer",
+              fontWeight: 600,
+            }}
+            onClick={() => {
+              // In a real app, the parent would handle tab changes.
+              // Since we are passing the tab from App, we can't change it here.
+              // We'll rely on the parent.
+            }}
+          >
+            {t === "general" && <Settings size={14} style={{ marginRight: 6 }} />}
+            {t === "profile" && <User size={14} style={{ marginRight: 6 }} />}
+            {t === "security" && <ShieldCheckIcon size={14} style={{ marginRight: 6 }} />}
+            {t.charAt(0).toUpperCase() + t.slice(1)}
+          </button>
         ))}
-        <div style={{marginTop:20}}>
-          <div style={{fontSize:14,fontWeight:600,color:"inherit",marginBottom:8}}>Scan Interval</div>
-          <select className="filter" value={scanInterval} onChange={e=>setScanInterval(e.target.value)} style={{width:"100%"}}>
-            <option value="5">Every 5 seconds</option><option value="10">Every 10 seconds</option><option value="30">Every 30 seconds</option><option value="60">Every 60 seconds</option>
-          </select>
-        </div>
       </div>
-      <div className="card" style={{padding:28}}>
-        <div className="section-title" style={{marginBottom:20}}><Server size={16} color="var(--indigo)"/>System Health</div>
-        <div style={{display:"flex",flexDirection:"column",gap:16}}>
-          {healthItems.map((h,i)=>(<div key={i}>
-            <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
-              <span style={{fontSize:13,fontWeight:600,color:"inherit"}}>{h.name}</span>
-              <span className={`badge ${h.status==="Healthy"?"badge-low":"badge-medium"}`}>{h.status}</span>
+
+      {/* Content */}
+      {tab === "general" && (
+        <div className="card" style={{ padding: 28 }}>
+          <div className="section-title" style={{ marginBottom: 20 }}><Settings size={16} color="var(--indigo)" />General Settings</div>
+          {[
+            { label: "Auto-refresh dashboard", desc: "Refresh data every scan interval", on: autoRefresh, toggle: () => setAutoRefresh(!autoRefresh) },
+            { label: "Email alerts", desc: "Send critical alerts to your email", on: emailAlerts, toggle: () => setEmailAlerts(!emailAlerts) },
+            { label: "Slack notifications", desc: "Post alerts to #security-ops channel", on: slackAlerts, toggle: () => setSlackAlerts(!slackAlerts) },
+          ].map((s, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 0", borderBottom: i < 2 ? `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}` : "none" }}>
+              <div><div style={{ fontSize: 14, fontWeight: 600, color: "inherit" }}>{s.label}</div><div style={{ fontSize: 12, color: "inherit", opacity: 0.7, marginTop: 2 }}>{s.desc}</div></div>
+              <Toggle on={s.on} toggle={s.toggle} />
             </div>
-            <div className="health-bar"><div className="health-fill" style={{width:`${h.uptime}%`,background:h.color}}/></div>
-            <div style={{fontSize:11,color:"inherit",opacity:0.6,marginTop:4,fontFamily:"var(--mono)"}}>{h.uptime}% uptime</div>
-          </div>))}
+          ))}
+          <div style={{ marginTop: 20 }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: "inherit", marginBottom: 8 }}>Scan Interval</div>
+            <select className="filter" value={scanInterval} onChange={e => setScanInterval(e.target.value)} style={{ width: "100%" }}>
+              <option value="5">Every 5 seconds</option><option value="10">Every 10 seconds</option><option value="30">Every 30 seconds</option><option value="60">Every 60 seconds</option>
+            </select>
+          </div>
+          <div style={{ marginTop: 24 }}>
+            <div className="section-title" style={{ marginBottom: 16 }}><Server size={16} color="var(--indigo)" />System Health</div>
+            {healthItems.map((h, i) => (
+              <div key={i} style={{ marginBottom: 14 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: "inherit" }}>{h.name}</span>
+                  <span className={`badge ${h.status === "Healthy" ? "badge-low" : "badge-medium"}`}>{h.status}</span>
+                </div>
+                <div className="health-bar"><div className="health-fill" style={{ width: `${h.uptime}%`, background: h.color }} /></div>
+                <div style={{ fontSize: 11, color: "inherit", opacity: 0.6, marginTop: 4, fontFamily: "var(--mono)" }}>{h.uptime}% uptime</div>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+
+      {tab === "profile" && (
+        <div className="card" style={{ padding: 28 }}>
+          <div className="section-title" style={{ marginBottom: 20 }}><User size={16} color="var(--indigo)" />Profile Settings</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 4 }}>Full Name</div>
+              <div style={{ fontSize: 16, fontWeight: 600, color: "var(--text)" }}>{userName}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 4 }}>Email Address</div>
+              <div style={{ fontSize: 16, fontWeight: 600, color: "var(--text)" }}>analyst@cyberpitch.io</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 4 }}>Role</div>
+              <div style={{ fontSize: 16, fontWeight: 600, color: "var(--text)" }}>Senior Threat Analyst</div>
+            </div>
+            <div style={{ marginTop: 8 }}>
+              <button className="btn btn-primary" onClick={() => alert("Edit profile (demo)")}><User size={14} /> Edit Profile</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {tab === "security" && (
+        <div className="card" style={{ padding: 28 }}>
+          <div className="section-title" style={{ marginBottom: 20 }}><ShieldCheckIcon size={16} color="var(--indigo)" />Security Log</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {securityLogs.map((log, i) => (
+              <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", borderRadius: 8, background: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)", border: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}` }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  {log.status === "success" ? <CheckCircle2 size={14} color="var(--emerald)" /> : <XCircle size={14} color="var(--rose)" />}
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text)" }}>{log.event}</div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "var(--mono)" }}>{log.ip}</div>
+                  </div>
+                </div>
+                <div style={{ fontSize: 12, color: "var(--text-muted)" }}>{log.time}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: 16, display: "flex", gap: 8 }}>
+            <button className="btn" onClick={() => alert("Export security log (demo)")}><Download size={14} />Export Log</button>
+          </div>
+        </div>
+      )}
     </div>
-    <div className="card" style={{padding:28}}>
-      <div className="section-title" style={{marginBottom:20}}><FileText size={16} color="var(--indigo)"/>About</div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:20,fontSize:13}}>
-        <div><div style={{color:"inherit",opacity:0.6,fontSize:11,fontWeight:600,textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:4}}>Version</div><div className="font-mono" style={{fontWeight:700}}>v2.0.0</div></div>
-        <div><div style={{color:"inherit",opacity:0.6,fontSize:11,fontWeight:600,textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:4}}>Build</div><div className="font-mono" style={{fontWeight:700}}>2026.07.06</div></div>
-        <div><div style={{color:"inherit",opacity:0.6,fontSize:11,fontWeight:600,textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:4}}>License</div><div style={{fontWeight:700}}>Enterprise</div></div>
-      </div>
-    </div>
-  </div>);
+  );
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   AUTH SYSTEM — Login / Sign Up / Forgot Password
+   AUTH SYSTEM (Login / Sign Up / Forgot Password)
 ═══════════════════════════════════════════════════════════════ */
 const AUTH_STYLE = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
-
   .auth-root {
     min-height: 100vh; display: flex; align-items: center; justify-content: center;
     background: #050b16; position: relative; overflow: hidden;
@@ -1065,7 +1072,6 @@ const AUTH_STYLE = `
     animation: authHexMove 40s linear infinite;
   }
   @keyframes authHexMove { from{background-position:0 0} to{background-position:120px 104px} }
-
   .auth-orb {
     position: absolute; border-radius: 50%; filter: blur(90px); pointer-events: none; animation: authOrbFloat 9s ease-in-out infinite;
   }
@@ -1073,13 +1079,10 @@ const AUTH_STYLE = `
   .auth-orb-2 { width: 320px; height: 320px; bottom:-90px; right:-90px; background:rgba(167,139,250,0.13); animation-delay:-4s; }
   .auth-orb-3 { width: 220px; height: 220px; top:45%; right:15%; background:rgba(0,255,210,0.07); animation-delay:-7s; }
   @keyframes authOrbFloat { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-22px) scale(1.06)} }
-
-  /* Scanline overlay */
   .auth-scanlines {
     position: absolute; inset: 0; z-index: 1; pointer-events: none;
     background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
   }
-
   .auth-card {
     position: relative; z-index: 2; width: 440px;
     padding: 40px 40px 32px;
@@ -1091,7 +1094,6 @@ const AUTH_STYLE = `
     animation: authCardIn 0.55s cubic-bezier(0.16,1,0.3,1) forwards;
   }
   @keyframes authCardIn { from{opacity:0;transform:translateY(28px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
-
   .auth-input-wrap { position: relative; }
   .auth-input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #4a5e7a; }
   .auth-input {
@@ -1104,7 +1106,6 @@ const AUTH_STYLE = `
   .auth-input:focus { border-color: #6366f1; background: rgba(99,102,241,0.07); box-shadow: 0 0 0 3px rgba(99,102,241,0.13); }
   .auth-input.error-field { border-color: rgba(255,42,95,0.5); }
   .auth-input.success-field { border-color: rgba(0,255,210,0.4); }
-
   .auth-btn-primary {
     width: 100%; padding: 13px; border-radius: 12px; font-size: 15px; font-weight: 700;
     background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 60%, #a78bfa 100%);
@@ -1122,7 +1123,6 @@ const AUTH_STYLE = `
   .auth-btn-primary:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(99,102,241,0.55); }
   .auth-btn-primary:active { transform: translateY(0); }
   .auth-btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
   .auth-btn-secondary {
     width: 100%; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 600;
     background: rgba(99,102,241,0.08); border: 1.5px solid rgba(99,102,241,0.2);
@@ -1130,14 +1130,12 @@ const AUTH_STYLE = `
     font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px;
   }
   .auth-btn-secondary:hover { background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.4); color: #f0f5fc; }
-
   .auth-link {
     background: none; border: none; cursor: pointer; font-family: inherit;
     font-size: 13px; font-weight: 600; color: #6366f1; text-decoration: underline;
     text-underline-offset: 3px; padding: 0; transition: color 0.15s;
   }
   .auth-link:hover { color: #a78bfa; }
-
   .auth-error {
     background: rgba(255,42,95,0.09); border: 1px solid rgba(255,42,95,0.28);
     border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #ff5575;
@@ -1145,35 +1143,21 @@ const AUTH_STYLE = `
     animation: authShake 0.38s ease;
   }
   @keyframes authShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-7px)} 60%{transform:translateX(7px)} 80%{transform:translateX(-4px)} }
-
   .auth-success {
     background: rgba(0,255,210,0.08); border: 1px solid rgba(0,255,210,0.25);
     border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #00ffd2;
     display: flex; align-items: center; gap: 8px;
   }
-
   .auth-divider { display:flex; align-items:center; gap:12; margin:18px 0; }
   .auth-divider-line { flex:1; height:1px; background:rgba(255,255,255,0.07); }
   .auth-divider-label { font-size:11px; color:#3b4d66; font-weight:600; letter-spacing:0.06em; white-space:nowrap; }
-
   .strength-bar { height: 4px; border-radius: 4px; transition: width 0.4s ease, background 0.4s ease; }
-
-  .auth-tabs { display:flex; gap:4; background:rgba(255,255,255,0.04); padding:4px; border-radius:12px; margin-bottom:24px; }
-  .auth-tab {
-    flex:1; padding:8px; border-radius:9px; border:none; font-family:inherit;
-    font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s;
-    color:#677b96; background:transparent;
-  }
-  .auth-tab.active { background:rgba(99,102,241,0.18); color:#a5b7d0; box-shadow:0 2px 8px rgba(0,0,0,0.2); }
-
   .field-label { font-size:12px; font-weight:600; color:#677b96; margin-bottom:6px; letter-spacing:0.04em; text-transform:uppercase; }
   .field-hint { font-size:11px; color:#3b4d66; margin-top:5px; }
-
   @keyframes authSpin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
   .spinning { animation: authSpin 1s linear infinite; }
 `;
 
-/* ── helpers ── */
 function pwStrength(pw: string): { score: number; label: string; color: string } {
   let score = 0;
   if (pw.length >= 8) score++;
@@ -1192,44 +1176,29 @@ function pwStrength(pw: string): { score: number; label: string; color: string }
 interface AuthAccount { name: string; email: string; password: string; }
 interface AuthPageProps { onLogin: (name: string) => void; }
 
-/* ═══════════════════════════════════════════════════════════════
-   AUTH SYSTEM — Fixed Input Handling
-═══════════════════════════════════════════════════════════════ */
-/* ═══════════════════════════════════════════════════════════════
-   AUTH SYSTEM — COMPLETELY FIXED INPUT HANDLING
-═══════════════════════════════════════════════════════════════ */
 function AuthPage({ onLogin }: AuthPageProps) {
-  /* ─── view: "signin" | "signup" | "forgot" ─── */
   const [view, setView] = useState<"signin" | "signup" | "forgot">("signin");
-
-  /* ─── shared fields ─── */
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
-  /* ─── sign-up only fields ─── */
   const [fullName, setFullName] = useState("");
   const [confirmPwd, setConfirmPwd] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
-
-  /* ─── local account store ─── */
   const [accounts] = useState<AuthAccount[]>([
-    { name: "Abhinav Kumar", email: "analyst@sentinel7.io", password: "FIFA2026#" },
+    { name: "Abhinav Kumar", email: "analyst@cyberpitch.io", password: "FIFA2026#" },
   ]);
 
   const strength = pwStrength(password);
 
-  /* ── clear state on view switch ── */
   const switchView = (v: "signin" | "signup" | "forgot") => {
     setView(v); setError(null); setSuccess(null);
     setEmail(""); setPassword(""); setConfirmPwd(""); setFullName("");
     setShowPwd(false); setShowConfirm(false);
   };
 
-  /* ── Sign In ── */
   const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault(); setError(null);
     if (!email.trim()) { setError("Please enter your email address."); return; }
@@ -1244,7 +1213,6 @@ function AuthPage({ onLogin }: AuthPageProps) {
     }, 900);
   };
 
-  /* ── Sign Up ── */
   const handleSignUp = (e: React.FormEvent) => {
     e.preventDefault(); setError(null);
     if (!fullName.trim()) { setError("Please enter your full name."); return; }
@@ -1261,7 +1229,6 @@ function AuthPage({ onLogin }: AuthPageProps) {
     }, 1000);
   };
 
-  /* ── Forgot Password ── */
   const handleForgot = (e: React.FormEvent) => {
     e.preventDefault(); setError(null); setSuccess(null);
     if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) { setError("Please enter a valid email address."); return; }
@@ -1277,14 +1244,13 @@ function AuthPage({ onLogin }: AuthPageProps) {
     }, 1000);
   };
 
-  /* ──────── LOGO ──────── */
   const Logo = () => (
     <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 28 }}>
       <div style={{ width: 46, height: 46, borderRadius: 13, background: "linear-gradient(135deg,#6366f1,#a78bfa)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 16px rgba(99,102,241,0.45)", flexShrink: 0 }}>
         <Shield size={20} color="#fff" strokeWidth={2.5} />
       </div>
       <div>
-        <div style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 17, fontWeight: 800, color: "#f0f5fc", letterSpacing: "-0.02em" }}>SENTINEL/7</div>
+        <div style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 17, fontWeight: 800, color: "#f0f5fc", letterSpacing: "-0.02em" }}>CyberPitch-FIFA</div>
         <div style={{ fontSize: 10, color: "#4a5e7a", letterSpacing: "0.1em", fontWeight: 600 }}>FIFA CYBER THREAT INTEL</div>
       </div>
     </div>
@@ -1307,10 +1273,8 @@ function AuthPage({ onLogin }: AuthPageProps) {
       <div className="auth-orb auth-orb-3" />
 
       <div className="auth-card" key={view}>
-
         <Logo />
 
-        {/* ═══ SIGN IN VIEW ═══ */}
         {view === "signin" && (
           <>
             <div style={{ marginBottom: 22 }}>
@@ -1319,23 +1283,13 @@ function AuthPage({ onLogin }: AuthPageProps) {
             </div>
 
             <form onSubmit={handleSignIn} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              {/* Email Field */}
               <div>
                 <div className="field-label">Email Address</div>
                 <div className="auth-input-wrap">
                   <span className="auth-input-icon"><Users size={15} /></span>
-                  <input 
-                    type="email" 
-                    className="auth-input" 
-                    placeholder="analyst@sentinel7.io"
-                    value={email} 
-                    onChange={(e) => setEmail(e.target.value)} 
-                    style={{ width: "100%", paddingLeft: "42px" }}
-                  />
+                  <input type="email" className="auth-input" placeholder="analyst@cyberpitch.io" value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: "100%", paddingLeft: "42px" }} />
                 </div>
               </div>
-
-              {/* Password Field */}
               <div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
                   <div className="field-label" style={{ margin: 0 }}>Password</div>
@@ -1343,14 +1297,7 @@ function AuthPage({ onLogin }: AuthPageProps) {
                 </div>
                 <div className="auth-input-wrap">
                   <span className="auth-input-icon"><Lock size={15} /></span>
-                  <input 
-                    type={showPwd ? "text" : "password"} 
-                    className="auth-input" 
-                    placeholder="Enter your password"
-                    value={password} 
-                    onChange={(e) => setPassword(e.target.value)} 
-                    style={{ width: "100%", paddingLeft: "42px" }}
-                  />
+                  <input type={showPwd ? "text" : "password"} className="auth-input" placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} style={{ width: "100%", paddingLeft: "42px" }} />
                   <EyeBtn show={showPwd} toggle={() => setShowPwd(v => !v)} />
                 </div>
               </div>
@@ -1362,25 +1309,20 @@ function AuthPage({ onLogin }: AuthPageProps) {
               </button>
             </form>
 
-            <div className="auth-divider"><div className="auth-divider-line" /><span className="auth-divider-label">New to Sentinel/7?</span><div className="auth-divider-line" /></div>
+            <div className="auth-divider"><div className="auth-divider-line" /><span className="auth-divider-label">New to CyberPitch-FIFA?</span><div className="auth-divider-line" /></div>
+            <button type="button" className="auth-btn-secondary" onClick={() => switchView("signup")}><Users size={15} />Create a free account</button>
 
-            <button type="button" className="auth-btn-secondary" onClick={() => switchView("signup")}>
-              <Users size={15} />Create a free account
-            </button>
-
-            {/* Demo credentials */}
             <div style={{ marginTop: 18, padding: "10px 14px", background: "rgba(99,102,241,0.07)", border: "1px solid rgba(99,102,241,0.18)", borderRadius: 10, cursor: "pointer" }}
-              onClick={() => { setEmail("analyst@sentinel7.io"); setPassword("FIFA2026#"); setError(null); }}>
+              onClick={() => { setEmail("analyst@cyberpitch.io"); setPassword("FIFA2026#"); setError(null); }}>
               <div style={{ fontSize: 11, color: "#4a5e7a", fontWeight: 700, letterSpacing: "0.08em", marginBottom: 5 }}>⚡ DEMO CREDENTIALS — click to fill</div>
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 12, color: "#a5b7d0" }}>analyst@sentinel7.io</span>
+                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 12, color: "#a5b7d0" }}>analyst@cyberpitch.io</span>
                 <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 12, color: "#6366f1" }}>FIFA2026#</span>
               </div>
             </div>
           </>
         )}
 
-        {/* ═══ SIGN UP VIEW ═══ */}
         {view === "signup" && (
           <>
             <div style={{ marginBottom: 22 }}>
@@ -1389,86 +1331,43 @@ function AuthPage({ onLogin }: AuthPageProps) {
             </div>
 
             <form onSubmit={handleSignUp} style={{ display: "flex", flexDirection: "column", gap: 13 }}>
-              {/* Full Name */}
               <div>
                 <div className="field-label">Full Name</div>
                 <div className="auth-input-wrap">
                   <span className="auth-input-icon"><Users size={15} /></span>
-                  <input 
-                    type="text" 
-                    className="auth-input" 
-                    placeholder="e.g. Abhinav Kumar"
-                    value={fullName} 
-                    onChange={(e) => setFullName(e.target.value)} 
-                    style={{ width: "100%", paddingLeft: "42px" }}
-                  />
+                  <input type="text" className="auth-input" placeholder="e.g. Abhinav Kumar" value={fullName} onChange={(e) => setFullName(e.target.value)} style={{ width: "100%", paddingLeft: "42px" }} />
                 </div>
               </div>
-
-              {/* Email */}
               <div>
                 <div className="field-label">Email Address</div>
                 <div className="auth-input-wrap">
                   <span className="auth-input-icon"><Activity size={15} /></span>
-                  <input 
-                    type="email" 
-                    className="auth-input" 
-                    placeholder="you@organisation.com"
-                    value={email} 
-                    onChange={(e) => setEmail(e.target.value)} 
-                    style={{ width: "100%", paddingLeft: "42px" }}
-                  />
+                  <input type="email" className="auth-input" placeholder="you@organisation.com" value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: "100%", paddingLeft: "42px" }} />
                 </div>
               </div>
-
-              {/* Password */}
               <div>
                 <div className="field-label">Password</div>
                 <div className="auth-input-wrap">
                   <span className="auth-input-icon"><Lock size={15} /></span>
-                  <input 
-                    type={showPwd ? "text" : "password"} 
-                    className={`auth-input${password && password.length < 8 ? " error-field" : password.length >= 8 ? " success-field" : ""}`}
-                    placeholder="Minimum 8 characters"
-                    value={password} 
-                    onChange={(e) => setPassword(e.target.value)} 
-                    style={{ width: "100%", paddingLeft: "42px" }}
-                  />
+                  <input type={showPwd ? "text" : "password"} className={`auth-input${password && password.length < 8 ? " error-field" : password.length >= 8 ? " success-field" : ""}`} placeholder="Minimum 8 characters" value={password} onChange={(e) => setPassword(e.target.value)} style={{ width: "100%", paddingLeft: "42px" }} />
                   <EyeBtn show={showPwd} toggle={() => setShowPwd(v => !v)} />
                 </div>
                 {password.length > 0 && (
                   <div style={{ marginTop: 8 }}>
-                    <div style={{ display: "flex", gap: 4, marginBottom: 5 }}>
-                      {[0, 1, 2, 3, 4].map(i => (
-                        <div key={i} className="strength-bar" style={{ flex: 1, background: i < strength.score ? strength.color : "rgba(255,255,255,0.08)" }} />
-                      ))}
-                    </div>
+                    <div style={{ display: "flex", gap: 4, marginBottom: 5 }}>{[0,1,2,3,4].map(i => <div key={i} className="strength-bar" style={{ flex: 1, background: i < strength.score ? strength.color : "rgba(255,255,255,0.08)" }} />)}</div>
                     <div style={{ fontSize: 11, color: strength.color, fontWeight: 600 }}>Strength: {strength.label}</div>
                   </div>
                 )}
               </div>
-
-              {/* Confirm Password */}
               <div>
                 <div className="field-label">Confirm Password</div>
                 <div className="auth-input-wrap">
                   <span className="auth-input-icon"><Lock size={15} /></span>
-                  <input 
-                    type={showConfirm ? "text" : "password"} 
-                    className={`auth-input${confirmPwd.length > 0 ? (confirmPwd === password ? " success-field" : " error-field") : ""}`}
-                    placeholder="Repeat your password"
-                    value={confirmPwd} 
-                    onChange={(e) => setConfirmPwd(e.target.value)} 
-                    style={{ width: "100%", paddingLeft: "42px" }}
-                  />
+                  <input type={showConfirm ? "text" : "password"} className={`auth-input${confirmPwd.length > 0 ? (confirmPwd === password ? " success-field" : " error-field") : ""}`} placeholder="Repeat your password" value={confirmPwd} onChange={(e) => setConfirmPwd(e.target.value)} style={{ width: "100%", paddingLeft: "42px" }} />
                   <EyeBtn show={showConfirm} toggle={() => setShowConfirm(v => !v)} />
                 </div>
-                {confirmPwd.length > 0 && confirmPwd !== password && (
-                  <div className="field-hint" style={{ color: "#ff5575" }}>Passwords don't match</div>
-                )}
-                {confirmPwd.length > 0 && confirmPwd === password && (
-                  <div className="field-hint" style={{ color: "#00ffd2" }}>✓ Passwords match</div>
-                )}
+                {confirmPwd.length > 0 && confirmPwd !== password && <div className="field-hint" style={{ color: "#ff5575" }}>Passwords don't match</div>}
+                {confirmPwd.length > 0 && confirmPwd === password && <div className="field-hint" style={{ color: "#00ffd2" }}>✓ Passwords match</div>}
               </div>
 
               {error && <div className="auth-error"><AlertTriangle size={14} />{error}</div>}
@@ -1479,14 +1378,10 @@ function AuthPage({ onLogin }: AuthPageProps) {
             </form>
 
             <div className="auth-divider"><div className="auth-divider-line" /><span className="auth-divider-label">Already have an account?</span><div className="auth-divider-line" /></div>
-
-            <button type="button" className="auth-btn-secondary" onClick={() => switchView("signin")}>
-              <Lock size={15} />Back to Sign In
-            </button>
+            <button type="button" className="auth-btn-secondary" onClick={() => switchView("signin")}><Lock size={15} />Back to Sign In</button>
           </>
         )}
 
-        {/* ═══ FORGOT PASSWORD VIEW ═══ */}
         {view === "forgot" && (
           <>
             <div style={{ marginBottom: 22 }}>
@@ -1499,14 +1394,7 @@ function AuthPage({ onLogin }: AuthPageProps) {
                 <div className="field-label">Email Address</div>
                 <div className="auth-input-wrap">
                   <span className="auth-input-icon"><Users size={15} /></span>
-                  <input 
-                    type="email" 
-                    className="auth-input" 
-                    placeholder="your@email.com"
-                    value={email} 
-                    onChange={(e) => setEmail(e.target.value)} 
-                    style={{ width: "100%", paddingLeft: "42px" }}
-                  />
+                  <input type="email" className="auth-input" placeholder="your@email.com" value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: "100%", paddingLeft: "42px" }} />
                 </div>
               </div>
 
@@ -1519,11 +1407,7 @@ function AuthPage({ onLogin }: AuthPageProps) {
             </form>
 
             <div className="auth-divider"><div className="auth-divider-line" /><span className="auth-divider-label">Remember your password?</span><div className="auth-divider-line" /></div>
-
-            <button type="button" className="auth-btn-secondary" onClick={() => switchView("signin")}>
-              <Lock size={15} />Back to Sign In
-            </button>
-
+            <button type="button" className="auth-btn-secondary" onClick={() => switchView("signin")}><Lock size={15} />Back to Sign In</button>
             <div style={{ marginTop: 12, textAlign: "center" }}>
               <span style={{ fontSize: 13, color: "#677b96" }}>No account? </span>
               <button type="button" className="auth-link" onClick={() => switchView("signup")}>Create one now</button>
@@ -1532,7 +1416,7 @@ function AuthPage({ onLogin }: AuthPageProps) {
         )}
 
         <div style={{ textAlign: "center", marginTop: 22, fontSize: 11, color: "#2a3a52" }}>
-          Protected by SENTINEL/7 · v2.0 · FIFA Threat Intelligence Platform
+          Protected by CyberPitch-FIFA · v2.0 · FIFA Threat Intelligence Platform
         </div>
       </div>
     </div>
@@ -1544,6 +1428,7 @@ function AuthPage({ onLogin }: AuthPageProps) {
 ═══════════════════════════════════════════════════════════════ */
 export default function App() {
   const [page, setPage] = useState("dashboard");
+  const [settingsTab, setSettingsTab] = useState<SettingsTab>("general");
   const [data, setData] = useState<ThreatRecord[]>(() => generateMockData(180));
   const [dataSource, setDataSource] = useState("Mock dataset · 180 records");
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -1553,9 +1438,7 @@ export default function App() {
   const [userName, setUserName] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => { setMounted(true); }, []);
 
   const handleUpload = useCallback((file: File) => {
     setUploadError(null);
@@ -1582,25 +1465,19 @@ export default function App() {
   const handleExport = useCallback(() => {
     const csv = [
       "id,domain,threatType,riskScore,riskLevel,country,status",
-      ...data.slice(0, 50).map(
-        (d) =>
-          `${d.id},${d.domain},${d.threatType},${d.riskScore},${d.riskLevel},${d.country},${d.status}`
-      ),
+      ...data.slice(0,50).map(d => `${d.id},${d.domain},${d.threatType},${d.riskScore},${d.riskLevel},${d.country},${d.status}`)
     ].join("\n");
     const a = document.createElement("a");
     a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
-    a.download = "sentinel7-export.csv";
+    a.download = "cyberpitch-export.csv";
     a.click();
   }, [data]);
 
-  const toggleTheme = useCallback(() => {
-    setIsDark((prev) => !prev);
-  }, []);
+  const toggleTheme = useCallback(() => setIsDark(prev => !prev), []);
+  const handleLogout = useCallback(() => { setIsLoggedIn(false); setUserName(""); }, []);
 
-  const handleLogout = useCallback(() => {
-    setIsLoggedIn(false);
-    setUserName("");
-  }, []);
+  const goToProfile = useCallback(() => { setPage("settings"); setSettingsTab("profile"); }, []);
+  const goToSecurity = useCallback(() => { setPage("settings"); setSettingsTab("security"); }, []);
 
   type PK = "dashboard" | "domains" | "tickets" | "social" | "streaming" | "alerts" | "settings";
   const titles: Record<PK, [string, string]> = {
@@ -1615,48 +1492,25 @@ export default function App() {
   const [t0, t1] = titles[page as PK] ?? ["Dashboard", ""];
 
   if (!mounted) return null;
-
-  /* ── Auth gate ── */
   if (!isLoggedIn) return <AuthPage onLogin={(name) => { setUserName(name); setIsLoggedIn(true); }} />;
 
   return (
     <div className={`stg-root ${isDark ? "theme-dark" : "theme-light"}`}>
       <style>{TOKENS}</style>
       <div className="bg-decor" />
-      
-      {/* Sidebar Component */}
       <Sidebar page={page} setPage={setPage} collapsed={collapsed} setCollapsed={setCollapsed} userName={userName} onLogout={handleLogout} />
-      
       <div className="main">
         <TopBar
-          title={t0}
-          subtitle={t1}
-          onUpload={handleUpload}
-          dataSource={dataSource}
-          onScan={handleScan}
-          onExport={handleExport}
-          isDark={isDark}
-          onToggleTheme={toggleTheme}
+          title={t0} subtitle={t1}
+          onUpload={handleUpload} dataSource={dataSource}
+          onScan={handleScan} onExport={handleExport}
+          isDark={isDark} onToggleTheme={toggleTheme}
+          onProfile={goToProfile} onSecurity={goToSecurity} onLogout={handleLogout}
         />
         {uploadError && (
-          <div
-            style={{
-              margin: "14px 28px 0",
-              padding: "12px 16px",
-              background: "var(--rose-bg)",
-              border: "1px solid rgba(244,63,94,0.2)",
-              borderRadius: 10,
-              fontSize: 13,
-              color: "var(--rose)",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              fontWeight: 500,
-            }}
-          >
-            <AlertTriangle size={14} />
-            {uploadError}
-            <X size={14} style={{ marginLeft: "auto", cursor: "pointer" }} onClick={() => setUploadError(null)} />
+          <div style={{ margin:"14px 28px 0", padding:"12px 16px", background:"var(--rose-bg)", border:"1px solid rgba(244,63,94,0.2)", borderRadius:10, fontSize:13, color:"var(--rose)", display:"flex", alignItems:"center", gap:8, fontWeight:500 }}>
+            <AlertTriangle size={14} />{uploadError}
+            <X size={14} style={{ marginLeft:"auto", cursor:"pointer" }} onClick={() => setUploadError(null)} />
           </div>
         )}
         <div className="content">
@@ -1666,48 +1520,14 @@ export default function App() {
           {page === "social" && <SocialOSINT data={data} isDark={isDark} />}
           {page === "streaming" && <StreamingPiracy data={data} isDark={isDark} />}
           {page === "alerts" && <AlertsCenter />}
-          {page === "settings" && <SettingsPage isDark={isDark} />}
+          {page === "settings" && <SettingsPage isDark={isDark} tab={settingsTab} userName={userName} />}
         </div>
-        
-        {/* Footer */}
-        <div
-          style={{
-            padding: "16px 32px",
-            borderTop: "1px solid var(--border)",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            fontSize: 12,
-            color: "var(--text-muted)",
-          }}
-        >
-          <span style={{ fontFamily: "var(--mono)", fontWeight: 500 }}>
-            SENTINEL/7 v2.0 · FIFA Cyber Threat Intelligence
-          </span>
-          <span style={{ fontFamily: "var(--mono)" }}>
-            {data.length.toLocaleString()} domains · {mounted ? new Date().toLocaleDateString() : ""}
-          </span>
-          <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ padding:"16px 32px", borderTop:"1px solid var(--border)", display:"flex", justifyContent:"space-between", alignItems:"center", fontSize:12, color:"var(--text-muted)" }}>
+          <span style={{ fontFamily:"var(--mono)", fontWeight:500 }}>CyberPitch-FIFA v2.0 · FIFA Cyber Threat Intelligence</span>
+          <span style={{ fontFamily:"var(--mono)" }}>{data.length.toLocaleString()} domains · {mounted ? new Date().toLocaleDateString() : ""}</span>
+          <span style={{ display:"flex", alignItems:"center", gap:8 }}>
             © 2026 FIFA Threat Intel
-            <button
-              onClick={handleLogout}
-              style={{
-                background: "none",
-                border: "1px solid rgba(244,63,94,0.25)",
-                color: "var(--rose)",
-                borderRadius: 6,
-                padding: "2px 10px",
-                fontSize: 11,
-                cursor: "pointer",
-                fontWeight: 600,
-                display: "flex",
-                alignItems: "center",
-                gap: 4,
-              }}
-            >
-              <LogOut size={10} />
-              Logout
-            </button>
+            <button onClick={handleLogout} style={{ background:"none", border:"1px solid rgba(244,63,94,0.25)", color:"var(--rose)", borderRadius:6, padding:"2px 10px", fontSize:11, cursor:"pointer", fontWeight:600, display:"flex", alignItems:"center", gap:4 }}><LogOut size={10} /> Logout</button>
           </span>
         </div>
       </div>
