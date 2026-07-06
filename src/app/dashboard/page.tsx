@@ -6,11 +6,13 @@ import {
   Shield, AlertTriangle, Globe2, Ticket, Radio, Users, Bell, Settings,
   LayoutDashboard, TrendingUp, TrendingDown, Search, Upload, ChevronDown,
   ChevronRight, ChevronLeft, ExternalLink, Lock, Unlock, ShieldAlert, ShieldCheck,
+
   CircleDot, X, Info, RefreshCw, Download, HelpCircle, LogOut,
   MessageSquare, Hash, Eye, Wifi, Server, Cpu, HardDrive,
   Activity, Zap, FileText, Share2, BarChart3, Filter, Calendar,
   CheckCircle2, XCircle, Clock, Star, Target, Flame, Waves, Monitor,
   Sun, Moon, User, ShieldCheck as ShieldCheckIcon, History,
+
 } from "lucide-react";
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar,
@@ -398,44 +400,7 @@ function generateMockData(count=180) {
   return rows;
 }
 
-const CSV_FIELD_MAP: Record<string,string[]> = {
-  domain:["domain","url","domain_name"], threatType:["threat_type","threattype","category","type"],
-  riskScore:["risk_score","riskscore","score"], registrationDate:["registration_date","reg_date","created_date"],
-  ageDays:["age_days","domain_age","age"], registrar:["registrar","whois_registrar"],
-  country:["country","whois_country","registrant_country"], sslStatus:["ssl_status","ssl","certificate_status"],
-  similarityScore:["similarity_score","visual_similarity","similarity"], detectedDate:["detected_date","detection_date","date_detected"],
-  status:["status","state"], estimatedLoss:["estimated_loss","financial_loss","loss_usd"],
-  affectedUsers:["affected_users","victims","num_victims"], source:["source","data_source"],
-};
-function findKey(row:Record<string,string>,aliases:string[]):string|null {
-  for (const a of aliases) { const m=Object.keys(row).find(k=>k.toLowerCase().replace(/\s+/g,"_")===a); if(m) return m; } return null;
-}
-function normalizeCSVRow(row:Record<string,string>,idx:number) {
-  const get=(f:string,fb:string)=>{ const k=findKey(row,CSV_FIELD_MAP[f]||[]); return k&&row[k]?row[k]:fb; };
-  const rs=Math.min(100,Math.max(0,Number(get("riskScore",String(Math.round(Math.random()*100))))||0));
-  const tt=get("threatType","Phishing");
-  return {
-    id:`CSV-${1000+idx}`,
-    domain:get("domain","unknown.com"),
-    threatType:THREAT_TYPES.includes(tt)?tt:"Phishing",
-    riskScore:rs,
-    riskLevel:rs>=70?"High":rs>=40?"Medium":"Low",
-    registrationDate:get("registrationDate","—"),
-    ageDays:Number(get("ageDays","0"))||0,
-    registrar:get("registrar","Unknown"),
-    country:get("country","Unknown"),
-    sslStatus:get("sslStatus","Unknown"),
-    similarityScore:Number(get("similarityScore","0"))||0,
-    detectedDate:get("detectedDate","—"),
-    status:get("status","Active"),
-    estimatedLoss:Number(get("estimatedLoss","0"))||0,
-    affectedUsers:Number(get("affectedUsers","0"))||0,
-    officialPrice:null as number|null,
-    scamPrice:null as number|null,
-    redFlags:[] as string[],
-    source:get("source","Uploaded CSV"),
-  };
-}
+// Removed normalizeCSVRow and CSV field maps
 
 interface ThreatRecord {
   id:string; domain:string; threatType:string; riskScore:number; riskLevel:string;
@@ -565,13 +530,14 @@ function TopBar({ title, subtitle, onUpload, dataSource, onScan, onExport, isDar
         </div>
         <div className="section-sub" style={{marginTop:2}}>{subtitle}</div>
       </div>
-      <div style={{display:"flex",alignItems:"center",gap:10}}>
-        <div className="status-pill" style={{fontSize:11}}><Info size={12}/>{dataSource}</div>
-        <button className="btn" onClick={onScan}><RefreshCw size={13}/>Scan Now</button>
-        <button className="btn" onClick={onExport}><Download size={13}/>Export</button>
-        <input ref={fileRef} type="file" accept=".csv" style={{display:"none"}} onChange={e=>{const f=e.target.files?.[0];if(f)onUpload(f);}}/>
-        <button className="btn btn-primary" onClick={()=>fileRef.current?.click()}><Upload size={14}/>Upload CSV</button>
-        <div style={{width:1,height:24,background:"var(--border)",margin:"0 2px"}}/>
+
+      <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+        <div className="status-pill" style={{ fontSize:11 }}><Info size={12}/>{dataSource}</div>
+        <span style={{ fontSize:11, color:"var(--text-faint)", fontFamily:"var(--mono)" }}>Updated: Just now</span>
+
+        <button className="btn btn-gold" onClick={onScan}><RefreshCw size={13}/>Scan Now</button>
+
+        <div style={{ width:1, height:24, background:"var(--border)", margin:"0 4px" }}/>
 
         <button onClick={onToggleTheme} style={{background:"none",border:"none",color:"var(--text-muted)",cursor:"pointer",padding:6,borderRadius:8,display:"flex",alignItems:"center"}} title={isDark ? "Light Mode" : "Dark Mode"}>
           {isDark ? <Sun size={17} color="var(--amber)" /> : <Moon size={17} />}
@@ -1330,45 +1296,17 @@ function AuthPage({ onLogin }: AuthPageProps) {
               <div style={{ fontSize: 13, color: "#677b96" }}>Join the FIFA Threat Intelligence platform</div>
             </div>
 
-            <form onSubmit={handleSignUp} style={{ display: "flex", flexDirection: "column", gap: 13 }}>
-              <div>
-                <div className="field-label">Full Name</div>
-                <div className="auth-input-wrap">
-                  <span className="auth-input-icon"><Users size={15} /></span>
-                  <input type="text" className="auth-input" placeholder="e.g. Abhinav Kumar" value={fullName} onChange={(e) => setFullName(e.target.value)} style={{ width: "100%", paddingLeft: "42px" }} />
-                </div>
-              </div>
-              <div>
-                <div className="field-label">Email Address</div>
-                <div className="auth-input-wrap">
-                  <span className="auth-input-icon"><Activity size={15} /></span>
-                  <input type="email" className="auth-input" placeholder="you@organisation.com" value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: "100%", paddingLeft: "42px" }} />
-                </div>
-              </div>
-              <div>
-                <div className="field-label">Password</div>
-                <div className="auth-input-wrap">
-                  <span className="auth-input-icon"><Lock size={15} /></span>
-                  <input type={showPwd ? "text" : "password"} className={`auth-input${password && password.length < 8 ? " error-field" : password.length >= 8 ? " success-field" : ""}`} placeholder="Minimum 8 characters" value={password} onChange={(e) => setPassword(e.target.value)} style={{ width: "100%", paddingLeft: "42px" }} />
-                  <EyeBtn show={showPwd} toggle={() => setShowPwd(v => !v)} />
-                </div>
-                {password.length > 0 && (
-                  <div style={{ marginTop: 8 }}>
-                    <div style={{ display: "flex", gap: 4, marginBottom: 5 }}>{[0,1,2,3,4].map(i => <div key={i} className="strength-bar" style={{ flex: 1, background: i < strength.score ? strength.color : "rgba(255,255,255,0.08)" }} />)}</div>
-                    <div style={{ fontSize: 11, color: strength.color, fontWeight: 600 }}>Strength: {strength.label}</div>
-                  </div>
-                )}
-              </div>
-              <div>
-                <div className="field-label">Confirm Password</div>
-                <div className="auth-input-wrap">
-                  <span className="auth-input-icon"><Lock size={15} /></span>
-                  <input type={showConfirm ? "text" : "password"} className={`auth-input${confirmPwd.length > 0 ? (confirmPwd === password ? " success-field" : " error-field") : ""}`} placeholder="Repeat your password" value={confirmPwd} onChange={(e) => setConfirmPwd(e.target.value)} style={{ width: "100%", paddingLeft: "42px" }} />
-                  <EyeBtn show={showConfirm} toggle={() => setShowConfirm(v => !v)} />
-                </div>
-                {confirmPwd.length > 0 && confirmPwd !== password && <div className="field-hint" style={{ color: "#ff5575" }}>Passwords don't match</div>}
-                {confirmPwd.length > 0 && confirmPwd === password && <div className="field-hint" style={{ color: "#00ffd2" }}>✓ Passwords match</div>}
-              </div>
+      <div className="card" style={{ padding:24 }}>
+        <div className="section-title"><Key size={16} color="var(--gold)"/> API Keys</div>
+        <div className="section-sub" style={{ marginBottom:12 }}>Your current API key</div>
+        <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+          <code className="font-mono" style={{ background:"rgba(0,210,255,0.05)", padding:"6px 12px", borderRadius:6, flex:1, border:"1px solid var(--border)" }}>{apiKey}</code>
+          <div className="btn" onClick={() => alert("Backend API not connected: API Key generation must be handled securely on the server.")}>Regenerate</div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
               {error && <div className="auth-error"><AlertTriangle size={14} />{error}</div>}
 
@@ -1442,36 +1380,328 @@ export default function App() {
 
   const handleUpload = useCallback((file: File) => {
     setUploadError(null);
-    Papa.parse<Record<string, string>>(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (results) => {
+    Papa.parse<Record<string,string>>(file, {
+      header: true, skipEmptyLines: true, dynamicTyping: true,
+      complete: async (results) => {
         try {
-          const n: ThreatRecord[] = (results.data as Record<string, string>[])
-            .filter((r) => r.domain)
-            .map((r, i) => normalizeCSVRow(r, i));
-          if (!n.length) throw new Error("empty");
-          setData(n);
-          setDataSource(`${file.name} · ${n.length} records`);
-        } catch {
-          setUploadError("Couldn't parse CSV — check it has a header row.");
-        }
+          const raw = results.data as Record<string,string>[];
+          const domains = raw.filter(r => !!r.domain).map(r => r.domain);
+          if (domains.length === 0) throw new Error("empty");
+          
+          setDataSource(`Analyzing ${domains.length} domains...`);
+          
+          const newRecords: ThreatRecord[] = [];
+          
+          // Process sequentially to not overload the ML backend
+          for (let i = 0; i < domains.length; i++) {
+            const domain = domains[i];
+            try {
+              const res = await fetch("/api/analyze", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ domain }),
+              });
+              if (!res.ok) continue;
+              const { data: mlResult } = await res.json();
+              
+              const prob = mlResult["Phishing Probability"] || 0;
+              const riskScore = Math.round(prob * 100);
+              
+              newRecords.push({
+                id: `CSV-${1000+i}`,
+                domain: domain,
+                threatType: mlResult["Malware Signature Match"] ? "Malware" : "Phishing",
+                riskScore: riskScore,
+                riskLevel: riskScore >= 70 ? "High" : riskScore >= 40 ? "Medium" : "Low",
+                registrationDate: "—",
+                ageDays: mlResult["WHOIS Age Days"] || 0,
+                registrar: "Unknown",
+                country: mlResult["Hosting Country"] || "Unknown",
+                sslStatus: mlResult["SSL Status"] || "Unknown",
+                similarityScore: Math.round((mlResult["Visual Match"] || 0) * 100),
+                detectedDate: new Date().toISOString().split('T')[0],
+                status: riskScore >= 70 ? "Blocked" : "Active",
+                estimatedLoss: 0, affectedUsers: 0, officialPrice: null, scamPrice: null, redFlags: [], source: "CSV ML Scan"
+              });
+            } catch (err) {
+              console.error(`Failed to analyze ${domain}`, err);
+            }
+          }
+          
+          if (newRecords.length > 0) {
+            setData(newRecords);
+            setDataSource(`${file.name} · ${newRecords.length} records analyzed`);
+          } else {
+            setUploadError("Failed to analyze any domains from the CSV.");
+            setDataSource("Mock dataset");
+          }
+        } catch { setUploadError("Invalid CSV Format. Please upload a CSV with a single header row containing the exact column 'domain'."); }
       },
       error: () => setUploadError("Failed to read the CSV file."),
     });
   }, []);
 
-  const handleScan = useCallback(() => alert("Initiating live threat scan across all pipelines…"), []);
-  const handleExport = useCallback(() => {
-    const csv = [
-      "id,domain,threatType,riskScore,riskLevel,country,status",
-      ...data.slice(0,50).map(d => `${d.id},${d.domain},${d.threatType},${d.riskScore},${d.riskLevel},${d.country},${d.status}`)
-    ].join("\n");
-    const a = document.createElement("a");
-    a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
-    a.download = "cyberpitch-export.csv";
-    a.click();
-  }, [data]);
+  const handleScan = useCallback(() => {
+    setPage("scan");
+  }, []);
+  const handleExport = useCallback(()=>{
+    const csv = ["id,domain,threatType,riskScore,riskLevel,country,status", ...data.slice(0,50).map(d=>`${d.id},${d.domain},${d.threatType},${d.riskScore},${d.riskLevel},${d.country},${d.status}`)].join("\n");
+    const a = document.createElement("a"); a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv); a.download="sentinel7-export.csv"; a.click();
+  },[data]);
+
+  const pageTitles: Record<string, [string,string]> = {
+    dashboard: ["Threat Overview", "Real-time snapshot across all detection pipelines"],
+    scan:      ["Real-time Threat Scanner", "Analyze any domain through the Sentinel/7 pipeline"],
+    domains:   ["Domain Threat Intelligence", "Detect & analyze fraudulent FIFA domains"],
+    tickets:   ["Ticketing Fraud Monitor", "Fake portals, pricing anomalies & victim impact"],
+    social:    ["Social & OSINT Intelligence", "Social mentions, OSINT reports & blacklist feeds"],
+    streaming: ["Streaming Piracy Monitor", "Illegal streaming sites & risk assessment"],
+    alerts:    ["Threat Alerts", "Live feed of critical and high‑risk threats"],
+    settings:  ["Settings", "User preferences, thresholds and API keys"],
+  };
+
+  /* ---------------------------------------------------------------
+     SCAN VIEW COMPONENT (Neon Styled)
+  ------------------------------------------------------------------*/
+  function ScanView() {
+    const [scanDomain, setScanDomain] = useState("");
+    const [scanLoading, setScanLoading] = useState(false);
+    const [scanResult, setScanResult] = useState<any>(null);
+    const [scanError, setScanError] = useState<string|null>(null);
+    const [activeStep, setActiveStep] = useState(0);
+    const [batchProgress, setBatchProgress] = useState<{current: number, total: number} | null>(null);
+    const [batchResults, setBatchResults] = useState<any[] | null>(null);
+
+    useEffect(() => {
+      if (!scanLoading) { setActiveStep(0); return; }
+      const int = setInterval(() => setActiveStep(s => s < 5 ? s + 1 : s), 400);
+      return () => clearInterval(int);
+    }, [scanLoading]);
+
+    const PIPELINE_STEPS = [
+      { name: "Lexical & URL Parser", desc: "Analyzing TLD, typosquatting distances, and character patterns", icon: Search },
+      { name: "WHOIS Registry Lookup", desc: "Checking domain age, registrar history, and privacy flags", icon: Globe },
+      { name: "DNS Resolution Module", desc: "Resolving A, AAAA, MX, and TXT records", icon: Server },
+      { name: "SSL Certificate Validation", desc: "Checking issuer trust, expiration, and SAN lists", icon: ShieldCheck },
+      { name: "Visual Similarity Match", desc: "Comparing page screenshots against known FIFA templates", icon: Image },
+      { name: "ML Threat Scoring", desc: "Aggregating signals into final probability matrix", icon: Cpu }
+    ];
+
+    const handleBatchScan = (file: File) => {
+      setScanLoading(true);
+      setScanError("Batch processing started. This may take a moment...");
+      setBatchProgress(null);
+      setBatchResults(null);
+      setScanResult(null);
+
+      Papa.parse<Record<string,string>>(file, {
+        header: true, skipEmptyLines: true, dynamicTyping: true,
+        complete: async (results) => {
+          try {
+            const raw = results.data as Record<string,string>[];
+            const domains = raw.filter(r => !!r.domain).map(r => r.domain);
+            if (domains.length === 0) throw new Error("empty");
+            
+            setBatchProgress({ current: 0, total: domains.length });
+            const newRecordsObj = [];
+            const newRecordsCsv = [];
+            
+            for (let i = 0; i < domains.length; i++) {
+              const domain = domains[i];
+              try {
+                const res = await fetch("/api/analyze", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ domain }) });
+                if (!res.ok) continue;
+                const { data: mlResult } = await res.json();
+                const prob = mlResult["Phishing Probability"] || 0;
+                const riskScore = Math.round(prob * 100);
+                
+                const rec = {
+                  id: `CSV-${1000+i}`, domain,
+                  threatType: mlResult["Malware Signature Match"] ? "Malware" : "Phishing",
+                  riskScore, riskLevel: riskScore >= 70 ? "High" : riskScore >= 40 ? "Medium" : "Low",
+                  country: mlResult["Hosting Country"] || "Unknown", status: riskScore >= 70 ? "Blocked" : "Active"
+                };
+                newRecordsObj.push(rec);
+                newRecordsCsv.push(`${rec.id},${rec.domain},${rec.threatType},${rec.riskScore},${rec.riskLevel},${rec.country},${rec.status}`);
+              } catch (err) {}
+              setBatchProgress({ current: i + 1, total: domains.length });
+            }
+            
+            if (newRecordsCsv.length > 0) {
+              const csv = ["id,domain,threatType,riskScore,riskLevel,country,status", ...newRecordsCsv].join("\n");
+              const a = document.createElement("a"); a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv); a.download="sentinel7-batch-results.csv"; a.click();
+              setScanError("Batch scan complete. Results downloaded automatically.");
+              setBatchResults(newRecordsObj);
+            } else {
+              setScanError("Failed to analyze any domains from the CSV.");
+            }
+          } catch { setScanError("Invalid CSV Format. Requires 'domain' column."); }
+          finally { setScanLoading(false); setBatchProgress(null); }
+        },
+        error: (err) => { setScanError(`Error reading file: ${err.message}`); setScanLoading(false); setBatchProgress(null); },
+      });
+    };
+
+    const runScan = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!scanDomain.trim()) return;
+      setScanLoading(true); setScanError(null); setScanResult(null); setBatchResults(null);
+      try {
+        const res = await fetch("/api/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ domain: scanDomain.trim() }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Scan failed");
+        setScanResult(data.data);
+      } catch (err: any) {
+        setScanError(err.message);
+      } finally {
+        setScanLoading(false);
+      }
+    };
+
+    return (
+      <div style={{ display:"flex", flexDirection:"column", gap:24, maxWidth: 900 }}>
+        <div className="card" style={{ padding:24 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:20 }}>
+            <ShieldAlert size={24} color="var(--blue-neon)"/> 
+            <div>
+              <div style={{ fontSize:16, fontWeight:600, color:"var(--text)" }}>Domain Scanner Engine</div>
+              <div style={{ fontSize:12, color:"var(--text-dim)" }}>Run a comprehensive analysis through Sentinel/7's ML pipeline</div>
+            </div>
+          </div>
+            {!scanResult ? (
+              <form onSubmit={runScan} style={{ display:"flex", gap:12, alignItems:"center", flexWrap:"wrap" }}>
+                <input type="text" className="search" style={{ flex:1, minWidth:250 }} placeholder="Enter domain (e.g. fifa-rewards-claims.com)" value={scanDomain} onChange={e=>setScanDomain(e.target.value)} required />
+                <button type="submit" className="btn btn-gold" disabled={scanLoading}>
+                  {scanLoading ? <RefreshCw size={14} className="animate-spin" style={{ animation:"spin 1s linear infinite" }}/> : <Play size={14}/>}
+                  {scanLoading ? "Scanning..." : "Start Scan"}
+                </button>
+                <div style={{ color: "var(--text-faint)", fontSize: 12, padding: "0 8px" }}>OR</div>
+                <input id="scan-csv-upload" type="file" accept=".csv" style={{ display:"none" }} onChange={(e)=>{ const f=e.target.files?.[0]; if(f) handleBatchScan(f); }}/>
+                <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
+                  <button type="button" className="btn" onClick={()=>document.getElementById("scan-csv-upload")?.click()}><Upload size={14}/>Batch CSV Upload</button>
+                  <div style={{ fontSize: 9.5, color: "var(--text-faint)", textAlign: "center", textTransform: "uppercase", letterSpacing: "0.05em" }}>Requires 'domain' column</div>
+                </div>
+              </form>
+            ) : null}
+
+            {scanLoading && (
+              <div style={{ display:"flex", flexDirection:"column", gap:12, marginTop:24 }}>
+                {batchProgress && (
+                  <div style={{ textAlign:"center", fontSize:14, color:"var(--blue-neon)", fontWeight:600, padding: 12, border: "1px dashed var(--blue-neon)", borderRadius: 8 }}>
+                    Batch Processing in Progress: Analyzed {batchProgress.current} out of {batchProgress.total} domains...
+                  </div>
+                )}
+                {PIPELINE_STEPS.map((step, idx) => {
+                  const Icon = step.icon;
+                  const status = idx < activeStep ? "success" : idx === activeStep ? "running" : "idle";
+                  return (
+                    <div key={idx} style={{ 
+                      display:"flex", alignItems:"center", gap:16, padding:"12px 16px", borderRadius:8,
+                      background: status==="success" ? "rgba(0,255,210,0.05)" : status==="running" ? "rgba(0,210,255,0.08)" : "transparent",
+                      border: "1px solid",
+                      borderColor: status==="success" ? "rgba(0,255,210,0.2)" : status==="running" ? "var(--blue-neon)" : "transparent",
+                      transition: "all 0.3s ease"
+                    }}>
+                      <div style={{ 
+                        width:32, height:32, borderRadius:8, display:"flex", alignItems:"center", justifyContent:"center",
+                        background: status==="success" ? "var(--green)" : status==="running" ? "var(--blue-neon)" : "rgba(255,255,255,0.05)",
+                        color: status==="idle" ? "var(--text-faint)" : "#030812"
+                      }}>
+                        {status === "success" ? <ShieldCheck size={16}/> : status === "running" ? <RefreshCw size={16} className="animate-spin" style={{ animation:"spin 1s linear infinite" }}/> : <Icon size={16}/>}
+                      </div>
+                      <div>
+                        <div style={{ fontSize:14, fontWeight:600, color: status==="idle" ? "var(--text-dim)" : "var(--text)" }}>{step.name}</div>
+                        <div style={{ fontSize:12, color:"var(--text-faint)", marginTop:2 }}>{step.desc}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {batchResults && !scanLoading && (
+              <div style={{ marginTop:24 }}>
+                <div style={{ fontSize:14, fontWeight:600, color:"var(--text)", marginBottom:12 }}>Recent Batch Classification Results</div>
+                <div className="table-container">
+                  <table style={{ width:"100%", borderCollapse:"collapse", fontSize:12 }}>
+                    <thead>
+                      <tr style={{ borderBottom:"1px solid var(--border)", color:"var(--text-dim)", textAlign:"left" }}>
+                        <th style={{ padding:12, fontWeight:500 }}>Domain</th>
+                        <th style={{ padding:12, fontWeight:500 }}>Threat Type</th>
+                        <th style={{ padding:12, fontWeight:500 }}>Risk Score</th>
+                        <th style={{ padding:12, fontWeight:500 }}>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {batchResults.slice(0, 10).map((r, idx) => (
+                        <tr key={idx} style={{ borderBottom:"1px solid rgba(255,255,255,0.05)" }}>
+                          <td style={{ padding:12, fontWeight:500, color:"var(--text)" }}>{r.domain}</td>
+                          <td style={{ padding:12, color:"var(--text-dim)" }}>{r.threatType}</td>
+                          <td style={{ padding:12 }}>
+                            <span className="badge badge-neutral" style={{ background: r.riskScore >= 70 ? "rgba(255,42,95,0.15)" : r.riskScore >= 40 ? "rgba(255,159,26,0.15)" : "rgba(0,255,210,0.15)", color: r.riskScore >= 70 ? "var(--red)" : r.riskScore >= 40 ? "var(--amber)" : "var(--green)" }}>
+                              {r.riskScore} / 100
+                            </span>
+                          </td>
+                          <td style={{ padding:12 }}>{r.status}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {batchResults.length > 10 && <div style={{ fontSize:11, color:"var(--text-dim)", textAlign:"center", marginTop:12 }}>Showing first 10 results. See downloaded CSV for full report.</div>}
+              </div>
+            )}
+
+            {scanResult && !scanLoading && (
+              <div style={{ display:"flex", flexDirection:"column", gap:20, marginTop:24 }}>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
+                  <div>
+                    <div style={{ fontSize:10, color:"var(--text-faint)", letterSpacing:"0.1em", textTransform:"uppercase", fontWeight:600 }}>Analysis Result</div>
+                    <div className="font-mono" style={{ fontSize:22, fontWeight:700, color:"var(--text)", marginTop:4 }}>{scanResult["Domain Name"]}</div>
+                  </div>
+                  <div style={{ display:"flex", gap:8 }}>
+                    {riskBadge(scanResult["Severity"] || "Low")}
+                    <span className="badge badge-neutral">{scanResult["Threat Type"]}</span>
+                  </div>
+                </div>
+
+                {scanError && <div style={{ color:"var(--red)", fontSize:13 }}>{scanError}</div>}
+
+                <div className="stat-grid" style={{ gridTemplateColumns:"repeat(3, 1fr)", gap:12, marginBottom:0 }}>
+                  <div className="card" style={{ padding:16, textAlign:"center" }}>
+                    <div className="stat-label" style={{ marginTop:0, marginBottom:8 }}>Risk Score</div>
+                    <div className="stat-value">{scanResult["Risk Score"]}</div>
+                  </div>
+                  <div className="card" style={{ padding:16, textAlign:"center" }}>
+                    <div className="stat-label" style={{ marginTop:0, marginBottom:8 }}>Phishing Prob.</div>
+                    <div className="stat-value" style={{ fontSize:20 }}>{typeof scanResult["Phishing Probability"]==="number" ? (scanResult["Phishing Probability"]*100).toFixed(1)+"%" : "N/A"}</div>
+                  </div>
+                  <div className="card" style={{ padding:16, textAlign:"center" }}>
+                    <div className="stat-label" style={{ marginTop:0, marginBottom:8 }}>Visual Match</div>
+                    <div className="stat-value" style={{ fontSize:20 }}>{typeof scanResult["Visual Similarity Score"]==="number" ? (scanResult["Visual Similarity Score"]*100).toFixed(1)+"%" : "N/A"}</div>
+                  </div>
+                </div>
+
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
+                  <div className="card" style={{ padding:14 }}>
+                    <div style={{ fontSize:10, color:"var(--text-faint)", fontWeight:600, textTransform:"uppercase" }}>Recommended Action</div>
+                    <div style={{ color:"var(--red)", fontSize:13, fontWeight:600, marginTop:4 }}>{scanResult["Recommended Action"] || "Review required."}</div>
+                  </div>
+                  <div className="card" style={{ padding:14 }}>
+                    <div style={{ fontSize:10, color:"var(--text-faint)", fontWeight:600, textTransform:"uppercase" }}>Key Indicators</div>
+                    <div style={{ marginTop:4, display:"flex", flexDirection:"column", gap:4 }}>
+                      {(scanResult["Explanations"] || []).map((exp: string, idx: number) => (
+                        <div key={idx} style={{ display:"flex", alignItems:"flex-start", gap:6, fontSize:12, color:"var(--text-dim)" }}>
+                          <AlertTriangle size={12} color="var(--red)" style={{ marginTop:2, flexShrink:0 }}/> {exp}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
 
   const toggleTheme = useCallback(() => setIsDark(prev => !prev), []);
   const handleLogout = useCallback(() => { setIsLoggedIn(false); setUserName(""); }, []);
