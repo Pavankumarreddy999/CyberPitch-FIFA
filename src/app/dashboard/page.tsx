@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import Papa from "papaparse";
 import {
   Shield, AlertTriangle, Globe2, Ticket, Radio, Users, Bell, Settings,
@@ -9,7 +10,7 @@ import {
   CircleDot, X, Info, RefreshCw, Download, HelpCircle, LogOut, Sun, Moon,
   UserPlus, LogIn, Eye, EyeOff, Key, Mail, Award, BarChart3, Activity,
   Database, Zap, Fingerprint, FileText, BookOpen, Server, Cpu, Clock,
-  Percent, MapPin, Link2, Fingerprint as FingerprintIcon,
+  Percent, MapPin, Link2, Fingerprint as FingerprintIcon, Play
 } from "lucide-react";
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar,
@@ -428,10 +429,12 @@ interface SidebarProps {
   setCollapsed: (c: boolean) => void;
   onLogout: () => void;
   user: string;
+  onNavigate?: (href: string) => void;
 }
-function Sidebar({ page, setPage, collapsed, setCollapsed, onLogout, user }: SidebarProps) {
+function Sidebar({ page, setPage, collapsed, setCollapsed, onLogout, user, onNavigate }: SidebarProps) {
   const items = [
     { key:"dashboard", label:"Dashboard", icon:LayoutDashboard, enabled:true },
+    { key:"scan",      label:"Scan URL",      icon:Search,   enabled:true },
     { key:"domains",   label:"Domain Intelligence", icon:Globe2, enabled:true },
     { key:"tickets",   label:"Ticketing Fraud",     icon:Ticket, enabled:true },
     { key:"social",    label:"Social & OSINT",      icon:Users,    enabled:true },
@@ -465,7 +468,14 @@ function Sidebar({ page, setPage, collapsed, setCollapsed, onLogout, user }: Sid
             <div
               key={it.key}
               className={`navitem${isActive?" active":""}${!it.enabled?" disabled":""}`}
-              onClick={() => it.enabled && setPage(it.key)}
+              onClick={() => {
+                if (!it.enabled) return;
+                if (it.href && onNavigate) {
+                  onNavigate(it.href);
+                } else {
+                  setPage(it.key);
+                }
+              }}
               style={{ padding: collapsed?"10px 0":"10px 14px", justifyContent: collapsed?"center":"flex-start" }}
             >
               <Icon size={16}/>
@@ -1474,17 +1484,33 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState("");
   const [showSignup, setShowSignup] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    setIsMounted(true);
+    setIsLoggedIn(localStorage.getItem('sentinel_isLoggedIn') === 'true');
+    setUser(localStorage.getItem('sentinel_user') || "");
+  }, []);
 
   const handleLogin = (username: string) => {
     setUser(username);
     setIsLoggedIn(true);
     setPage("dashboard");
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('sentinel_user', username);
+      localStorage.setItem('sentinel_isLoggedIn', 'true');
+    }
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUser("");
     setPage("dashboard");
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('sentinel_user');
+      localStorage.removeItem('sentinel_isLoggedIn');
+    }
   };
 
   const handleUpload = useCallback((file: File) => {
@@ -1504,7 +1530,9 @@ export default function App() {
     });
   }, []);
 
-  const handleScan = useCallback(()=>alert("Initiating live threat scan across all FIFA-related domain pipelines…"),[]);
+  const handleScan = useCallback(() => {
+    setPage("scan");
+  }, []);
   const handleExport = useCallback(()=>{
     const csv = ["id,domain,threatType,riskScore,riskLevel,country,status", ...data.slice(0,50).map(d=>`${d.id},${d.domain},${d.threatType},${d.riskScore},${d.riskLevel},${d.country},${d.status}`)].join("\n");
     const a = document.createElement("a"); a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv); a.download="sentinel7-export.csv"; a.click();
@@ -1512,6 +1540,7 @@ export default function App() {
 
   const pageTitles: Record<string, [string,string]> = {
     dashboard: ["Threat Overview", "Real-time snapshot across all detection pipelines"],
+    scan:      ["Real-time Threat Scanner", "Analyze any domain through the Sentinel/7 pipeline"],
     domains:   ["Domain Threat Intelligence", "Detect & analyze fraudulent FIFA domains"],
     tickets:   ["Ticketing Fraud Monitor", "Fake portals, pricing anomalies & victim impact"],
     social:    ["Social & OSINT Intelligence", "Social mentions, OSINT reports & blacklist feeds"],
@@ -1520,11 +1549,128 @@ export default function App() {
     settings:  ["Settings", "User preferences, thresholds and API keys"],
   };
 
+  /* ---------------------------------------------------------------
+     SCAN VIEW COMPONENT (Neon Styled)
+  ------------------------------------------------------------------*/
+  function ScanView() {
+    const [scanDomain, setScanDomain] = useState("");
+    const [scanLoading, setScanLoading] = useState(false);
+    const [scanResult, setScanResult] = useState<any>(null);
+    const [scanError, setScanError] = useState<string|null>(null);
+
+    const runScan = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!scanDomain.trim()) return;
+      setScanLoading(true); setScanError(null); setScanResult(null);
+      try {
+        const res = await fetch("/api/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ domain: scanDomain.trim() }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Scan failed");
+        setScanResult(data.data);
+      } catch (err: any) {
+        setScanError(err.message);
+      } finally {
+        setScanLoading(false);
+      }
+    };
+
+    return (
+      <div style={{ display:"flex", flexDirection:"column", gap:24, maxWidth: 900 }}>
+        <div className="card" style={{ padding:24 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:20 }}>
+            <ShieldAlert size={24} color="var(--blue-neon)"/> 
+            <div>
+              <div style={{ fontSize:16, fontWeight:600, color:"var(--text)" }}>Domain Scanner Engine</div>
+              <div style={{ fontSize:12, color:"var(--text-dim)" }}>Run a comprehensive analysis through Sentinel/7's ML pipeline</div>
+            </div>
+          </div>
+            {!scanResult ? (
+              <form onSubmit={runScan} style={{ display:"flex", gap:12 }}>
+                <input type="text" className="search" style={{ flex:1, width:"auto" }} placeholder="Enter domain (e.g. fifa-rewards-claims.com)" value={scanDomain} onChange={e=>setScanDomain(e.target.value)} required />
+                <button type="submit" className="btn btn-gold" disabled={scanLoading}>
+                  {scanLoading ? <RefreshCw size={14} className="animate-spin" style={{ animation:"spin 1s linear infinite" }}/> : <Play size={14}/>}
+                  {scanLoading ? "Scanning..." : "Start Scan"}
+                </button>
+              </form>
+            ) : (
+              <div style={{ display:"flex", flexDirection:"column", gap:20 }}>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
+                  <div>
+                    <div style={{ fontSize:10, color:"var(--text-faint)", letterSpacing:"0.1em", textTransform:"uppercase", fontWeight:600 }}>Analysis Result</div>
+                    <div className="font-mono" style={{ fontSize:22, fontWeight:700, color:"var(--text)", marginTop:4 }}>{scanResult["Domain Name"]}</div>
+                  </div>
+                  <div style={{ display:"flex", gap:8 }}>
+                    {riskBadge(scanResult["Severity"] || "Low")}
+                    <span className="badge badge-neutral">{scanResult["Threat Type"]}</span>
+                  </div>
+                </div>
+
+                {scanError && <div style={{ color:"var(--red)", fontSize:13 }}>{scanError}</div>}
+
+                <div className="stat-grid" style={{ gridTemplateColumns:"repeat(3, 1fr)", gap:12, marginBottom:0 }}>
+                  <div className="card" style={{ padding:16, textAlign:"center" }}>
+                    <div className="stat-label" style={{ marginTop:0, marginBottom:8 }}>Risk Score</div>
+                    <div className="stat-value">{scanResult["Risk Score"]}</div>
+                  </div>
+                  <div className="card" style={{ padding:16, textAlign:"center" }}>
+                    <div className="stat-label" style={{ marginTop:0, marginBottom:8 }}>Phishing Prob.</div>
+                    <div className="stat-value" style={{ fontSize:20 }}>{typeof scanResult["Phishing Probability"]==="number" ? (scanResult["Phishing Probability"]*100).toFixed(1)+"%" : "N/A"}</div>
+                  </div>
+                  <div className="card" style={{ padding:16, textAlign:"center" }}>
+                    <div className="stat-label" style={{ marginTop:0, marginBottom:8 }}>Visual Match</div>
+                    <div className="stat-value" style={{ fontSize:20 }}>{typeof scanResult["Visual Similarity Score"]==="number" ? (scanResult["Visual Similarity Score"]*100).toFixed(1)+"%" : "N/A"}</div>
+                  </div>
+                </div>
+
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
+                  <div className="card" style={{ padding:14 }}>
+                    <div style={{ fontSize:10, color:"var(--text-faint)", fontWeight:600, textTransform:"uppercase" }}>Recommended Action</div>
+                    <div style={{ color:"var(--red)", fontSize:13, fontWeight:600, marginTop:4 }}>{scanResult["Recommended Action"] || "Review required."}</div>
+                  </div>
+                  <div className="card" style={{ padding:14 }}>
+                    <div style={{ fontSize:10, color:"var(--text-faint)", fontWeight:600, textTransform:"uppercase" }}>Key Indicators</div>
+                    <div style={{ marginTop:4, display:"flex", flexDirection:"column", gap:4 }}>
+                      {(scanResult["Explanations"] || []).map((exp: string, idx: number) => (
+                        <div key={idx} style={{ display:"flex", alignItems:"flex-start", gap:6, fontSize:12, color:"var(--text-dim)" }}>
+                          <AlertTriangle size={12} color="var(--red)" style={{ marginTop:2, flexShrink:0 }}/> {exp}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display:"grid", gridTemplateColumns:"repeat(4, 1fr)", gap:8 }}>
+                  {[{l:"WHOIS Age", v:scanResult["WHOIS Age Days"]!==undefined?scanResult["WHOIS Age Days"]+" d":"Unk"}, {l:"SSL", v:scanResult["SSL Status"]}, {l:"Hosting", v:scanResult["Hosting Country"]}, {l:"Malware", v:scanResult["Malware Signature Match"]?"Yes":"No"}].map((s,i) => (
+                    <div key={i} style={{ background:"rgba(0,210,255,0.05)", border:"1px solid var(--border-strong)", borderRadius:8, padding:10, textAlign:"center" }}>
+                      <div style={{ fontSize:9, color:"var(--text-faint)", textTransform:"uppercase", fontWeight:600 }}>{s.l}</div>
+                      <div style={{ fontSize:12, color:"var(--text)", fontWeight:500, marginTop:2 }}>{s.v}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {scanError && !scanResult && <div style={{ color:"var(--red)", fontSize:13 }}>{scanError}</div>}
+        </div>
+      </div>
+    );
+  }
+
+  if (!isMounted) return null;
+
   if (!isLoggedIn) {
-    return showSignup ? (
-      <SignupPage onLogin={handleLogin} setShowSignup={setShowSignup} />
-    ) : (
-      <LoginPage onLogin={handleLogin} setShowSignup={setShowSignup} />
+    return (
+      <>
+        <style>{TOKENS}</style>
+        {showSignup ? (
+          <SignupPage onLogin={handleLogin} setShowSignup={setShowSignup} />
+        ) : (
+          <LoginPage onLogin={handleLogin} setShowSignup={setShowSignup} />
+        )}
+      </>
     );
   }
 
@@ -1534,7 +1680,7 @@ export default function App() {
     <div className="stg-root">
       <style>{TOKENS}</style>
       <div className="hexbg"/>
-      <Sidebar page={page} setPage={setPage} collapsed={collapsed} setCollapsed={setCollapsed} onLogout={handleLogout} user={user} />
+      <Sidebar page={page} setPage={setPage} collapsed={collapsed} setCollapsed={setCollapsed} onLogout={handleLogout} user={user} onNavigate={(href) => router.push(href)} />
       <div className="main">
         <TopBar title={title} subtitle={subtitle} onUpload={handleUpload} dataSource={dataSource} onScan={handleScan} onExport={handleExport} user={user} />
         {uploadError && (
@@ -1545,6 +1691,7 @@ export default function App() {
         )}
         <div className="content">
           {page === "dashboard" && <Dashboard data={data} />}
+          {page === "scan" && <ScanView />}
           {page === "domains" && <DomainIntel data={data} />}
           {page === "tickets" && <TicketingFraud data={data} />}
           {page === "social" && <SocialOSINT data={data} />}
