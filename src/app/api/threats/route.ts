@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 // GET /api/threats - Get all threats from backend
 export async function GET() {
   try {
-    const historyRes = await fetch("http://localhost:8000/api/scan/history?limit=100", {
+    const historyRes = await fetch("http://127.0.0.1:8000/api/scan/history?limit=100", {
       cache: "no-store"
     });
     
@@ -137,7 +137,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const scanRes = await fetch("http://localhost:8000/api/scan", {
+    const scanRes = await fetch("http://127.0.0.1:8000/api/scan", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -178,7 +178,7 @@ export async function DELETE(request: Request) {
   }
 
   try {
-    const backendRes = await fetch(`http://localhost:8000/api/scan/${id}`, {
+    const backendRes = await fetch(`http://127.0.0.1:8000/api/scan/${id}`, {
       method: "DELETE",
     });
 
@@ -197,4 +197,4 @@ export async function DELETE(request: Request) {
       { status: 500 }
     );
   }
-}
+}

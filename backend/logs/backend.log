@@ -465,3 +465,106 @@ AttributeError: 'coroutine' object has no attribute 'get'
 2026-07-06 22:30:12,272 INFO Running job "run_once (trigger: interval[12:00:00], next run at: 2026-07-06 17:00:12 IST)" (scheduled at 2026-07-06 17:00:12.245238+05:30)
 2026-07-06 22:37:08,064 INFO Job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 05:00:12 IST)" executed successfully
 2026-07-06 22:54:10,155 INFO Scanning domain: hi.com
+2026-07-07 06:34:09,252 INFO Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-07-07 06:34:09,254 INFO Added job "run_once" to job store "default"
+2026-07-07 06:34:09,254 INFO Scheduler started
+2026-07-07 06:34:09,382 INFO Running job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 01:04:09 IST)" (scheduled at 2026-07-07 01:04:09.248167+05:30)
+2026-07-07 06:41:47,352 INFO Job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 13:04:09 IST)" executed successfully
+2026-07-07 06:45:29,989 INFO Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-07-07 06:45:29,989 INFO Added job "run_once" to job store "default"
+2026-07-07 06:45:29,990 INFO Scheduler started
+2026-07-07 06:45:29,995 INFO Running job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 01:15:29 IST)" (scheduled at 2026-07-07 01:15:29.980373+05:30)
+2026-07-07 06:46:25,535 ERROR Job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 13:15:29 IST)" raised an exception
+Traceback (most recent call last):
+  File "C:\Users\santh\AppData\Local\Programs\Python\Python311\Lib\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\santh\OneDrive\Desktop\mrn\CyberPitch-FIFA\backend\scripts\domain_discovery.py", line 155, in run_once
+    live = bulk_resolve(new_domains)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\santh\OneDrive\Desktop\mrn\CyberPitch-FIFA\backend\scripts\domain_discovery.py", line 132, in bulk_resolve
+    futures = {ex.submit(_resolves, d): d for d in domains}
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\santh\OneDrive\Desktop\mrn\CyberPitch-FIFA\backend\scripts\domain_discovery.py", line 132, in <dictcomp>
+    futures = {ex.submit(_resolves, d): d for d in domains}
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\santh\AppData\Local\Programs\Python\Python311\Lib\concurrent\futures\thread.py", line 169, in submit
+    raise RuntimeError('cannot schedule new futures after '
+RuntimeError: cannot schedule new futures after interpreter shutdown
+2026-07-07 07:00:40,567 INFO Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-07-07 07:00:40,570 INFO Added job "run_once" to job store "default"
+2026-07-07 07:00:40,570 INFO Scheduler started
+2026-07-07 07:00:40,574 INFO Running job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 01:30:40 IST)" (scheduled at 2026-07-07 01:30:40.564302+05:30)
+2026-07-07 07:03:38,139 WARNING (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "C:\Users\santh\OneDrive\Desktop\mrn\CyberPitch-FIFA\backend\venv\Lib\site-packages\passlib\handlers\bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2026-07-07 07:06:22,274 WARNING (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "C:\Users\santh\OneDrive\Desktop\mrn\CyberPitch-FIFA\backend\venv\Lib\site-packages\passlib\handlers\bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2026-07-07 07:06:44,180 WARNING (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "C:\Users\santh\OneDrive\Desktop\mrn\CyberPitch-FIFA\backend\venv\Lib\site-packages\passlib\handlers\bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2026-07-07 07:38:18,132 INFO Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-07-07 07:38:18,134 INFO Added job "run_once" to job store "default"
+2026-07-07 07:38:18,134 INFO Scheduler started
+2026-07-07 07:38:18,137 INFO Running job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 02:08:18 IST)" (scheduled at 2026-07-07 02:08:18.129842+05:30)
+2026-07-07 07:38:44,617 INFO Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-07-07 07:38:44,618 INFO Added job "run_once" to job store "default"
+2026-07-07 07:38:44,618 INFO Scheduler started
+2026-07-07 07:38:44,621 INFO Running job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 02:08:44 IST)" (scheduled at 2026-07-07 02:08:44.615965+05:30)
+2026-07-07 07:38:52,584 ERROR Job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 14:08:18 IST)" raised an exception
+Traceback (most recent call last):
+  File "C:\Users\santh\OneDrive\Desktop\mrn\CyberPitch-FIFA\backend\venv\Lib\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\santh\OneDrive\Desktop\mrn\CyberPitch-FIFA\backend\scripts\domain_discovery.py", line 155, in run_once
+    live = bulk_resolve(new_domains)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\santh\OneDrive\Desktop\mrn\CyberPitch-FIFA\backend\scripts\domain_discovery.py", line 132, in bulk_resolve
+    futures = {ex.submit(_resolves, d): d for d in domains}
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\santh\OneDrive\Desktop\mrn\CyberPitch-FIFA\backend\scripts\domain_discovery.py", line 132, in <dictcomp>
+    futures = {ex.submit(_resolves, d): d for d in domains}
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\santh\AppData\Local\Programs\Python\Python311\Lib\concurrent\futures\thread.py", line 169, in submit
+    raise RuntimeError('cannot schedule new futures after '
+RuntimeError: cannot schedule new futures after interpreter shutdown
+2026-07-07 07:42:37,813 INFO Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-07-07 07:42:37,814 INFO Added job "run_once" to job store "default"
+2026-07-07 07:42:37,814 INFO Scheduler started
+2026-07-07 07:42:37,815 INFO Running job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 02:12:37 IST)" (scheduled at 2026-07-07 02:12:37.813282+05:30)
+2026-07-07 07:43:11,472 ERROR Job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 14:12:37 IST)" raised an exception
+Traceback (most recent call last):
+  File "C:\Users\santh\OneDrive\Desktop\mrn\CyberPitch-FIFA\backend\venv\Lib\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\santh\OneDrive\Desktop\mrn\CyberPitch-FIFA\backend\scripts\domain_discovery.py", line 155, in run_once
+    live = bulk_resolve(new_domains)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\santh\OneDrive\Desktop\mrn\CyberPitch-FIFA\backend\scripts\domain_discovery.py", line 132, in bulk_resolve
+    futures = {ex.submit(_resolves, d): d for d in domains}
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\santh\OneDrive\Desktop\mrn\CyberPitch-FIFA\backend\scripts\domain_discovery.py", line 132, in <dictcomp>
+    futures = {ex.submit(_resolves, d): d for d in domains}
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\santh\AppData\Local\Programs\Python\Python311\Lib\concurrent\futures\thread.py", line 169, in submit
+    raise RuntimeError('cannot schedule new futures after '
+RuntimeError: cannot schedule new futures after interpreter shutdown
+2026-07-07 07:53:34,627 INFO Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-07-07 07:53:34,629 INFO Added job "run_once" to job store "default"
+2026-07-07 07:53:34,629 INFO Scheduler started
+2026-07-07 07:53:34,630 INFO Running job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 02:23:34 IST)" (scheduled at 2026-07-07 02:23:34.625777+05:30)
+2026-07-07 08:02:40,478 INFO Job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 14:23:34 IST)" executed successfully
+2026-07-07 08:06:09,033 INFO Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-07-07 08:06:09,034 INFO Added job "run_once" to job store "default"
+2026-07-07 08:06:09,034 INFO Scheduler started
+2026-07-07 08:06:09,035 INFO Running job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 02:36:09 IST)" (scheduled at 2026-07-07 02:36:09.032810+05:30)

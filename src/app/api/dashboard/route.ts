@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const statsRes = await fetch("http://localhost:8000/api/scan/stats", {
+    const statsRes = await fetch("http://127.0.0.1:8000/api/scan/stats", {
       cache: "no-store"
     });
     
@@ -11,7 +11,7 @@ export async function GET() {
     }
     const statsData = await statsRes.json();
 
-    const historyRes = await fetch("http://localhost:8000/api/scan/history?limit=30", {
+    const historyRes = await fetch("http://127.0.0.1:8000/api/scan/history?limit=30", {
       cache: "no-store"
     });
     
@@ -50,4 +50,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+}

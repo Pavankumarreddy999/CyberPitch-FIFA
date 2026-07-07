@@ -21,3 +21,5 @@ joblib==1.5.1
 python-multipart==0.0.20
 
 apscheduler>=3.11
+passlib[bcrypt]==1.7.4
+PyJWT==2.8.0
