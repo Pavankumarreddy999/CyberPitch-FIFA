@@ -10,7 +10,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const backendRes = await fetch("http://localhost:8000/api/scan", {
+    const backendRes = await fetch("http://127.0.0.1:8000/api/scan", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -34,4 +34,4 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-}
+}

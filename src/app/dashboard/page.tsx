@@ -345,20 +345,20 @@ function generateMockData(count = 180) {
     const flags = [...RED_FLAG_POOL].sort(() => rnd() - 0.5).slice(0, flagCount);
     rows.push({
       id: `TH-${1000 + i}`,
-      domain: `fifa-${["worldcup","tickets2026","official","matchday","livepass","fanzone","goldpass"][Math.floor(rnd()*7)]}-${Math.floor(rnd()*999)}.${["com","net","info","xyz","ru","top"][Math.floor(rnd()*6)]}`,
+      domain: `fifa-${["worldcup", "tickets2026", "official", "matchday", "livepass", "fanzone", "goldpass"][Math.floor(rnd() * 7)]}-${Math.floor(rnd() * 999)}.${["com", "net", "info", "xyz", "ru", "top"][Math.floor(rnd() * 6)]}`,
       threatType,
       riskScore,
       riskLevel: riskScore >= 70 ? "High" : riskScore >= 40 ? "Medium" : "Low",
-      registrationDate: `2025-${String(Math.floor(rnd()*12)+1).padStart(2,"0")}-${String(Math.floor(rnd()*28)+1).padStart(2,"0")}`,
+      registrationDate: `2025-${String(Math.floor(rnd() * 12) + 1).padStart(2, "0")}-${String(Math.floor(rnd() * 28) + 1).padStart(2, "0")}`,
       ageDays,
       registrar: REGISTRARS[Math.floor(rnd() * REGISTRARS.length)],
       country: COUNTRIES[Math.floor(rnd() * COUNTRIES.length)],
       sslStatus: SSL_STATES[Math.floor(rnd() * SSL_STATES.length)],
       similarityScore: Math.round(40 + rnd() * 60),
-      detectedDate: `2026-0${Math.floor(rnd()*6)+1}-${String(Math.floor(rnd()*28)+1).padStart(2,"0")}`,
+      detectedDate: `2026-0${Math.floor(rnd() * 6) + 1}-${String(Math.floor(rnd() * 28) + 1).padStart(2, "0")}`,
       status: STATUSES[Math.floor(rnd() * STATUSES.length)],
-      estimatedLoss: isTicket ? Math.round(rnd()*45000) : Math.round(rnd()*8000),
-      affectedUsers: isTicket ? Math.floor(rnd()*900) : Math.floor(rnd()*200),
+      estimatedLoss: isTicket ? Math.round(rnd() * 45000) : Math.round(rnd() * 8000),
+      affectedUsers: isTicket ? Math.floor(rnd() * 900) : Math.floor(rnd() * 200),
       officialPrice: isTicket ? officialPrice : null,
       scamPrice: isTicket ? Math.round(officialPrice * (0.15 + rnd() * 0.35)) : null,
       redFlags: flags,
@@ -382,16 +382,16 @@ interface ThreatRecord {
   osintReportCount?: number; socialMediaMentions?: number; blacklistSource?: string;
 }
 
-const RISK_COLOR: Record<string,string> = { High:"var(--red)", Medium:"var(--amber)", Low:"var(--green)" };
+const RISK_COLOR: Record<string, string> = { High: "var(--red)", Medium: "var(--amber)", Low: "var(--green)" };
 
 function riskBadge(level: string) {
   const cls = level === "High" ? "badge-high" : level === "Medium" ? "badge-medium" : "badge-low";
   return <span className={`badge ${cls}`}>{level}</span>;
 }
 function sslBadge(status: string) {
-  if (status === "Valid")   return <span className="badge badge-low"><Lock size={10}/>Valid</span>;
+  if (status === "Valid") return <span className="badge badge-low"><Lock size={10} />Valid</span>;
   if (status === "Unknown") return <span className="badge badge-neutral">Unknown</span>;
-  return <span className="badge badge-high"><Unlock size={10}/>{status}</span>;
+  return <span className="badge badge-high"><Unlock size={10} />{status}</span>;
 }
 
 /* ---------------------------------------------------------------
@@ -406,8 +406,8 @@ function RiskGauge({ value }: { value: number }) {
   const y = cy - r * Math.sin(rad);
   return (
     <svg width="180" height="100" viewBox="0 0 180 100">
-      <path d="M 20 80 A 70 70 0 0 1 160 80" fill="none" stroke="rgba(0,210,255,0.12)" strokeWidth="12" strokeLinecap="round"/>
-      <path d={`M 20 80 A 70 70 0 0 1 ${x} ${y}`} fill="none" stroke={color} strokeWidth="12" strokeLinecap="round" style={{ filter:`drop-shadow(0 0 6px ${color})` }}/>
+      <path d="M 20 80 A 70 70 0 0 1 160 80" fill="none" stroke="rgba(0,210,255,0.12)" strokeWidth="12" strokeLinecap="round" />
+      <path d={`M 20 80 A 70 70 0 0 1 ${x} ${y}`} fill="none" stroke={color} strokeWidth="12" strokeLinecap="round" style={{ filter: `drop-shadow(0 0 6px ${color})` }} />
       <text x="90" y="72" textAnchor="middle" fontFamily="JetBrains Mono,monospace" fontSize="28" fontWeight="700" fill="#f0f5fc">{value}</text>
       <text x="90" y="90" textAnchor="middle" fontFamily="Inter,sans-serif" fontSize="10" fill="#a5b7d0">/ 100</text>
     </svg>
@@ -428,31 +428,31 @@ interface SidebarProps {
 }
 function Sidebar({ page, setPage, collapsed, setCollapsed, onLogout, user, onNavigate }: SidebarProps) {
   const items: { key: string; label: string; icon: any; enabled: boolean; href?: string }[] = [
-    { key:"dashboard", label:"Dashboard", icon:LayoutDashboard, enabled:true },
-    { key:"scan",      label:"Scan URL",      icon:Search,   enabled:true },
-    { key:"domains",   label:"Domain Intelligence", icon:Globe2, enabled:true },
-    { key:"tickets",   label:"Ticketing Fraud",     icon:Ticket, enabled:true },
-    { key:"social",    label:"Social & OSINT",      icon:Users,    enabled:true },
-    { key:"settings",  label:"Settings",            icon:Settings, enabled:true },
+    { key: "dashboard", label: "Dashboard", icon: LayoutDashboard, enabled: true },
+    { key: "scan", label: "Scan URL", icon: Search, enabled: true },
+    { key: "domains", label: "Domain Intelligence", icon: Globe2, enabled: true },
+    { key: "tickets", label: "Ticketing Fraud", icon: Ticket, enabled: true },
+    { key: "social", label: "Social & OSINT", icon: Users, enabled: true },
+    { key: "settings", label: "Settings", icon: Settings, enabled: true },
   ];
   return (
     <div className={`sidebar${collapsed ? " collapsed" : ""}`}>
-      <div className="brand" style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"24px 16px" }}>
-        <div style={{ display:"flex", alignItems:"center", gap: collapsed ? 0 : 10 }}>
-          <div className="brand-mark"><Shield size={17} color="#030812" strokeWidth={2.5}/></div>
+      <div className="brand" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "24px 16px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: collapsed ? 0 : 10 }}>
+          <div className="brand-mark"><Shield size={17} color="#030812" strokeWidth={2.5} /></div>
           {!collapsed && (
             <div>
-              <div className="font-display" style={{ fontSize:14.5, fontWeight:700, background:"linear-gradient(135deg,var(--gold),#ff9f1a)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>CyberPitch-FIFA</div>
-              <div style={{ fontSize:9, color:"var(--text-dim)", letterSpacing:"0.08em" }}>FIFA THREAT INTEL</div>
+              <div className="font-display" style={{ fontSize: 14.5, fontWeight: 700, background: "linear-gradient(135deg,var(--gold),#ff9f1a)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>CyberPitch-FIFA</div>
+              <div style={{ fontSize: 9, color: "var(--text-dim)", letterSpacing: "0.08em" }}>FIFA THREAT INTEL</div>
             </div>
           )}
         </div>
-        <button onClick={() => setCollapsed(!collapsed)} style={{ background:"none", border:"none", color:"var(--text-faint)", cursor:"pointer", display:"flex", alignItems:"center" }} title={collapsed?"Expand":"Collapse"}>
-          {collapsed ? <ChevronRight size={16}/> : <ChevronLeft size={16}/>}
+        <button onClick={() => setCollapsed(!collapsed)} style={{ background: "none", border: "none", color: "var(--text-faint)", cursor: "pointer", display: "flex", alignItems: "center" }} title={collapsed ? "Expand" : "Collapse"}>
+          {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </button>
       </div>
 
-      <div className="navgroup" style={{ padding:"16px 8px" }}>
+      <div className="navgroup" style={{ padding: "16px 8px" }}>
         <div className="navlabel" style={{ display: collapsed ? "none" : "block" }}>Monitor</div>
         {items.map((it) => {
           const Icon = it.icon;
@@ -460,7 +460,7 @@ function Sidebar({ page, setPage, collapsed, setCollapsed, onLogout, user, onNav
           return (
             <div
               key={it.key}
-              className={`navitem${isActive?" active":""}${!it.enabled?" disabled":""}`}
+              className={`navitem${isActive ? " active" : ""}${!it.enabled ? " disabled" : ""}`}
               onClick={() => {
                 if (!it.enabled) return;
                 if (it.href && onNavigate) {
@@ -469,29 +469,29 @@ function Sidebar({ page, setPage, collapsed, setCollapsed, onLogout, user, onNav
                   setPage(it.key);
                 }
               }}
-              style={{ padding: collapsed?"10px 0":"10px 14px", justifyContent: collapsed?"center":"flex-start" }}
+              style={{ padding: collapsed ? "10px 0" : "10px 14px", justifyContent: collapsed ? "center" : "flex-start" }}
             >
-              <Icon size={16}/>
+              <Icon size={16} />
               {!collapsed && <span>{it.label}</span>}
             </div>
           );
         })}
       </div>
 
-      <div style={{ marginTop:"auto", padding: collapsed?"12px 6px":"12px 16px", borderTop:"1px solid var(--border)" }}>
-        <div style={{ display:"flex", alignItems:"center", gap:10, justifyContent: collapsed?"center":"flex-start" }}>
-          <div style={{ width:32, height:32, borderRadius:"50%", background:"linear-gradient(135deg,var(--blue-neon),var(--blue-deep))", display:"flex", alignItems:"center", justifyContent:"center", color:"#030812", fontWeight:"bold", fontSize:12, flexShrink:0 }}>
+      <div style={{ marginTop: "auto", padding: collapsed ? "12px 6px" : "12px 16px", borderTop: "1px solid var(--border)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: collapsed ? "center" : "flex-start" }}>
+          <div style={{ width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg,var(--blue-neon),var(--blue-deep))", display: "flex", alignItems: "center", justifyContent: "center", color: "#030812", fontWeight: "bold", fontSize: 12, flexShrink: 0 }}>
             {user?.charAt(0).toUpperCase() || "A"}
           </div>
           {!collapsed && (
-            <div style={{ minWidth:0, flex:1 }}>
-              <div style={{ fontSize:12.5, fontWeight:600, color:"var(--text)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{user || "Analyst"}</div>
-              <div style={{ fontSize:10, color:"var(--text-faint)" }}>Analyst Level 3</div>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ fontSize: 12.5, fontWeight: 600, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user || "Analyst"}</div>
+              <div style={{ fontSize: 10, color: "var(--text-faint)" }}>Analyst Level 3</div>
             </div>
           )}
           {!collapsed && (
-            <button onClick={onLogout} style={{ background:"none", border:"none", color:"var(--text-faint)", cursor:"pointer", padding:2 }} title="Logout">
-              <LogOut size={14}/>
+            <button onClick={onLogout} style={{ background: "none", border: "none", color: "var(--text-faint)", cursor: "pointer", padding: 2 }} title="Logout">
+              <LogOut size={14} />
             </button>
           )}
         </div>
@@ -510,79 +510,50 @@ interface TopBarProps {
   user: string;
   dark: boolean;
   setDark: (val: boolean) => void;
+  onLogout: () => void;
 }
-function TopBar({ title, subtitle, onUpload, dataSource, onScan, onExport, user, dark, setDark }: TopBarProps) {
+function TopBar({ title, subtitle, onUpload, dataSource, onScan, onExport, user, dark, setDark, onLogout }: TopBarProps) {
   const fileRef = React.useRef<HTMLInputElement>(null);
   const [showBell, setShowBell] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
 
   const notifications = [
-    { type:"Critical", text:"Fake ticket domain registered: fifa2026-store.xyz", time:"2m ago" },
-    { type:"Warning",  text:"High traffic load detected on pipeline #4",          time:"15m ago" },
-    { type:"Info",     text:"Threat database successfully refreshed",              time:"1h ago" },
+    { type: "Critical", text: "Fake ticket domain registered: fifa2026-store.xyz", time: "2m ago" },
+    { type: "Warning", text: "High traffic load detected on pipeline #4", time: "15m ago" },
+    { type: "Info", text: "Threat database successfully refreshed", time: "1h ago" },
   ];
 
   return (
     <div className="topbar">
       <div>
-        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-          <div className="font-display" style={{ fontSize:19, fontWeight:700 }}>{title}</div>
-          <span className="pulse-dot" title="Live refresh active"/>
-          <span style={{ fontSize:10, color:"var(--green)", fontFamily:"var(--mono)" }}>AUTO-REFRESH: 10S</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div className="font-display" style={{ fontSize: 19, fontWeight: 700 }}>{title}</div>
+          <span className="pulse-dot" title="Live refresh active" />
         </div>
         <div className="section-sub">{subtitle}</div>
       </div>
 
-      <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-        <div className="status-pill" style={{ fontSize:11 }}><Info size={12}/>{dataSource}</div>
-        <span style={{ fontSize:11, color:"var(--text-faint)", fontFamily:"var(--mono)" }}>Updated: Just now</span>
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
 
-        <button className="btn btn-gold" onClick={onScan}><RefreshCw size={13}/>Scan Now</button>
 
-        <div style={{ width:1, height:24, background:"var(--border)", margin:"0 4px" }}/>
+        <button className="btn btn-gold" onClick={onScan}><RefreshCw size={13} />Scan Now</button>
 
-        <button onClick={()=>{ setDark(!dark); }} style={{ background:"none", border:"none", color:"var(--text-dim)", cursor:"pointer" }} title="Toggle theme">
-          {dark ? <Sun size={15}/> : <Moon size={15}/>}
+        <div style={{ width: 1, height: 24, background: "var(--border)", margin: "0 4px" }} />
+
+        <button onClick={() => { setDark(!dark); }} style={{ background: "none", border: "none", color: "var(--text-dim)", cursor: "pointer" }} title="Toggle theme">
+          {dark ? <Sun size={15} /> : <Moon size={15} />}
         </button>
 
-        <button onClick={()=>alert("CyberPitch-FIFA Guide: Upload a threat-intel CSV, filter domains using the controls, or monitor fraudulent ticket price drops.")} style={{ background:"none", border:"none", color:"var(--text-dim)", cursor:"pointer" }} title="Help & Guides">
-          <HelpCircle size={15}/>
-        </button>
-
-        <div style={{ position:"relative" }}>
-          <button onClick={()=>{ setShowBell(!showBell); setShowProfile(false); }} style={{ background:"none", border:"none", color:"var(--text-dim)", cursor:"pointer", position:"relative" }}>
-            <Bell size={15}/>
-            <span style={{ position:"absolute", top:-4, right:-4, width:14, height:14, borderRadius:"50%", background:"var(--red)", color:"#fff", fontSize:8, fontWeight:"bold", display:"flex", alignItems:"center", justifyContent:"center" }}>3</span>
-          </button>
-          {showBell && (
-            <div style={{ position:"absolute", top:30, right:-10, width:320, background:"rgba(10,25,50,0.97)", border:"1.5px solid var(--blue-neon)", borderRadius:12, padding:12, zIndex:10, boxShadow:"0 8px 32px rgba(0,0,0,0.5)" }}>
-              <div style={{ fontSize:12, fontWeight:700, borderBottom:"1px solid var(--border)", paddingBottom:6, marginBottom:8, display:"flex", justifyContent:"space-between" }}>
-                <span>NOTIFICATIONS</span>
-                <span style={{ color:"var(--blue-neon)", cursor:"pointer" }} onClick={()=>setShowBell(false)}>Clear all</span>
-              </div>
-              {notifications.map((n,idx)=>(
-                <div key={idx} style={{ fontSize:11.5, borderBottom:"1px solid rgba(255,255,255,0.05)", paddingBottom:6, marginBottom:6 }}>
-                  <div style={{ display:"flex", justifyContent:"space-between", marginBottom:2 }}>
-                    <span style={{ fontWeight:600, color:n.type==="Critical"?"var(--red)":n.type==="Warning"?"var(--amber)":"var(--green)" }}>{n.type}</span>
-                    <span style={{ color:"var(--text-faint)" }}>{n.time}</span>
-                  </div>
-                  <div style={{ color:"var(--text-dim)" }}>{n.text}</div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div style={{ position:"relative" }}>
-          <div onClick={()=>{ setShowProfile(!showProfile); setShowBell(false); }} style={{ width:28, height:28, borderRadius:"50%", background:"linear-gradient(135deg,var(--gold),var(--gold-dim))", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:"bold", fontSize:11, color:"#030812" }}>
+        <div style={{ position: "relative" }}>
+          <div onClick={() => { setShowProfile(!showProfile); }} style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg,var(--gold),var(--gold-dim))", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", fontSize: 11, color: "#030812" }}>
             {user?.charAt(0).toUpperCase() || "A"}
           </div>
           {showProfile && (
-            <div style={{ position:"absolute", top:32, right:0, width:160, background:"rgba(10,25,50,0.97)", border:"1px solid var(--blue-neon)", borderRadius:8, padding:8, zIndex:10, boxShadow:"0 8px 32px rgba(0,0,0,0.5)" }}>
-              <div style={{ fontSize:12, padding:"6px 8px", cursor:"pointer", color:"var(--text)", borderBottom:"1px solid var(--border)" }} onClick={()=>alert("Profile Settings")}>My Profile</div>
-              <div style={{ fontSize:12, padding:"6px 8px", cursor:"pointer", color:"var(--text)", borderBottom:"1px solid var(--border)" }} onClick={()=>alert("Security Log")}>Security Log</div>
-              <div style={{ fontSize:12, padding:"6px 8px", cursor:"pointer", color:"var(--red)", borderBottom:"1px solid var(--border)" }} onClick={()=>alert("Logged Out")}>
-                <div style={{ display:"flex", alignItems:"center", gap:4 }}><LogOut size={12}/>Log Out</div>
+            <div style={{ position: "absolute", top: 32, right: 0, width: 160, background: "rgba(10,25,50,0.97)", border: "1px solid var(--blue-neon)", borderRadius: 8, padding: 8, zIndex: 10, boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }}>
+              <div style={{ fontSize: 12, padding: "6px 8px", cursor: "pointer", color: "var(--text)", borderBottom: "1px solid var(--border)" }} onClick={() => alert("Profile Settings")}>My Profile</div>
+              <div style={{ fontSize: 12, padding: "6px 8px", cursor: "pointer", color: "var(--text)", borderBottom: "1px solid var(--border)" }} onClick={() => alert("Security Log")}>Security Log</div>
+              <div style={{ fontSize: 12, padding: "6px 8px", cursor: "pointer", color: "var(--red)", borderBottom: "1px solid var(--border)" }} onClick={() => { setShowProfile(false); onLogout(); }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 4 }}><LogOut size={12} />Log Out</div>
               </div>
             </div>
           )}
@@ -596,35 +567,35 @@ function TopBar({ title, subtitle, onUpload, dataSource, onScan, onExport, user,
    DASHBOARD PAGE (from your original)
 ------------------------------------------------------------------*/
 function Dashboard({ data }: { data: ThreatRecord[] }) {
-  const stats = useMemo(()=>{
-    const byType=(t:string)=>data.filter(d=>d.threatType===t).length;
-    return { total:data.length, tickets:byType("Ticket Scam"), phishing:byType("Phishing"), streaming:byType("Streaming Piracy"), malware:byType("Malware") };
-  },[data]);
+  const stats = useMemo(() => {
+    const byType = (t: string) => data.filter(d => d.threatType === t).length;
+    return { total: data.length, tickets: byType("Ticket Scam"), phishing: byType("Phishing"), streaming: byType("Streaming Piracy"), malware: byType("Malware") };
+  }, [data]);
 
-  const avgRisk = useMemo(()=>data.length ? Math.round(data.reduce((a,d)=>a+d.riskScore,0)/data.length) : 0,[data]);
+  const avgRisk = useMemo(() => data.length ? Math.round(data.reduce((a, d) => a + d.riskScore, 0) / data.length) : 0, [data]);
 
-  const riskDist = useMemo(()=>{
-    const counts:Record<string,number>={High:0,Medium:0,Low:0};
-    data.forEach(d=>(counts[d.riskLevel]=(counts[d.riskLevel]||0)+1));
+  const riskDist = useMemo(() => {
+    const counts: Record<string, number> = { High: 0, Medium: 0, Low: 0 };
+    data.forEach(d => (counts[d.riskLevel] = (counts[d.riskLevel] || 0) + 1));
     return [
-      {name:"High",   value:counts.High,   color:"#ff2a5f"},
-      {name:"Medium", value:counts.Medium, color:"#ff9f1a"},
-      {name:"Low",    value:counts.Low,    color:"#00ffd2"},
+      { name: "High", value: counts.High, color: "#ff2a5f" },
+      { name: "Medium", value: counts.Medium, color: "#ff9f1a" },
+      { name: "Low", value: counts.Low, color: "#00ffd2" },
     ];
-  },[data]);
+  }, [data]);
 
-  const countryDist = useMemo(()=>{
-    const counts:Record<string,number>={};
-    data.forEach(d=>(counts[d.country]=(counts[d.country]||0)+1));
-    return Object.entries(counts).map(([country,count])=>({country,count:count as number})).sort((a,b)=>b.count-a.count).slice(0,5);
-  },[data]);
+  const countryDist = useMemo(() => {
+    const counts: Record<string, number> = {};
+    data.forEach(d => (counts[d.country] = (counts[d.country] || 0) + 1));
+    return Object.entries(counts).map(([country, count]) => ({ country, count: count as number })).sort((a, b) => b.count - a.count).slice(0, 5);
+  }, [data]);
 
-  const timelineData = useMemo(()=>{
-    const dates=["06-29","06-30","07-01","07-02","07-03","07-04","07-05","07-06"];
-    return dates.map((d,idx)=>({ date:d, "Threat Alerts":data.filter(item=>item.detectedDate?.endsWith(d)).length||(12+(idx*3)%7) }));
-  },[data]);
+  const timelineData = useMemo(() => {
+    const dates = ["06-29", "06-30", "07-01", "07-02", "07-03", "07-04", "07-05", "07-06"];
+    return dates.map((d, idx) => ({ date: d, "Threat Alerts": data.filter(item => item.detectedDate?.endsWith(d)).length || (12 + (idx * 3) % 7) }));
+  }, [data]);
 
-  const recent = useMemo(()=>[...data].sort((a,b)=>(b.detectedDate||"").localeCompare(a.detectedDate||"")).slice(0,8),[data]);
+  const recent = useMemo(() => [...data].sort((a, b) => (b.detectedDate || "").localeCompare(a.detectedDate || "")).slice(0, 8), [data]);
 
   const sparklines = [
     "M0,18 Q15,4 30,14 T60,2 T90,16 L100,8",
@@ -635,116 +606,116 @@ function Dashboard({ data }: { data: ThreatRecord[] }) {
   ];
 
   const statCards = [
-    {label:"Total threats detected",    value:stats.total,    icon:ShieldAlert,  color:"var(--gold)",      trend:"+12.4%", up:true,  spark:sparklines[0]},
-    {label:"Fake ticketing portals",    value:stats.tickets,  icon:Ticket,       color:"var(--red)",       trend:"+8.1%",  up:true,  spark:sparklines[1]},
-    {label:"Phishing campaigns",        value:stats.phishing, icon:AlertTriangle,color:"var(--amber)",     trend:"+3.6%",  up:true,  spark:sparklines[2]},
-    {label:"Malware / impersonation",   value:stats.malware,  icon:ShieldCheck,  color:"var(--green)",     trend:"+5.9%",  up:true,  spark:sparklines[4]},
+    { label: "Total threats detected", value: stats.total, icon: ShieldAlert, color: "var(--gold)", trend: "+12.4%", up: true, spark: sparklines[0] },
+    { label: "Fake ticketing portals", value: stats.tickets, icon: Ticket, color: "var(--red)", trend: "+8.1%", up: true, spark: sparklines[1] },
+    { label: "Phishing campaigns", value: stats.phishing, icon: AlertTriangle, color: "var(--amber)", trend: "+3.6%", up: true, spark: sparklines[2] },
+    { label: "Malware / impersonation", value: stats.malware, icon: ShieldCheck, color: "var(--green)", trend: "+5.9%", up: true, spark: sparklines[4] },
   ];
 
   return (
-    <div style={{ display:"flex", flexDirection:"column", gap:20 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div className="stat-grid">
-        {statCards.map((s,i)=>{
-          const Icon=s.icon;
+        {statCards.map((s, i) => {
+          const Icon = s.icon;
           return (
             <div className="card stat-card" key={i}>
-              <div className="scanline"/>
-              <div className="stat-icon" style={{ background:`${s.color}18`, border:`1.5px solid ${s.color}40` }}><Icon size={16} color={s.color}/></div>
-              <div className="stat-value" style={{ fontSize:26, fontWeight:800 }}>{s.value.toLocaleString()}</div>
+              <div className="scanline" />
+              <div className="stat-icon" style={{ background: `${s.color}18`, border: `1.5px solid ${s.color}40` }}><Icon size={16} color={s.color} /></div>
+              <div className="stat-value" style={{ fontSize: 26, fontWeight: 800 }}>{s.value.toLocaleString()}</div>
               <div className="stat-label">{s.label}</div>
-              <div style={{ height:26, marginTop:10, marginBottom:8 }}>
+              <div style={{ height: 26, marginTop: 10, marginBottom: 8 }}>
                 <svg viewBox="0 0 100 25" width="100%" height="100%" preserveAspectRatio="none">
-                  <path d={s.spark} fill="none" stroke={s.color} strokeWidth="2" strokeLinecap="round" style={{ filter:`drop-shadow(0 2px 4px ${s.color}40)` }}/>
+                  <path d={s.spark} fill="none" stroke={s.color} strokeWidth="2" strokeLinecap="round" style={{ filter: `drop-shadow(0 2px 4px ${s.color}40)` }} />
                 </svg>
               </div>
-              <div className="trend" style={{ color:s.up?"var(--red)":"var(--green)" }}>
-                {s.up ? <TrendingUp size={12}/> : <TrendingDown size={12}/>} {s.trend} vs last week
+              <div className="trend" style={{ color: s.up ? "var(--red)" : "var(--green)" }}>
+                {s.up ? <TrendingUp size={12} /> : <TrendingDown size={12} />} {s.trend} vs last week
               </div>
             </div>
           );
         })}
       </div>
 
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1.2fr", gap:16 }}>
-        <div className="card" style={{ padding:20 }}>
-          <div className="section-title"><ShieldAlert size={15} color="var(--gold)"/>Average risk score</div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1.2fr", gap: 16 }}>
+        <div className="card" style={{ padding: 20 }}>
+          <div className="section-title"><ShieldAlert size={15} color="var(--gold)" />Average risk score</div>
           <div className="section-sub">Across all tracked domains &amp; campaigns</div>
-          <div style={{ display:"flex", alignItems:"center", justifyContent:"center", padding:"18px 0 6px" }}>
-            <RiskGauge value={avgRisk}/>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "18px 0 6px" }}>
+            <RiskGauge value={avgRisk} />
           </div>
         </div>
 
-        <div className="card" style={{ padding:20 }}>
-          <div className="section-title"><CircleDot size={15} color="var(--gold)"/>Risk level distribution</div>
+        <div className="card" style={{ padding: 20 }}>
+          <div className="section-title"><CircleDot size={15} color="var(--gold)" />Risk level distribution</div>
           <div className="section-sub">{data.length} records analyzed</div>
-          <div style={{ height:170 }}>
+          <div style={{ height: 170 }}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie data={riskDist} dataKey="value" nameKey="name" innerRadius={50} outerRadius={66} paddingAngle={4}>
-                  {riskDist.map((entry,idx)=><Cell key={idx} fill={entry.color} stroke="none"/>)}
+                  {riskDist.map((entry, idx) => <Cell key={idx} fill={entry.color} stroke="none" />)}
                 </Pie>
-                <Tooltip contentStyle={{ background:"rgba(8,17,36,0.95)", border:"1.5px solid var(--blue-neon)", borderRadius:10, fontSize:12, boxShadow:"0 0 15px rgba(0,210,255,0.2)" }}/>
+                <Tooltip contentStyle={{ background: "rgba(8,17,36,0.95)", border: "1.5px solid var(--blue-neon)", borderRadius: 10, fontSize: 12, boxShadow: "0 0 15px rgba(0,210,255,0.2)" }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
-          <div style={{ display:"flex", justifyContent:"center", gap:14, marginTop:-6 }}>
-            {riskDist.map(r=>(
-              <div key={r.name} style={{ display:"flex", alignItems:"center", gap:5, fontSize:11, color:"var(--text-dim)" }}>
-                <span style={{ width:8, height:8, borderRadius:"50%", background:r.color, display:"inline-block" }}/>{r.name} ({r.value})
+          <div style={{ display: "flex", justifyContent: "center", gap: 14, marginTop: -6 }}>
+            {riskDist.map(r => (
+              <div key={r.name} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: "var(--text-dim)" }}>
+                <span style={{ width: 8, height: 8, borderRadius: "50%", background: r.color, display: "inline-block" }} />{r.name} ({r.value})
               </div>
             ))}
           </div>
         </div>
 
-        <div className="card" style={{ padding:20 }}>
-          <div className="section-title"><Globe2 size={15} color="var(--gold)"/>Top hosting countries</div>
+        <div className="card" style={{ padding: 20 }}>
+          <div className="section-title"><Globe2 size={15} color="var(--gold)" />Top hosting countries</div>
           <div className="section-sub">Registrant server geographic density</div>
-          <div style={{ height:190 }}>
+          <div style={{ height: 190 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={countryDist} layout="vertical" margin={{ left:0, right:10 }}>
-                <CartesianGrid stroke="rgba(0,210,255,0.08)" horizontal={false}/>
-                <XAxis type="number" hide/>
-                <YAxis dataKey="country" type="category" width={70} tick={{ fill:"#8ea0bc", fontSize:11 }} axisLine={false} tickLine={false}/>
-                <Tooltip contentStyle={{ background:"rgba(8,17,36,0.95)", border:"1.5px solid var(--blue-neon)", borderRadius:10, fontSize:12 }} cursor={{ fill:"rgba(255,215,0,0.06)" }}/>
-                <Bar dataKey="count" fill="var(--gold)" radius={[0,4,4,0]} barSize={11}/>
+              <BarChart data={countryDist} layout="vertical" margin={{ left: 0, right: 10 }}>
+                <CartesianGrid stroke="rgba(0,210,255,0.08)" horizontal={false} />
+                <XAxis type="number" hide />
+                <YAxis dataKey="country" type="category" width={70} tick={{ fill: "#8ea0bc", fontSize: 11 }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={{ background: "rgba(8,17,36,0.95)", border: "1.5px solid var(--blue-neon)", borderRadius: 10, fontSize: 12 }} cursor={{ fill: "rgba(255,215,0,0.06)" }} />
+                <Bar dataKey="count" fill="var(--gold)" radius={[0, 4, 4, 0]} barSize={11} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
       </div>
 
-      <div className="card" style={{ padding:20 }}>
-        <div className="section-title"><Bell size={15} color="var(--gold)"/>Threat alert timeline</div>
+      <div className="card" style={{ padding: 20 }}>
+        <div className="section-title"><Bell size={15} color="var(--gold)" />Threat alert timeline</div>
         <div className="section-sub">Daily detection count — last 8 days</div>
-        <div style={{ height:160, marginTop:12 }}>
+        <div style={{ height: 160, marginTop: 12 }}>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={timelineData}>
-              <CartesianGrid stroke="rgba(0,210,255,0.06)" vertical={false}/>
-              <XAxis dataKey="date" tick={{ fill:"#8ea0bc", fontSize:11 }} axisLine={false} tickLine={false}/>
-              <YAxis tick={{ fill:"#8ea0bc", fontSize:11 }} axisLine={false} tickLine={false}/>
-              <Tooltip contentStyle={{ background:"rgba(8,17,36,0.95)", border:"1.5px solid var(--blue-neon)", borderRadius:10, fontSize:12 }}/>
-              <Line type="monotone" dataKey="Threat Alerts" stroke="var(--blue-neon)" strokeWidth={2} dot={{ fill:"var(--blue-neon)", r:3 }} activeDot={{ r:5 }}/>
+              <CartesianGrid stroke="rgba(0,210,255,0.06)" vertical={false} />
+              <XAxis dataKey="date" tick={{ fill: "#8ea0bc", fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: "#8ea0bc", fontSize: 11 }} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={{ background: "rgba(8,17,36,0.95)", border: "1.5px solid var(--blue-neon)", borderRadius: 10, fontSize: 12 }} />
+              <Line type="monotone" dataKey="Threat Alerts" stroke="var(--blue-neon)" strokeWidth={2} dot={{ fill: "var(--blue-neon)", r: 3 }} activeDot={{ r: 5 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
       </div>
 
       <div className="card">
-        <div style={{ padding:"16px 20px", borderBottom:"1px solid var(--border)" }}>
-          <div className="section-title"><Bell size={15} color="var(--gold)"/>Recent threats feed</div>
+        <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)" }}>
+          <div className="section-title"><Bell size={15} color="var(--gold)" />Recent threats feed</div>
           <div className="section-sub">Latest detections across all pipelines</div>
         </div>
         <table>
           <thead><tr><th>Domain / Entity</th><th>Type</th><th>Risk</th><th>Country</th><th>Detected</th><th>Status</th></tr></thead>
           <tbody>
-            {recent.map(r=>(
+            {recent.map(r => (
               <tr key={r.id}>
                 <td className="domain-name">{r.domain}</td>
                 <td><span className="badge badge-neutral">{r.threatType}</span></td>
                 <td>{riskBadge(r.riskLevel)}</td>
-                <td style={{ color:"var(--text-dim)" }}>{r.country}</td>
-                <td className="font-mono" style={{ color:"var(--text-dim)" }}>{r.detectedDate}</td>
-                <td><span className={`badge ${r.status==="Blocked"?"badge-low":r.status==="Active"?"badge-high":"badge-medium"}`}>{r.status}</span></td>
+                <td style={{ color: "var(--text-dim)" }}>{r.country}</td>
+                <td className="font-mono" style={{ color: "var(--text-dim)" }}>{r.detectedDate}</td>
+                <td><span className={`badge ${r.status === "Blocked" ? "badge-low" : r.status === "Active" ? "badge-high" : "badge-medium"}`}>{r.status}</span></td>
               </tr>
             ))}
           </tbody>
@@ -764,55 +735,55 @@ function DomainIntel({ data }: { data: ThreatRecord[] }) {
   const [statusFilter, setStatusFilter] = useState("All");
   const [sortKey, setSortKey] = useState<keyof ThreatRecord>("riskScore");
   const [sortAsc, setSortAsc] = useState(false);
-  const [expanded, setExpanded] = useState<string|null>(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const PAGE_SIZE = 10;
 
-  const filtered = useMemo(()=>{
-    let rows = data.filter(d=>{
+  const filtered = useMemo(() => {
+    let rows = data.filter(d => {
       if (q && !d.domain.toLowerCase().includes(q.toLowerCase())) return false;
       if (riskFilter !== "All" && d.riskLevel !== riskFilter) return false;
       if (typeFilter !== "All" && d.threatType !== typeFilter) return false;
       if (statusFilter !== "All" && d.status !== statusFilter) return false;
       return true;
     });
-    rows = [...rows].sort((a,b)=>{
-      const av=a[sortKey], bv=b[sortKey];
-      if (typeof av==="number"&&typeof bv==="number") return sortAsc?(av-bv):(bv-av);
-      return sortAsc?String(av).localeCompare(String(bv)):String(bv).localeCompare(String(av));
+    rows = [...rows].sort((a, b) => {
+      const av = a[sortKey], bv = b[sortKey];
+      if (typeof av === "number" && typeof bv === "number") return sortAsc ? (av - bv) : (bv - av);
+      return sortAsc ? String(av).localeCompare(String(bv)) : String(bv).localeCompare(String(av));
     });
     return rows;
-  },[data,q,riskFilter,typeFilter,statusFilter,sortKey,sortAsc]);
+  }, [data, q, riskFilter, typeFilter, statusFilter, sortKey, sortAsc]);
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  const paginated = filtered.slice(page*PAGE_SIZE,(page+1)*PAGE_SIZE);
+  const paginated = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
-  function handleSort(key: keyof ThreatRecord){
-    if (sortKey===key) setSortAsc(!sortAsc);
+  function handleSort(key: keyof ThreatRecord) {
+    if (sortKey === key) setSortAsc(!sortAsc);
     else { setSortKey(key); setSortAsc(false); }
     setPage(0);
   }
 
   return (
     <div>
-      <div className="card" style={{ padding:16, marginBottom:16, display:"flex", gap:12, alignItems:"center", flexWrap:"wrap" }}>
-        <div style={{ position:"relative" }}>
-          <Search size={14} style={{ position:"absolute", left:11, top:11, color:"var(--text-faint)" }}/>
-          <input className="search" placeholder="Search domain or URL…" value={q} onChange={e=>{setQ(e.target.value);setPage(0);}}/>
+      <div className="card" style={{ padding: 16, marginBottom: 16, display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+        <div style={{ position: "relative" }}>
+          <Search size={14} style={{ position: "absolute", left: 11, top: 11, color: "var(--text-faint)" }} />
+          <input className="search" placeholder="Search domain or URL…" value={q} onChange={e => { setQ(e.target.value); setPage(0); }} />
         </div>
-        <select className="filter" value={riskFilter} onChange={e=>{setRiskFilter(e.target.value);setPage(0);}}>
+        <select className="filter" value={riskFilter} onChange={e => { setRiskFilter(e.target.value); setPage(0); }}>
           <option>All</option><option>High</option><option>Medium</option><option>Low</option>
         </select>
-        <select className="filter" value={typeFilter} onChange={e=>{setTypeFilter(e.target.value);setPage(0);}}>
-          <option>All</option>{THREAT_TYPES.map(t=><option key={t}>{t}</option>)}
+        <select className="filter" value={typeFilter} onChange={e => { setTypeFilter(e.target.value); setPage(0); }}>
+          <option>All</option>{THREAT_TYPES.map(t => <option key={t}>{t}</option>)}
         </select>
-        <select className="filter" value={statusFilter} onChange={e=>{setStatusFilter(e.target.value);setPage(0);}}>
-          <option>All</option>{STATUSES.map(s=><option key={s}>{s}</option>)}
+        <select className="filter" value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(0); }}>
+          <option>All</option>{STATUSES.map(s => <option key={s}>{s}</option>)}
         </select>
-        <button className="btn" onClick={()=>{setQ("");setRiskFilter("All");setTypeFilter("All");setStatusFilter("All");setPage(0);}}>
-          <X size={13}/>Clear Filters
+        <button className="btn" onClick={() => { setQ(""); setRiskFilter("All"); setTypeFilter("All"); setStatusFilter("All"); setPage(0); }}>
+          <X size={13} />Clear Filters
         </button>
-        <div style={{ marginLeft:"auto", fontSize:12, color:"var(--text-dim)", fontFamily:"var(--mono)" }}>
+        <div style={{ marginLeft: "auto", fontSize: 12, color: "var(--text-dim)", fontFamily: "var(--mono)" }}>
           {filtered.length} of {data.length} domains
         </div>
       </div>
@@ -822,58 +793,58 @@ function DomainIntel({ data }: { data: ThreatRecord[] }) {
           <thead>
             <tr>
               <th></th>
-              <th className="sortable" onClick={()=>handleSort("domain")}>Domain {sortKey==="domain"?(sortAsc?"↑":"↓"):""}</th>
+              <th className="sortable" onClick={() => handleSort("domain")}>Domain {sortKey === "domain" ? (sortAsc ? "↑" : "↓") : ""}</th>
               <th>Threat type</th>
-              <th className="sortable" onClick={()=>handleSort("riskScore")}>Risk score {sortKey==="riskScore"?(sortAsc?"↑":"↓"):""}</th>
-              <th className="sortable" onClick={()=>handleSort("ageDays")}>Age {sortKey==="ageDays"?(sortAsc?"↑":"↓"):""}</th>
+              <th className="sortable" onClick={() => handleSort("riskScore")}>Risk score {sortKey === "riskScore" ? (sortAsc ? "↑" : "↓") : ""}</th>
+              <th className="sortable" onClick={() => handleSort("ageDays")}>Age {sortKey === "ageDays" ? (sortAsc ? "↑" : "↓") : ""}</th>
               <th>SSL</th>
               <th>Country</th>
-              <th className="sortable" onClick={()=>handleSort("similarityScore")}>Similarity {sortKey==="similarityScore"?(sortAsc?"↑":"↓"):""}</th>
+              <th className="sortable" onClick={() => handleSort("similarityScore")}>Similarity {sortKey === "similarityScore" ? (sortAsc ? "↑" : "↓") : ""}</th>
               <th>Status</th>
             </tr>
           </thead>
           <tbody>
-            {paginated.map(d=>(
+            {paginated.map(d => (
               <React.Fragment key={d.id}>
-                <tr onClick={()=>setExpanded(expanded===d.id?null:d.id)}>
-                  <td style={{ width:20 }}>{expanded===d.id?<ChevronDown size={14} color="var(--text-dim)"/>:<ChevronRight size={14} color="var(--text-dim)"/>}</td>
+                <tr onClick={() => setExpanded(expanded === d.id ? null : d.id)}>
+                  <td style={{ width: 20 }}>{expanded === d.id ? <ChevronDown size={14} color="var(--text-dim)" /> : <ChevronRight size={14} color="var(--text-dim)" />}</td>
                   <td className="domain-name">{d.domain}</td>
                   <td><span className="badge badge-neutral">{d.threatType}</span></td>
                   <td>
-                    <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                      <div className="risk-bar-track"><div className="risk-bar-fill" style={{ width:`${d.riskScore}%`, background:RISK_COLOR[d.riskLevel] }}/></div>
-                      <span className="font-mono" style={{ fontSize:11.5, color:RISK_COLOR[d.riskLevel] }}>{d.riskScore}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div className="risk-bar-track"><div className="risk-bar-fill" style={{ width: `${d.riskScore}%`, background: RISK_COLOR[d.riskLevel] }} /></div>
+                      <span className="font-mono" style={{ fontSize: 11.5, color: RISK_COLOR[d.riskLevel] }}>{d.riskScore}</span>
                     </div>
                   </td>
-                  <td className="font-mono" style={{ color:"var(--text-dim)" }}>{d.ageDays}d</td>
+                  <td className="font-mono" style={{ color: "var(--text-dim)" }}>{d.ageDays}d</td>
                   <td>{sslBadge(d.sslStatus)}</td>
-                  <td style={{ color:"var(--text-dim)" }}>{d.country}</td>
-                  <td className="font-mono" style={{ color:"var(--text-dim)" }}>{d.similarityScore?`${d.similarityScore}%`:"—"}</td>
-                  <td><span className={`badge ${d.status==="Blocked"?"badge-low":d.status==="Active"?"badge-high":"badge-medium"}`}>{d.status}</span></td>
+                  <td style={{ color: "var(--text-dim)" }}>{d.country}</td>
+                  <td className="font-mono" style={{ color: "var(--text-dim)" }}>{d.similarityScore ? `${d.similarityScore}%` : "—"}</td>
+                  <td><span className={`badge ${d.status === "Blocked" ? "badge-low" : d.status === "Active" ? "badge-high" : "badge-medium"}`}>{d.status}</span></td>
                 </tr>
-                {expanded===d.id && (
-                  <tr style={{ cursor:"default" }}>
-                    <td colSpan={9} style={{ background:"rgba(15,32,67,0.6)", padding:"16px 30px" }}>
-                      <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:18, fontSize:12 }}>
-                        <div><div style={{ color:"var(--text-faint)", marginBottom:4 }}>Registration date</div><div className="font-mono">{d.registrationDate}</div></div>
-                        <div><div style={{ color:"var(--text-faint)", marginBottom:4 }}>Registrar</div><div>{d.registrar}</div></div>
-                        <div><div style={{ color:"var(--text-faint)", marginBottom:4 }}>Detected on</div><div className="font-mono">{d.detectedDate}</div></div>
-                        <div><div style={{ color:"var(--text-faint)", marginBottom:4 }}>Data source</div><div>{d.source}</div></div>
+                {expanded === d.id && (
+                  <tr style={{ cursor: "default" }}>
+                    <td colSpan={9} style={{ background: "rgba(15,32,67,0.6)", padding: "16px 30px" }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 18, fontSize: 12 }}>
+                        <div><div style={{ color: "var(--text-faint)", marginBottom: 4 }}>Registration date</div><div className="font-mono">{d.registrationDate}</div></div>
+                        <div><div style={{ color: "var(--text-faint)", marginBottom: 4 }}>Registrar</div><div>{d.registrar}</div></div>
+                        <div><div style={{ color: "var(--text-faint)", marginBottom: 4 }}>Detected on</div><div className="font-mono">{d.detectedDate}</div></div>
+                        <div><div style={{ color: "var(--text-faint)", marginBottom: 4 }}>Data source</div><div>{d.source}</div></div>
                       </div>
-                      {d.redFlags?.length>0 && (
-                        <div style={{ marginTop:14 }}>
-                          <div style={{ color:"var(--text-faint)", marginBottom:6, fontSize:12 }}>Red flags</div>
-                          <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
-                            {d.redFlags.map((f,i)=><span key={i} className="flag-chip">{f}</span>)}
+                      {d.redFlags?.length > 0 && (
+                        <div style={{ marginTop: 14 }}>
+                          <div style={{ color: "var(--text-faint)", marginBottom: 6, fontSize: 12 }}>Red flags</div>
+                          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                            {d.redFlags.map((f, i) => <span key={i} className="flag-chip">{f}</span>)}
                           </div>
                         </div>
                       )}
-                      <div style={{ marginTop:14, display:"flex", alignItems:"center", gap:12 }}>
-                        <button className="btn" style={{ fontSize:12, padding:"6px 12px" }} onClick={()=>alert(`Investigating: ${d.domain}`)}>
-                          <ExternalLink size={12}/>Investigate
+                      <div style={{ marginTop: 14, display: "flex", alignItems: "center", gap: 12 }}>
+                        <button className="btn" style={{ fontSize: 12, padding: "6px 12px" }} onClick={() => alert(`Investigating: ${d.domain}`)}>
+                          <ExternalLink size={12} />Investigate
                         </button>
-                        <button className="btn" style={{ fontSize:12, padding:"6px 12px", color:"var(--red)", borderColor:"rgba(255,42,95,0.35)" }} onClick={()=>alert(`Blocking: ${d.domain}`)}>
-                          <X size={12}/>Block Domain
+                        <button className="btn" style={{ fontSize: 12, padding: "6px 12px", color: "var(--red)", borderColor: "rgba(255,42,95,0.35)" }} onClick={() => alert(`Blocking: ${d.domain}`)}>
+                          <X size={12} />Block Domain
                         </button>
                       </div>
                     </td>
@@ -883,15 +854,15 @@ function DomainIntel({ data }: { data: ThreatRecord[] }) {
             ))}
           </tbody>
         </table>
-        {filtered.length===0 && <div className="empty-state">No domains match those filters.</div>}
-        {filtered.length>0 && (
-          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"14px 20px", borderTop:"1px solid var(--border)" }}>
-            <span style={{ fontSize:12, color:"var(--text-dim)", fontFamily:"var(--mono)" }}>
-              Page {page+1} of {totalPages} &nbsp;·&nbsp; {filtered.length} results
+        {filtered.length === 0 && <div className="empty-state">No domains match those filters.</div>}
+        {filtered.length > 0 && (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", borderTop: "1px solid var(--border)" }}>
+            <span style={{ fontSize: 12, color: "var(--text-dim)", fontFamily: "var(--mono)" }}>
+              Page {page + 1} of {totalPages} &nbsp;·&nbsp; {filtered.length} results
             </span>
-            <div style={{ display:"flex", gap:8 }}>
-              <button className="pagination-btn" onClick={()=>setPage(p=>Math.max(0,p-1))} disabled={page===0}>← Prev</button>
-              <button className="pagination-btn" onClick={()=>setPage(p=>Math.min(totalPages-1,p+1))} disabled={page>=totalPages-1}>Next →</button>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button className="pagination-btn" onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}>← Prev</button>
+              <button className="pagination-btn" onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1}>Next →</button>
             </div>
           </div>
         )}
@@ -904,20 +875,20 @@ function DomainIntel({ data }: { data: ThreatRecord[] }) {
    TICKETING FRAUD PAGE (from your original)
 ------------------------------------------------------------------*/
 function TicketingFraud({ data }: { data: ThreatRecord[] }) {
-  const tickets = useMemo(()=>data.filter(d=>d.threatType==="Ticket Scam"),[data]);
-  const totals = useMemo(()=>({
+  const tickets = useMemo(() => data.filter(d => d.threatType === "Ticket Scam"), [data]);
+  const totals = useMemo(() => ({
     portals: tickets.length,
-    loss:    tickets.reduce((a,t)=>a+(t.estimatedLoss||0),0),
-    victims: tickets.reduce((a,t)=>a+(t.affectedUsers||0),0),
-  }),[tickets]);
+    loss: tickets.reduce((a, t) => a + (t.estimatedLoss || 0), 0),
+    victims: tickets.reduce((a, t) => a + (t.affectedUsers || 0), 0),
+  }), [tickets]);
 
 
 
-  const flagFreq=useMemo(()=>{
-    const counts:Record<string,number>={};
-    tickets.forEach(t=>(t.redFlags||[]).forEach(f=>(counts[f]=(counts[f]||0)+1)));
-    return Object.entries(counts).map(([flag,count])=>({flag,count:count as number})).sort((a,b)=>b.count-a.count).slice(0,6);
-  },[tickets]);
+  const flagFreq = useMemo(() => {
+    const counts: Record<string, number> = {};
+    tickets.forEach(t => (t.redFlags || []).forEach(f => (counts[f] = (counts[f] || 0) + 1)));
+    return Object.entries(counts).map(([flag, count]) => ({ flag, count: count as number })).sort((a, b) => b.count - a.count).slice(0, 6);
+  }, [tickets]);
 
   // Custom X-axis tick: wraps label at spaces into ≤2 lines, fully visible
   const FlagTick = ({ x, y, payload }: { x?: number; y?: number; payload?: { value: string } }) => {
@@ -938,19 +909,19 @@ function TicketingFraud({ data }: { data: ThreatRecord[] }) {
 
   return (
     <>
-      <div style={{ display:"grid", gridTemplateColumns:"60% 40%", gap:16, marginBottom:16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "60% 40%", gap: 16, marginBottom: 16 }}>
         {/* Most common red flags chart — vertical bars (60%) */}
-        <div className="card" style={{ padding:20 }}>
+        <div className="card" style={{ padding: 20 }}>
           <div className="section-title">Most common red flags</div>
           <div className="section-sub">Across all detected ticketing scams</div>
-          <div style={{ height:260 }}>
+          <div style={{ height: 260 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={flagFreq} margin={{ top:8, right:16, left:0, bottom:50 }}>
-                <CartesianGrid stroke="rgba(0,210,255,0.06)" vertical={false}/>
-                <XAxis dataKey="flag" type="category" tick={<FlagTick/>} axisLine={false} tickLine={false} interval={0} height={50}/>
-                <YAxis type="number" hide/>
-                <Tooltip contentStyle={{ background:"rgba(8,17,36,0.95)", border:"1.5px solid var(--blue-neon)", borderRadius:10, fontSize:12 }} cursor={{ fill:"rgba(255,215,0,0.06)" }}/>
-                <Bar dataKey="count" fill="var(--gold)" radius={[4,4,0,0]} barSize={28}/>
+              <BarChart data={flagFreq} margin={{ top: 8, right: 16, left: 0, bottom: 50 }}>
+                <CartesianGrid stroke="rgba(0,210,255,0.06)" vertical={false} />
+                <XAxis dataKey="flag" type="category" tick={<FlagTick />} axisLine={false} tickLine={false} interval={0} height={50} />
+                <YAxis type="number" hide />
+                <Tooltip contentStyle={{ background: "rgba(8,17,36,0.95)", border: "1.5px solid var(--blue-neon)", borderRadius: 10, fontSize: 12 }} cursor={{ fill: "rgba(255,215,0,0.06)" }} />
+                <Bar dataKey="count" fill="var(--gold)" radius={[4, 4, 0, 0]} barSize={28} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -958,13 +929,13 @@ function TicketingFraud({ data }: { data: ThreatRecord[] }) {
 
         {/* Fake portals detected stat card (40%) */}
         {[
-          {label:"Fake portals detected", value:totals.portals, icon:Ticket, color:"var(--red)", fmt:(v:number)=>v.toLocaleString()},
-        ].map((s,i)=>{
-          const Icon=s.icon;
+          { label: "Fake portals detected", value: totals.portals, icon: Ticket, color: "var(--red)", fmt: (v: number) => v.toLocaleString() },
+        ].map((s, i) => {
+          const Icon = s.icon;
           return (
-            <div className="card stat-card" key={i} style={{ display:"flex", flexDirection:"column", justifyContent:"center" }}>
-              <div className="scanline"/>
-              <div className="stat-icon" style={{ background:`${s.color}18`, border:`1.5px solid ${s.color}40` }}><Icon size={16} color={s.color}/></div>
+            <div className="card stat-card" key={i} style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
+              <div className="scanline" />
+              <div className="stat-icon" style={{ background: `${s.color}18`, border: `1.5px solid ${s.color}40` }}><Icon size={16} color={s.color} /></div>
               <div className="stat-value">{s.fmt(s.value)}</div>
               <div className="stat-label">{s.label}</div>
             </div>
@@ -973,32 +944,32 @@ function TicketingFraud({ data }: { data: ThreatRecord[] }) {
       </div>
 
       <div className="card">
-        <div style={{ padding:"16px 20px", borderBottom:"1px solid var(--border)" }}>
+        <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)" }}>
           <div className="section-title">Detected fake ticketing portals</div>
           <div className="section-sub">{tickets.length} portals flagged</div>
         </div>
         <table>
           <thead><tr><th>Domain</th><th>Risk</th><th>Listed price</th><th>Official price</th><th>Red flags</th><th>Est. loss</th><th>Status</th></tr></thead>
           <tbody>
-            {tickets.slice(0,40).map(t=>(
+            {tickets.slice(0, 40).map(t => (
               <tr key={t.id}>
                 <td className="domain-name">{t.domain}</td>
                 <td>{riskBadge(t.riskLevel)}</td>
-                <td className="font-mono" style={{ color:"var(--red)" }}>{t.scamPrice?`$${t.scamPrice}`:"—"}</td>
-                <td className="font-mono" style={{ color:"var(--text-dim)" }}>{t.officialPrice?`$${t.officialPrice}`:"—"}</td>
+                <td className="font-mono" style={{ color: "var(--red)" }}>{t.scamPrice ? `$${t.scamPrice}` : "—"}</td>
+                <td className="font-mono" style={{ color: "var(--text-dim)" }}>{t.officialPrice ? `$${t.officialPrice}` : "—"}</td>
                 <td>
-                  <div style={{ display:"flex", gap:4, flexWrap:"wrap", maxWidth:240 }}>
-                    {(t.redFlags||[]).slice(0,2).map((f,i)=><span key={i} className="flag-chip">{f}</span>)}
-                    {t.redFlags?.length>2 && <span className="flag-chip">+{t.redFlags.length-2}</span>}
+                  <div style={{ display: "flex", gap: 4, flexWrap: "wrap", maxWidth: 240 }}>
+                    {(t.redFlags || []).slice(0, 2).map((f, i) => <span key={i} className="flag-chip">{f}</span>)}
+                    {t.redFlags?.length > 2 && <span className="flag-chip">+{t.redFlags.length - 2}</span>}
                   </div>
                 </td>
-                <td className="font-mono">${(t.estimatedLoss||0).toLocaleString()}</td>
-                <td><span className={`badge ${t.status==="Blocked"?"badge-low":t.status==="Active"?"badge-high":"badge-medium"}`}>{t.status}</span></td>
+                <td className="font-mono">${(t.estimatedLoss || 0).toLocaleString()}</td>
+                <td><span className={`badge ${t.status === "Blocked" ? "badge-low" : t.status === "Active" ? "badge-high" : "badge-medium"}`}>{t.status}</span></td>
               </tr>
             ))}
           </tbody>
         </table>
-        {tickets.length===0 && <div className="empty-state">No ticket-scam records in the current dataset.</div>}
+        {tickets.length === 0 && <div className="empty-state">No ticket-scam records in the current dataset.</div>}
       </div>
     </>
   );
@@ -1018,18 +989,18 @@ function SocialOSINT({ data }: { data: ThreatRecord[] }) {
         acc[d.country] = (acc[d.country] || 0) + (d.osintReportCount || 0);
         return acc;
       }, {});
-    const sorted = Object.entries(topCountries).sort((a,b) => b[1] - a[1]).slice(0,5).map(([c,count]) => ({ country:c, count }));
+    const sorted = Object.entries(topCountries).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([c, count]) => ({ country: c, count }));
     return { totalReports, avgReports, countries: countries.length, topCountries: sorted };
   }, [data]);
 
   const blacklistFreq = useMemo(() => {
-    const counts: Record<string,number> = {};
+    const counts: Record<string, number> = {};
     data.forEach(d => { const s = d.blacklistSource || 'Unknown'; counts[s] = (counts[s] || 0) + 1; });
-    return Object.entries(counts).map(([s,c]) => ({ source:s, count:c })).sort((a,b) => b.count - a.count).slice(0,6);
+    return Object.entries(counts).map(([s, c]) => ({ source: s, count: c })).sort((a, b) => b.count - a.count).slice(0, 6);
   }, [data]);
 
   const socialMentions = useMemo(() => {
-    const total = data.reduce((acc,d) => acc + (d.socialMediaMentions || 0), 0);
+    const total = data.reduce((acc, d) => acc + (d.socialMediaMentions || 0), 0);
     return { total, avg: data.length ? Math.round(total / data.length) : 0 };
   }, [data]);
 
@@ -1059,33 +1030,33 @@ function SocialOSINT({ data }: { data: ThreatRecord[] }) {
         </div>
       </div>
 
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:16 }}>
-        <div className="card" style={{ padding:20 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+        <div className="card" style={{ padding: 20 }}>
           <div className="section-title">Top OSINT Sources by Country</div>
           <div className="section-sub">Number of reports per country</div>
-          <div style={{ height:190 }}>
+          <div style={{ height: 190 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={osintStats.topCountries} layout="vertical" margin={{ left:0, right:10 }}>
-                <CartesianGrid stroke="rgba(0,210,255,0.06)" horizontal={false}/>
-                <XAxis type="number" hide/>
-                <YAxis dataKey="country" type="category" width={70} tick={{ fill:"#8ea0bc", fontSize:11 }} axisLine={false} tickLine={false}/>
-                <Tooltip contentStyle={{ background:"rgba(8,17,36,0.95)", border:"1.5px solid var(--blue-neon)", borderRadius:10, fontSize:12 }} cursor={{ fill:"rgba(0,210,255,0.06)" }}/>
-                <Bar dataKey="count" fill="var(--blue-neon)" radius={[0,4,4,0]} barSize={11}/>
+              <BarChart data={osintStats.topCountries} layout="vertical" margin={{ left: 0, right: 10 }}>
+                <CartesianGrid stroke="rgba(0,210,255,0.06)" horizontal={false} />
+                <XAxis type="number" hide />
+                <YAxis dataKey="country" type="category" width={70} tick={{ fill: "#8ea0bc", fontSize: 11 }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={{ background: "rgba(8,17,36,0.95)", border: "1.5px solid var(--blue-neon)", borderRadius: 10, fontSize: 12 }} cursor={{ fill: "rgba(0,210,255,0.06)" }} />
+                <Bar dataKey="count" fill="var(--blue-neon)" radius={[0, 4, 4, 0]} barSize={11} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
-        <div className="card" style={{ padding:20 }}>
+        <div className="card" style={{ padding: 20 }}>
           <div className="section-title">Blacklist Sources</div>
           <div className="section-sub">Most frequently reported sources</div>
-          <div style={{ height:190 }}>
+          <div style={{ height: 190 }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={blacklistFreq}>
-                <CartesianGrid stroke="rgba(0,210,255,0.06)" vertical={false}/>
-                <XAxis dataKey="source" tick={{ fill:"#8ea0bc", fontSize:10 }} axisLine={false} tickLine={false}/>
-                <YAxis tick={{ fill:"#8ea0bc", fontSize:10 }} axisLine={false} tickLine={false}/>
-                <Tooltip contentStyle={{ background:"rgba(8,17,36,0.95)", border:"1.5px solid var(--blue-neon)", borderRadius:10, fontSize:12 }} cursor={{ fill:"rgba(0,255,210,0.06)" }}/>
-                <Bar dataKey="count" fill="var(--gold)" radius={[4,4,0,0]} barSize={14}/>
+                <CartesianGrid stroke="rgba(0,210,255,0.06)" vertical={false} />
+                <XAxis dataKey="source" tick={{ fill: "#8ea0bc", fontSize: 10 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: "#8ea0bc", fontSize: 10 }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={{ background: "rgba(8,17,36,0.95)", border: "1.5px solid var(--blue-neon)", borderRadius: 10, fontSize: 12 }} cursor={{ fill: "rgba(0,255,210,0.06)" }} />
+                <Bar dataKey="count" fill="var(--gold)" radius={[4, 4, 0, 0]} barSize={14} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -1093,20 +1064,20 @@ function SocialOSINT({ data }: { data: ThreatRecord[] }) {
       </div>
 
       <div className="card">
-        <div style={{ padding:"16px 20px", borderBottom:"1px solid var(--border)" }}>
-          <div className="section-title"><Bell size={15} color="var(--blue-neon)"/>OSINT Feed</div>
+        <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)" }}>
+          <div className="section-title"><Bell size={15} color="var(--blue-neon)" />OSINT Feed</div>
           <div className="section-sub">Recent intelligence from OSINT sources</div>
         </div>
         <table>
           <thead><tr><th>Domain</th><th>OSINT Reports</th><th>Social Mentions</th><th>Blacklist Source</th><th>Country</th><th>Risk</th></tr></thead>
           <tbody>
-            {data.slice(0,15).map(d=>(
+            {data.slice(0, 15).map(d => (
               <tr key={d.id}>
                 <td className="domain-name">{d.domain}</td>
                 <td className="font-mono">{d.osintReportCount || 0}</td>
                 <td className="font-mono">{d.socialMediaMentions || 0}</td>
                 <td><span className="badge badge-neutral">{d.blacklistSource || '—'}</span></td>
-                <td style={{ color:"var(--text-dim)" }}>{d.country}</td>
+                <td style={{ color: "var(--text-dim)" }}>{d.country}</td>
                 <td>{riskBadge(d.riskLevel)}</td>
               </tr>
             ))}
@@ -1132,36 +1103,36 @@ function SettingsPage({ user }: { user: string }) {
 
   return (
     <div>
-      <h2 className="font-display" style={{ fontSize:20, fontWeight:600, marginBottom:20 }}>Settings</h2>
+      <h2 className="font-display" style={{ fontSize: 20, fontWeight: 600, marginBottom: 20 }}>Settings</h2>
 
-      <div className="card" style={{ padding:24, marginBottom:16 }}>
-        <div className="section-title"><UserPlus size={16} color="var(--gold)"/> User Profile</div>
-        <div className="section-sub" style={{ marginBottom:16 }}>Logged in as <span className="font-mono" style={{ color:"var(--gold)" }}>{user}</span></div>
+      <div className="card" style={{ padding: 24, marginBottom: 16 }}>
+        <div className="section-title"><UserPlus size={16} color="var(--gold)" /> User Profile</div>
+        <div className="section-sub" style={{ marginBottom: 16 }}>Logged in as <span className="font-mono" style={{ color: "var(--gold)" }}>{user}</span></div>
         <div className="btn btn-gold" onClick={() => alert("Edit profile")}>Edit Profile</div>
       </div>
 
-      <div className="card" style={{ padding:24, marginBottom:16 }}>
-        <div className="section-title"><Percent size={16} color="var(--gold)"/> Threat Thresholds</div>
+      <div className="card" style={{ padding: 24, marginBottom: 16 }}>
+        <div className="section-title"><Percent size={16} color="var(--gold)" /> Threat Thresholds</div>
         <div className="section-sub">Risk score above which a domain is considered High Risk</div>
-        <div style={{ display:"flex", alignItems:"center", gap:16, marginTop:12 }}>
-          <input type="range" min="0" max="100" value={threshold} onChange={e => setThreshold(Number(e.target.value))} style={{ flex:1, accentColor:"var(--blue-neon)" }} />
-          <span className="font-mono" style={{ fontSize:18, fontWeight:600, color:"var(--blue-neon)" }}>{threshold}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 12 }}>
+          <input type="range" min="0" max="100" value={threshold} onChange={e => setThreshold(Number(e.target.value))} style={{ flex: 1, accentColor: "var(--blue-neon)" }} />
+          <span className="font-mono" style={{ fontSize: 18, fontWeight: 600, color: "var(--blue-neon)" }}>{threshold}</span>
         </div>
       </div>
 
-      <div className="card" style={{ padding:24, marginBottom:16 }}>
-        <div className="section-title"><Bell size={16} color="var(--gold)"/> Notifications</div>
-        <div style={{ display:"flex", alignItems:"center", gap:12, marginTop:12 }}>
-          <input type="checkbox" checked={notifyEmail} onChange={() => setNotifyEmail(!notifyEmail)} style={{ width:18, height:18, accentColor:"var(--blue-neon)" }} />
+      <div className="card" style={{ padding: 24, marginBottom: 16 }}>
+        <div className="section-title"><Bell size={16} color="var(--gold)" /> Notifications</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 12 }}>
+          <input type="checkbox" checked={notifyEmail} onChange={() => setNotifyEmail(!notifyEmail)} style={{ width: 18, height: 18, accentColor: "var(--blue-neon)" }} />
           <span>Email alerts for new critical threats</span>
         </div>
       </div>
 
-      <div className="card" style={{ padding:24 }}>
-        <div className="section-title"><Key size={16} color="var(--gold)"/> API Keys</div>
-        <div className="section-sub" style={{ marginBottom:12 }}>Your current API key</div>
-        <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-          <code className="font-mono" style={{ background:"rgba(0,210,255,0.05)", padding:"6px 12px", borderRadius:6, flex:1, border:"1px solid var(--border)" }}>{apiKey}</code>
+      <div className="card" style={{ padding: 24 }}>
+        <div className="section-title"><Key size={16} color="var(--gold)" /> API Keys</div>
+        <div className="section-sub" style={{ marginBottom: 12 }}>Your current API key</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <code className="font-mono" style={{ background: "rgba(0,210,255,0.05)", padding: "6px 12px", borderRadius: 6, flex: 1, border: "1px solid var(--border)" }}>{apiKey}</code>
           <div className="btn" onClick={() => alert("Backend API not connected: API Key generation must be handled securely on the server.")}>Regenerate</div>
         </div>
       </div>
@@ -1173,50 +1144,68 @@ function SettingsPage({ user }: { user: string }) {
    LOGIN PAGE
 ------------------------------------------------------------------*/
 function LoginPage({ onLogin, setShowSignup }: { onLogin: (user: string) => void; setShowSignup: (show: boolean) => void }) {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPwd, setShowPwd] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email && password) {
-      const user = email.split("@")[0];
-      onLogin(user);
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Login failed");
+      }
+      localStorage.setItem("cyberpitch_token", data.access_token);
+      onLogin(data.username);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="stg-root" style={{ justifyContent:"center", alignItems:"center", minHeight:"100vh" }}>
+    <div className="stg-root" style={{ justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
       <div className="hexbg" />
       <div className="auth-container">
-        <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:16 }}>
-          <div className="brand-mark" style={{ width:40, height:40 }}><Shield size={20} color="#030812" /></div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+          <div className="brand-mark" style={{ width: 40, height: 40 }}><Shield size={20} color="#030812" /></div>
           <div>
-            <div className="font-display" style={{ fontSize:18, fontWeight:700, background:"linear-gradient(135deg,var(--gold),#ff9f1a)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>CyberPitch-FIFA</div>
-            <div style={{ fontSize:10, color:"var(--text-dim)" }}>FIFA THREAT INTEL</div>
+            <div className="font-display" style={{ fontSize: 18, fontWeight: 700, background: "linear-gradient(135deg,var(--gold),#ff9f1a)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>CyberPitch-FIFA</div>
+            <div style={{ fontSize: 10, color: "var(--text-dim)" }}>FIFA THREAT INTEL</div>
           </div>
         </div>
         <h1>Welcome back</h1>
         <div className="sub">Sign in to access the threat intelligence dashboard</div>
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom:16 }}>
-            <label className="auth-label">Email</label>
-            <input type="email" className="auth-input" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} required />
+          <div style={{ marginBottom: 16 }}>
+            <label className="auth-label">Username</label>
+            <input type="text" className="auth-input" placeholder="Enter username" value={username} onChange={e => setUsername(e.target.value)} required />
           </div>
-          <div style={{ marginBottom:16 }}>
+          <div style={{ marginBottom: 16 }}>
             <label className="auth-label">Password</label>
-            <div style={{ position:"relative" }}>
+            <div style={{ position: "relative" }}>
               <input type={showPwd ? "text" : "password"} className="auth-input" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required />
-              <div style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", cursor:"pointer" }} onClick={() => setShowPwd(!showPwd)}>
+              <div style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", cursor: "pointer" }} onClick={() => setShowPwd(!showPwd)}>
                 {showPwd ? <EyeOff size={16} color="var(--text-dim)" /> : <Eye size={16} color="var(--text-dim)" />}
               </div>
             </div>
           </div>
-          <button type="submit" className="btn btn-gold" style={{ width:"100%", justifyContent:"center", padding:12 }}>
-            <LogIn size={16} /> Sign In
+          {error && <div style={{ color: "var(--red)", fontSize: 13, textAlign: "center", marginBottom: 16 }}>{error}</div>}
+          <button type="submit" className="btn btn-gold" style={{ width: "100%", justifyContent: "center", padding: 12 }} disabled={loading}>
+            {loading ? "Authenticating..." : <><LogIn size={16} /> Sign In</>}
           </button>
         </form>
-        <div style={{ marginTop:16, textAlign:"center", fontSize:14, color:"var(--text-dim)" }}>
+        <div style={{ marginTop: 16, textAlign: "center", fontSize: 14, color: "var(--text-dim)" }}>
           Don't have an account? <span className="auth-link" onClick={() => setShowSignup(true)}>Sign Up</span>
         </div>
       </div>
@@ -1228,49 +1217,62 @@ function LoginPage({ onLogin, setShowSignup }: { onLogin: (user: string) => void
    SIGNUP PAGE
 ------------------------------------------------------------------*/
 function SignupPage({ onLogin, setShowSignup }: { onLogin: (user: string) => void; setShowSignup: (show: boolean) => void }) {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email && password && name) {
-      const user = email.split("@")[0];
-      onLogin(user);
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Signup failed");
+      }
+      localStorage.setItem("cyberpitch_token", data.access_token);
+      onLogin(data.username);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="stg-root" style={{ justifyContent:"center", alignItems:"center", minHeight:"100vh" }}>
+    <div className="stg-root" style={{ justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
       <div className="hexbg" />
       <div className="auth-container">
-        <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:16 }}>
-          <div className="brand-mark" style={{ width:40, height:40 }}><Shield size={20} color="#030812" /></div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+          <div className="brand-mark" style={{ width: 40, height: 40 }}><Shield size={20} color="#030812" /></div>
           <div>
-            <div className="font-display" style={{ fontSize:18, fontWeight:700, background:"linear-gradient(135deg,var(--gold),#ff9f1a)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>CyberPitch-FIFA</div>
-            <div style={{ fontSize:10, color:"var(--text-dim)" }}>FIFA THREAT INTEL</div>
+            <div className="font-display" style={{ fontSize: 18, fontWeight: 700, background: "linear-gradient(135deg,var(--gold),#ff9f1a)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>CyberPitch-FIFA</div>
+            <div style={{ fontSize: 10, color: "var(--text-dim)" }}>FIFA THREAT INTEL</div>
           </div>
         </div>
         <h1>Create account</h1>
         <div className="sub">Start monitoring FIFA threats today</div>
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom:16 }}>
-            <label className="auth-label">Full Name</label>
-            <input type="text" className="auth-input" placeholder="John Doe" value={name} onChange={e => setName(e.target.value)} required />
+          <div style={{ marginBottom: 16 }}>
+            <label className="auth-label">Username</label>
+            <input type="text" className="auth-input" placeholder="Choose a username" value={username} onChange={e => setUsername(e.target.value)} required />
           </div>
-          <div style={{ marginBottom:16 }}>
-            <label className="auth-label">Email</label>
-            <input type="email" className="auth-input" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} required />
-          </div>
-          <div style={{ marginBottom:16 }}>
+          <div style={{ marginBottom: 16 }}>
             <label className="auth-label">Password</label>
             <input type="password" className="auth-input" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required />
           </div>
-          <button type="submit" className="btn btn-gold" style={{ width:"100%", justifyContent:"center", padding:12 }}>
-            <UserPlus size={16} /> Create Account
+          {error && <div style={{ color: "var(--red)", fontSize: 13, textAlign: "center", marginBottom: 16 }}>{error}</div>}
+          <button type="submit" className="btn btn-gold" style={{ width: "100%", justifyContent: "center", padding: 12 }} disabled={loading}>
+            {loading ? "Creating Account..." : <><UserPlus size={16} /> Create Account</>}
           </button>
         </form>
-        <div style={{ marginTop:16, textAlign:"center", fontSize:14, color:"var(--text-dim)" }}>
+        <div style={{ marginTop: 16, textAlign: "center", fontSize: 14, color: "var(--text-dim)" }}>
           Already have an account? <span className="auth-link" onClick={() => setShowSignup(false)}>Sign In</span>
         </div>
       </div>
@@ -1331,11 +1333,11 @@ function ScanView({
     setBatchResults(null);
     setScanResult(null);
 
-    Papa.parse<Record<string,string>>(file, {
+    Papa.parse<Record<string, string>>(file, {
       header: true, skipEmptyLines: true, dynamicTyping: true,
       complete: async (results) => {
         try {
-          const raw = results.data as Record<string,string>[];
+          const raw = results.data as Record<string, string>[];
           const domains = raw.filter(r => !!r.domain).map(r => r.domain);
           if (domains.length === 0) throw new Error("empty");
 
@@ -1352,20 +1354,20 @@ function ScanView({
               const prob = mlResult["Phishing Probability"] || 0;
               const riskScore = Math.round(prob * 100);
               const rec = {
-                id: `CSV-${1000+i}`, domain,
+                id: `CSV-${1000 + i}`, domain,
                 threatType: mlResult["Malware Signature Match"] ? "Malware" : "Phishing",
                 riskScore, riskLevel: riskScore >= 70 ? "High" : riskScore >= 40 ? "Medium" : "Low",
                 country: mlResult["Hosting Country"] || "Unknown", status: riskScore >= 70 ? "Blocked" : "Active"
               };
               newRecordsObj.push(rec);
               newRecordsCsv.push(`${rec.id},${rec.domain},${rec.threatType},${rec.riskScore},${rec.riskLevel},${rec.country},${rec.status}`);
-            } catch (err) {}
+            } catch (err) { }
             setBatchProgress({ current: i + 1, total: domains.length });
           }
 
           if (newRecordsCsv.length > 0) {
             const csv = ["id,domain,threatType,riskScore,riskLevel,country,status", ...newRecordsCsv].join("\n");
-            const a = document.createElement("a"); a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv); a.download="cyberpitch-fifa-batch-results.csv"; a.click();
+            const a = document.createElement("a"); a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv); a.download = "cyberpitch-fifa-batch-results.csv"; a.click();
             setScanError("Batch scan complete. Results downloaded automatically.");
             setBatchResults(newRecordsObj);
             fetchRealThreats();
@@ -1401,38 +1403,38 @@ function ScanView({
   };
 
   return (
-    <div style={{ display:"flex", flexDirection:"column", gap:24, maxWidth: 900 }}>
-      <div className="card" style={{ padding:24 }}>
-        <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:20 }}>
-          <ShieldAlert size={24} color="var(--blue-neon)"/>
+    <div style={{ display: "flex", flexDirection: "column", gap: 24, maxWidth: 900 }}>
+      <div className="card" style={{ padding: 24 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+          <ShieldAlert size={24} color="var(--blue-neon)" />
           <div>
-            <div style={{ fontSize:16, fontWeight:600, color:"var(--text)" }}>Domain Scanner Engine</div>
-            <div style={{ fontSize:12, color:"var(--text-dim)" }}>Run a comprehensive analysis through CyberPitch-FIFA's ML pipeline</div>
+            <div style={{ fontSize: 16, fontWeight: 600, color: "var(--text)" }}>Domain Scanner Engine</div>
+            <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Run a comprehensive analysis through CyberPitch-FIFA's ML pipeline</div>
           </div>
         </div>
-        <form onSubmit={runScan} style={{ display:"flex", gap:12, alignItems:"center", flexWrap:"wrap" }}>
-          <input type="text" className="search" style={{ flex:1, minWidth:250, paddingLeft:14 }} placeholder="Enter domain (e.g. fifa-rewards-claims.com)" value={scanDomain} onChange={e=>setScanDomain(e.target.value)} required />
+        <form onSubmit={runScan} style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+          <input type="text" className="search" style={{ flex: 1, minWidth: 250, paddingLeft: 14 }} placeholder="Enter domain (e.g. fifa-rewards-claims.com)" value={scanDomain} onChange={e => setScanDomain(e.target.value)} required />
           <button type="submit" className="btn btn-gold" disabled={scanLoading}>
-            {scanLoading ? <RefreshCw size={14} style={{ animation:"spin 1s linear infinite" }}/> : <Play size={14}/>}
+            {scanLoading ? <RefreshCw size={14} style={{ animation: "spin 1s linear infinite" }} /> : <Play size={14} />}
             {scanLoading ? "Scanning..." : "Start Scan"}
           </button>
           {scanResult && !scanLoading && (
-            <button type="button" className="btn" style={{ borderColor:"var(--text-faint)" }} onClick={() => { setScanResult(null); setScanError(null); setScanDomain(""); }}>
-              <X size={14}/> Clear Result
+            <button type="button" className="btn" style={{ borderColor: "var(--text-faint)" }} onClick={() => { setScanResult(null); setScanError(null); setScanDomain(""); }}>
+              <X size={14} /> Clear Result
             </button>
           )}
           <div style={{ color: "var(--text-faint)", fontSize: 12, padding: "0 8px" }}>OR</div>
-          <input id="scan-csv-upload" type="file" accept=".csv" style={{ display:"none" }} onChange={(e)=>{ const f=e.target.files?.[0]; if(f) handleBatchScan(f); }}/>
-          <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
-            <button type="button" className="btn" onClick={()=>document.getElementById("scan-csv-upload")?.click()}><Upload size={14}/>Batch CSV Upload</button>
+          <input id="scan-csv-upload" type="file" accept=".csv" style={{ display: "none" }} onChange={(e) => { const f = e.target.files?.[0]; if (f) handleBatchScan(f); }} />
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <button type="button" className="btn" onClick={() => document.getElementById("scan-csv-upload")?.click()}><Upload size={14} />Batch CSV Upload</button>
             <div style={{ fontSize: 9.5, color: "var(--text-faint)", textAlign: "center", textTransform: "uppercase", letterSpacing: "0.05em" }}>Requires 'domain' column</div>
           </div>
         </form>
 
         {scanLoading && (
-          <div style={{ display:"flex", flexDirection:"column", gap:12, marginTop:24 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 24 }}>
             {batchProgress && (
-              <div style={{ textAlign:"center", fontSize:14, color:"var(--blue-neon)", fontWeight:600, padding: 12, border: "1px dashed var(--blue-neon)", borderRadius: 8 }}>
+              <div style={{ textAlign: "center", fontSize: 14, color: "var(--blue-neon)", fontWeight: 600, padding: 12, border: "1px dashed var(--blue-neon)", borderRadius: 8 }}>
                 Batch Processing in Progress: Analyzed {batchProgress.current} out of {batchProgress.total} domains...
               </div>
             )}
@@ -1441,22 +1443,22 @@ function ScanView({
               const status = idx < activeStep ? "success" : idx === activeStep ? "running" : "idle";
               return (
                 <div key={idx} style={{
-                  display:"flex", alignItems:"center", gap:16, padding:"12px 16px", borderRadius:8,
-                  background: status==="success" ? "rgba(0,255,210,0.05)" : status==="running" ? "rgba(0,210,255,0.08)" : "transparent",
+                  display: "flex", alignItems: "center", gap: 16, padding: "12px 16px", borderRadius: 8,
+                  background: status === "success" ? "rgba(0,255,210,0.05)" : status === "running" ? "rgba(0,210,255,0.08)" : "transparent",
                   border: "1px solid",
-                  borderColor: status==="success" ? "rgba(0,255,210,0.2)" : status==="running" ? "var(--blue-neon)" : "transparent",
+                  borderColor: status === "success" ? "rgba(0,255,210,0.2)" : status === "running" ? "var(--blue-neon)" : "transparent",
                   transition: "all 0.3s ease"
                 }}>
                   <div style={{
-                    width:32, height:32, borderRadius:8, display:"flex", alignItems:"center", justifyContent:"center",
-                    background: status==="success" ? "var(--green)" : status==="running" ? "var(--blue-neon)" : "rgba(255,255,255,0.05)",
-                    color: status==="idle" ? "var(--text-faint)" : "#030812"
+                    width: 32, height: 32, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center",
+                    background: status === "success" ? "var(--green)" : status === "running" ? "var(--blue-neon)" : "rgba(255,255,255,0.05)",
+                    color: status === "idle" ? "var(--text-faint)" : "#030812"
                   }}>
-                    {status === "success" ? <ShieldCheck size={16}/> : status === "running" ? <RefreshCw size={16} style={{ animation:"spin 1s linear infinite" }}/> : <Icon size={16}/>}
+                    {status === "success" ? <ShieldCheck size={16} /> : status === "running" ? <RefreshCw size={16} style={{ animation: "spin 1s linear infinite" }} /> : <Icon size={16} />}
                   </div>
                   <div>
-                    <div style={{ fontSize:14, fontWeight:600, color: status==="idle" ? "var(--text-dim)" : "var(--text)" }}>{step.name}</div>
-                    <div style={{ fontSize:12, color:"var(--text-faint)", marginTop:2 }}>{step.desc}</div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: status === "idle" ? "var(--text-dim)" : "var(--text)" }}>{step.name}</div>
+                    <div style={{ fontSize: 12, color: "var(--text-faint)", marginTop: 2 }}>{step.desc}</div>
                   </div>
                 </div>
               );
@@ -1465,96 +1467,96 @@ function ScanView({
         )}
 
         {batchResults && !scanLoading && (
-          <div style={{ marginTop:24 }}>
-            <div style={{ fontSize:14, fontWeight:600, color:"var(--text)", marginBottom:12 }}>Recent Batch Classification Results</div>
+          <div style={{ marginTop: 24 }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text)", marginBottom: 12 }}>Recent Batch Classification Results</div>
             <div className="table-container">
-              <table style={{ width:"100%", borderCollapse:"collapse", fontSize:12 }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                 <thead>
-                  <tr style={{ borderBottom:"1px solid var(--border)", color:"var(--text-dim)", textAlign:"left" }}>
-                    <th style={{ padding:12, fontWeight:500 }}>Domain</th>
-                    <th style={{ padding:12, fontWeight:500 }}>Threat Type</th>
-                    <th style={{ padding:12, fontWeight:500 }}>Risk Score</th>
-                    <th style={{ padding:12, fontWeight:500 }}>Status</th>
+                  <tr style={{ borderBottom: "1px solid var(--border)", color: "var(--text-dim)", textAlign: "left" }}>
+                    <th style={{ padding: 12, fontWeight: 500 }}>Domain</th>
+                    <th style={{ padding: 12, fontWeight: 500 }}>Threat Type</th>
+                    <th style={{ padding: 12, fontWeight: 500 }}>Risk Score</th>
+                    <th style={{ padding: 12, fontWeight: 500 }}>Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {batchResults.slice(0, 10).map((r, idx) => (
-                    <tr key={idx} style={{ borderBottom:"1px solid rgba(255,255,255,0.05)" }}>
-                      <td style={{ padding:12, fontWeight:500, color:"var(--text)" }}>{r.domain}</td>
-                      <td style={{ padding:12, color:"var(--text-dim)" }}>{r.threatType}</td>
-                      <td style={{ padding:12 }}>
+                    <tr key={idx} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                      <td style={{ padding: 12, fontWeight: 500, color: "var(--text)" }}>{r.domain}</td>
+                      <td style={{ padding: 12, color: "var(--text-dim)" }}>{r.threatType}</td>
+                      <td style={{ padding: 12 }}>
                         <span className="badge badge-neutral" style={{ background: r.riskScore >= 70 ? "rgba(255,42,95,0.15)" : r.riskScore >= 40 ? "rgba(255,159,26,0.15)" : "rgba(0,255,210,0.15)", color: r.riskScore >= 70 ? "var(--red)" : r.riskScore >= 40 ? "var(--amber)" : "var(--green)" }}>
                           {r.riskScore} / 100
                         </span>
                       </td>
-                      <td style={{ padding:12 }}>{r.status}</td>
+                      <td style={{ padding: 12 }}>{r.status}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-            {batchResults.length > 10 && <div style={{ fontSize:11, color:"var(--text-dim)", textAlign:"center", marginTop:12 }}>Showing first 10 results. See downloaded CSV for full report.</div>}
+            {batchResults.length > 10 && <div style={{ fontSize: 11, color: "var(--text-dim)", textAlign: "center", marginTop: 12 }}>Showing first 10 results. See downloaded CSV for full report.</div>}
           </div>
         )}
 
         {scanResult && !scanLoading && (
-          <div style={{ display:"flex", flexDirection:"column", gap:20, marginTop:24 }}>
-            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 20, marginTop: 24 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
               <div>
-                <div style={{ fontSize:10, color:"var(--text-faint)", letterSpacing:"0.1em", textTransform:"uppercase", fontWeight:600 }}>Analysis Result</div>
-                <div className="font-mono" style={{ fontSize:22, fontWeight:700, color:"var(--text)", marginTop:4 }}>{scanResult["Domain Name"]}</div>
+                <div style={{ fontSize: 10, color: "var(--text-faint)", letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: 600 }}>Analysis Result</div>
+                <div className="font-mono" style={{ fontSize: 22, fontWeight: 700, color: "var(--text)", marginTop: 4 }}>{scanResult["Domain Name"]}</div>
               </div>
-              <div style={{ display:"flex", gap:8 }}>
+              <div style={{ display: "flex", gap: 8 }}>
                 {riskBadge(scanResult["Severity"] || "Low")}
                 <span className="badge badge-neutral">{scanResult["Threat Type"]}</span>
               </div>
             </div>
 
-            {scanError && <div style={{ color:"var(--red)", fontSize:13 }}>{scanError}</div>}
+            {scanError && <div style={{ color: "var(--red)", fontSize: 13 }}>{scanError}</div>}
 
-            <div className="stat-grid" style={{ gridTemplateColumns:"repeat(3, 1fr)", gap:12, marginBottom:0 }}>
-              <div className="card" style={{ padding:16, textAlign:"center" }}>
-                <div className="stat-label" style={{ marginTop:0, marginBottom:8 }}>Risk Score</div>
+            <div className="stat-grid" style={{ gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 0 }}>
+              <div className="card" style={{ padding: 16, textAlign: "center" }}>
+                <div className="stat-label" style={{ marginTop: 0, marginBottom: 8 }}>Risk Score</div>
                 <div className="stat-value">{scanResult["Risk Score"]}</div>
               </div>
-              <div className="card" style={{ padding:16, textAlign:"center" }}>
-                <div className="stat-label" style={{ marginTop:0, marginBottom:8 }}>Phishing Prob.</div>
-                <div className="stat-value" style={{ fontSize:20 }}>{typeof scanResult["Phishing Probability"]==="number" ? (scanResult["Phishing Probability"]*100).toFixed(1)+"%" : "N/A"}</div>
+              <div className="card" style={{ padding: 16, textAlign: "center" }}>
+                <div className="stat-label" style={{ marginTop: 0, marginBottom: 8 }}>Phishing Prob.</div>
+                <div className="stat-value" style={{ fontSize: 20 }}>{typeof scanResult["Phishing Probability"] === "number" ? (scanResult["Phishing Probability"] * 100).toFixed(1) + "%" : "N/A"}</div>
               </div>
-              <div className="card" style={{ padding:16, textAlign:"center" }}>
-                <div className="stat-label" style={{ marginTop:0, marginBottom:8 }}>Visual Match</div>
-                <div className="stat-value" style={{ fontSize:20 }}>{typeof scanResult["Visual Similarity Score"]==="number" ? (scanResult["Visual Similarity Score"]*100).toFixed(1)+"%" : "N/A"}</div>
+              <div className="card" style={{ padding: 16, textAlign: "center" }}>
+                <div className="stat-label" style={{ marginTop: 0, marginBottom: 8 }}>Visual Match</div>
+                <div className="stat-value" style={{ fontSize: 20 }}>{typeof scanResult["Visual Similarity Score"] === "number" ? (scanResult["Visual Similarity Score"] * 100).toFixed(1) + "%" : "N/A"}</div>
               </div>
             </div>
 
-            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
-              <div className="card" style={{ padding:14 }}>
-                <div style={{ fontSize:10, color:"var(--text-faint)", fontWeight:600, textTransform:"uppercase" }}>Recommended Action</div>
-                <div style={{ color:"var(--red)", fontSize:13, fontWeight:600, marginTop:4 }}>{scanResult["Recommended Action"] || "Review required."}</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div className="card" style={{ padding: 14 }}>
+                <div style={{ fontSize: 10, color: "var(--text-faint)", fontWeight: 600, textTransform: "uppercase" }}>Recommended Action</div>
+                <div style={{ color: "var(--red)", fontSize: 13, fontWeight: 600, marginTop: 4 }}>{scanResult["Recommended Action"] || "Review required."}</div>
               </div>
-              <div className="card" style={{ padding:14 }}>
-                <div style={{ fontSize:10, color:"var(--text-faint)", fontWeight:600, textTransform:"uppercase" }}>Key Indicators</div>
-                <div style={{ marginTop:4, display:"flex", flexDirection:"column", gap:4 }}>
+              <div className="card" style={{ padding: 14 }}>
+                <div style={{ fontSize: 10, color: "var(--text-faint)", fontWeight: 600, textTransform: "uppercase" }}>Key Indicators</div>
+                <div style={{ marginTop: 4, display: "flex", flexDirection: "column", gap: 4 }}>
                   {(scanResult["Explanations"] || []).map((exp: string, idx: number) => (
-                    <div key={idx} style={{ display:"flex", alignItems:"flex-start", gap:6, fontSize:12, color:"var(--text-dim)" }}>
-                      <AlertTriangle size={12} color="var(--red)" style={{ marginTop:2, flexShrink:0 }}/> {exp}
+                    <div key={idx} style={{ display: "flex", alignItems: "flex-start", gap: 6, fontSize: 12, color: "var(--text-dim)" }}>
+                      <AlertTriangle size={12} color="var(--red)" style={{ marginTop: 2, flexShrink: 0 }} /> {exp}
                     </div>
                   ))}
                 </div>
               </div>
             </div>
 
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(4, 1fr)", gap:8 }}>
-              {[{l:"WHOIS Age", v:scanResult["WHOIS Age Days"]!==undefined?scanResult["WHOIS Age Days"]+" d":"Unk"}, {l:"SSL", v:scanResult["SSL Status"]}, {l:"Hosting", v:scanResult["Hosting Country"]}, {l:"Malware", v:scanResult["Malware Signature Match"]?"Yes":"No"}].map((s,i) => (
-                <div key={i} style={{ background:"rgba(0,210,255,0.05)", border:"1px solid var(--border-strong)", borderRadius:8, padding:10, textAlign:"center" }}>
-                  <div style={{ fontSize:9, color:"var(--text-faint)", textTransform:"uppercase", fontWeight:600 }}>{s.l}</div>
-                  <div style={{ fontSize:12, color:"var(--text)", fontWeight:500, marginTop:2 }}>{s.v}</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
+              {[{ l: "WHOIS Age", v: scanResult["WHOIS Age Days"] !== undefined ? scanResult["WHOIS Age Days"] + " d" : "Unk" }, { l: "SSL", v: scanResult["SSL Status"] }, { l: "Hosting", v: scanResult["Hosting Country"] }, { l: "Malware", v: scanResult["Malware Signature Match"] ? "Yes" : "No" }].map((s, i) => (
+                <div key={i} style={{ background: "rgba(0,210,255,0.05)", border: "1px solid var(--border-strong)", borderRadius: 8, padding: 10, textAlign: "center" }}>
+                  <div style={{ fontSize: 9, color: "var(--text-faint)", textTransform: "uppercase", fontWeight: 600 }}>{s.l}</div>
+                  <div style={{ fontSize: 12, color: "var(--text)", fontWeight: 500, marginTop: 2 }}>{s.v}</div>
                 </div>
               ))}
             </div>
           </div>
         )}
-        {scanError && !scanResult && <div style={{ color:"var(--red)", fontSize:13 }}>{scanError}</div>}
+        {scanError && !scanResult && <div style={{ color: "var(--red)", fontSize: 13 }}>{scanError}</div>}
       </div>
     </div>
   );
@@ -1565,9 +1567,9 @@ function ScanView({
 ------------------------------------------------------------------*/
 export default function App() {
   const [page, setPage] = useState("dashboard");
-  const [data, setData] = useState<ThreatRecord[]>(()=>generateMockData(180));
+  const [data, setData] = useState<ThreatRecord[]>(() => generateMockData(180));
   const [dataSource, setDataSource] = useState("Mock dataset · 180 records");
-  const [uploadError, setUploadError] = useState<string|null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState("");
@@ -1580,9 +1582,9 @@ export default function App() {
   const [scanDomain, setScanDomain] = useState("");
   const [scanLoading, setScanLoading] = useState(false);
   const [scanResult, setScanResult] = useState<any>(null);
-  const [scanError, setScanError] = useState<string|null>(null);
+  const [scanError, setScanError] = useState<string | null>(null);
   const [activeStep, setActiveStep] = useState(0);
-  const [batchProgress, setBatchProgress] = useState<{current: number, total: number} | null>(null);
+  const [batchProgress, setBatchProgress] = useState<{ current: number, total: number } | null>(null);
   const [batchResults, setBatchResults] = useState<any[] | null>(null);
 
   const fetchRealThreats = useCallback(async () => {
@@ -1590,7 +1592,7 @@ export default function App() {
       const res = await fetch("/api/threats");
       if (!res.ok) throw new Error("Failed to fetch threats");
       const dbThreats: ThreatRecord[] = await res.json();
-      
+
       setData(prevData => {
         const mockData = generateMockData(180);
         // Remove mock data that matches real domains
@@ -1637,18 +1639,18 @@ export default function App() {
 
   const handleUpload = useCallback((file: File) => {
     setUploadError(null);
-    Papa.parse<Record<string,string>>(file, {
+    Papa.parse<Record<string, string>>(file, {
       header: true, skipEmptyLines: true, dynamicTyping: true,
       complete: async (results) => {
         try {
-          const raw = results.data as Record<string,string>[];
+          const raw = results.data as Record<string, string>[];
           const domains = raw.filter(r => !!r.domain).map(r => r.domain);
           if (domains.length === 0) throw new Error("empty");
-          
+
           setDataSource(`Analyzing ${domains.length} domains...`);
-          
+
           const newRecords: ThreatRecord[] = [];
-          
+
           // Process sequentially to not overload the ML backend
           for (let i = 0; i < domains.length; i++) {
             const domain = domains[i];
@@ -1660,12 +1662,12 @@ export default function App() {
               });
               if (!res.ok) continue;
               const { data: mlResult } = await res.json();
-              
+
               const prob = mlResult["Phishing Probability"] || 0;
               const riskScore = Math.round(prob * 100);
-              
+
               newRecords.push({
-                id: `CSV-${1000+i}`,
+                id: `CSV-${1000 + i}`,
                 domain: domain,
                 threatType: mlResult["Malware Signature Match"] ? "Malware" : "Phishing",
                 riskScore: riskScore,
@@ -1684,7 +1686,7 @@ export default function App() {
               console.error(`Failed to analyze ${domain}`, err);
             }
           }
-          
+
           if (newRecords.length > 0) {
             fetchRealThreats();
           } else {
@@ -1700,18 +1702,18 @@ export default function App() {
   const handleScan = useCallback(() => {
     setPage("scan");
   }, []);
-  const handleExport = useCallback(()=>{
-    const csv = ["id,domain,threatType,riskScore,riskLevel,country,status", ...data.slice(0,50).map(d=>`${d.id},${d.domain},${d.threatType},${d.riskScore},${d.riskLevel},${d.country},${d.status}`)].join("\n");
-    const a = document.createElement("a"); a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv); a.download="cyberpitch-fifa-export.csv"; a.click();
-  },[data]);
+  const handleExport = useCallback(() => {
+    const csv = ["id,domain,threatType,riskScore,riskLevel,country,status", ...data.slice(0, 50).map(d => `${d.id},${d.domain},${d.threatType},${d.riskScore},${d.riskLevel},${d.country},${d.status}`)].join("\n");
+    const a = document.createElement("a"); a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv); a.download = "cyberpitch-fifa-export.csv"; a.click();
+  }, [data]);
 
-  const pageTitles: Record<string, [string,string]> = {
+  const pageTitles: Record<string, [string, string]> = {
     dashboard: ["Threat Overview", "Real-time snapshot across all detection pipelines"],
-    scan:      ["Real-time Threat Scanner", "Analyze any domain through the CyberPitch-FIFA pipeline"],
-    domains:   ["Domain Threat Intelligence", "Detect & analyze fraudulent FIFA domains"],
-    tickets:   ["Ticketing Fraud Monitor", "Fake portals, pricing anomalies & victim impact"],
-    social:    ["Social & OSINT Intelligence", "Social mentions, OSINT reports & blacklist feeds"],
-    settings:  ["Settings", "User preferences, thresholds and API keys"],
+    scan: ["Real-time Threat Scanner", "Analyze any domain through the CyberPitch-FIFA pipeline"],
+    domains: ["Domain Threat Intelligence", "Detect & analyze fraudulent FIFA domains"],
+    tickets: ["Ticketing Fraud Monitor", "Fake portals, pricing anomalies & victim impact"],
+    social: ["Social & OSINT Intelligence", "Social mentions, OSINT reports & blacklist feeds"],
+    settings: ["Settings", "User preferences, thresholds and API keys"],
   };
 
   if (!isMounted) return null;
@@ -1739,14 +1741,14 @@ export default function App() {
   return (
     <div className={`stg-root ${dark ? 'dark' : 'light'}`}>
       <style>{TOKENS}</style>
-      <div className="hexbg"/>
+      <div className="hexbg" />
       <Sidebar page={page} setPage={setPage} collapsed={collapsed} setCollapsed={setCollapsed} onLogout={handleLogout} user={user} onNavigate={(href) => router.push(href)} />
       <div className="main">
-        <TopBar title={title} subtitle={subtitle} onUpload={handleUpload} dataSource={dataSource} onScan={handleScan} onExport={handleExport} user={user} dark={dark} setDark={toggleTheme} />
+        <TopBar title={title} subtitle={subtitle} onUpload={handleUpload} dataSource={dataSource} onScan={handleScan} onExport={handleExport} user={user} dark={dark} setDark={toggleTheme} onLogout={handleLogout} />
         {uploadError && (
-          <div style={{ margin:"14px 28px 0", padding:"10px 14px", background:"rgba(255,42,95,0.1)", border:"1px solid rgba(255,42,95,0.3)", borderRadius:8, fontSize:12.5, color:"var(--red)", display:"flex", alignItems:"center", gap:8 }}>
-            <AlertTriangle size={13}/>{uploadError}
-            <X size={13} style={{ marginLeft:"auto", cursor:"pointer" }} onClick={()=>setUploadError(null)}/>
+          <div style={{ margin: "14px 28px 0", padding: "10px 14px", background: "rgba(255,42,95,0.1)", border: "1px solid rgba(255,42,95,0.3)", borderRadius: 8, fontSize: 12.5, color: "var(--red)", display: "flex", alignItems: "center", gap: 8 }}>
+            <AlertTriangle size={13} />{uploadError}
+            <X size={13} style={{ marginLeft: "auto", cursor: "pointer" }} onClick={() => setUploadError(null)} />
           </div>
         )}
         <div className="content">
@@ -1768,7 +1770,7 @@ export default function App() {
 
           {page === "settings" && <SettingsPage user={user} />}
         </div>
-        <div style={{ padding:"16px 32px", borderTop:"1px solid var(--border)", display:"flex", justifyContent:"space-between", alignItems:"center", fontSize:11, color:"var(--text-faint)", fontFamily:"var(--mono)" }}>
+        <div style={{ padding: "16px 32px", borderTop: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 11, color: "var(--text-faint)", fontFamily: "var(--mono)" }}>
           <span>CyberPitch-FIFA v2.0.0 · FIFA Cyber Threat Intelligence Platform</span>
           <span>{data.length.toLocaleString()} domains monitored · {new Date().toLocaleString()}</span>
           <span>© 2026 FIFA Cyber Threat Intelligence</span>

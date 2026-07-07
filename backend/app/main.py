@@ -11,6 +11,7 @@ from app.api import html
 from app.api import url_features
 from app.api.threat import router as threat_router
 from app.api.scan import router as scan_router
+from app.api.auth import router as auth_router
 from scripts.domain_discovery import run_once
 
 Base.metadata.create_all(bind=engine)
@@ -42,6 +43,7 @@ app.include_router(html.router)
 app.include_router(url_features.router)
 app.include_router(threat_router)
 app.include_router(scan_router)
+app.include_router(auth_router)
 
 @app.get("/")
 def home():
