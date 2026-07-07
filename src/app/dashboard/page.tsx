@@ -316,60 +316,8 @@ const TOKENS = `
 /* ---------------------------------------------------------------
    MOCK DATA
 ------------------------------------------------------------------*/
-const THREAT_TYPES = ["Ticket Scam", "Phishing", "Malware"];
-const COUNTRIES = ["Russia", "Nigeria", "Vietnam", "Brazil", "India", "Ukraine", "Indonesia", "China", "Philippines", "USA"];
-const REGISTRARS = ["NameCheap Inc.", "GoDaddy.com LLC", "PDR Ltd.", "Alibaba Cloud", "REG.RU", "Dynadot LLC"];
-const SSL_STATES = ["Invalid", "Expired", "None", "Valid"];
+const THREAT_TYPES = ["Ticket Scam", "Phishing", "Malware", "Streaming Piracy"];
 const STATUSES = ["Active", "Under Review", "Blocked"];
-const RED_FLAG_POOL = [
-  "Price 60-80% below official", "Domain registered <30 days ago", "No SSL / self-signed cert",
-  "Spoofed FIFA branding", "Offshore hosting", "No refund policy listed",
-  "Unofficial payment gateway", "No verifiable physical address", "WHOIS privacy shield active",
-];
-
-function seededRandom(seed: number) {
-  let s = seed;
-  return () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
-}
-
-function generateMockData(count = 180) {
-  const rnd = seededRandom(42);
-  const rows = [];
-  for (let i = 0; i < count; i++) {
-    const threatType = THREAT_TYPES[Math.floor(rnd() * THREAT_TYPES.length)];
-    const riskScore = Math.round(rnd() * 100);
-    const ageDays = Math.floor(rnd() * 900) + 1;
-    const isTicket = threatType === "Ticket Scam";
-    const officialPrice = [80, 120, 250, 400][Math.floor(rnd() * 4)];
-    const flagCount = 2 + Math.floor(rnd() * 4);
-    const flags = [...RED_FLAG_POOL].sort(() => rnd() - 0.5).slice(0, flagCount);
-    rows.push({
-      id: `TH-${1000 + i}`,
-      domain: `fifa-${["worldcup", "tickets2026", "official", "matchday", "livepass", "fanzone", "goldpass"][Math.floor(rnd() * 7)]}-${Math.floor(rnd() * 999)}.${["com", "net", "info", "xyz", "ru", "top"][Math.floor(rnd() * 6)]}`,
-      threatType,
-      riskScore,
-      riskLevel: riskScore >= 70 ? "High" : riskScore >= 40 ? "Medium" : "Low",
-      registrationDate: `2025-${String(Math.floor(rnd() * 12) + 1).padStart(2, "0")}-${String(Math.floor(rnd() * 28) + 1).padStart(2, "0")}`,
-      ageDays,
-      registrar: REGISTRARS[Math.floor(rnd() * REGISTRARS.length)],
-      country: COUNTRIES[Math.floor(rnd() * COUNTRIES.length)],
-      sslStatus: SSL_STATES[Math.floor(rnd() * SSL_STATES.length)],
-      similarityScore: Math.round(40 + rnd() * 60),
-      detectedDate: `2026-0${Math.floor(rnd() * 6) + 1}-${String(Math.floor(rnd() * 28) + 1).padStart(2, "0")}`,
-      status: STATUSES[Math.floor(rnd() * STATUSES.length)],
-      estimatedLoss: isTicket ? Math.round(rnd() * 45000) : Math.round(rnd() * 8000),
-      affectedUsers: isTicket ? Math.floor(rnd() * 900) : Math.floor(rnd() * 200),
-      officialPrice: isTicket ? officialPrice : null,
-      scamPrice: isTicket ? Math.round(officialPrice * (0.15 + rnd() * 0.35)) : null,
-      redFlags: flags,
-      source: rnd() > 0.4 ? "Synthetic" : "Real (FBI/IC3-linked)",
-      osintReportCount: Math.floor(rnd() * 5) + 1,
-      socialMediaMentions: Math.floor(rnd() * 100),
-      blacklistSource: ["Google Safe Browsing", "PhishTank", "OpenPhish", "URLHaus"][Math.floor(rnd() * 4)],
-    });
-  }
-  return rows;
-}
 
 // Removed normalizeCSVRow and CSV field maps
 
@@ -1659,8 +1607,8 @@ function ScanView({
 ------------------------------------------------------------------*/
 export default function App() {
   const [page, setPage] = useState("dashboard");
-  const [data, setData] = useState<ThreatRecord[]>(() => generateMockData(180));
-  const [dataSource, setDataSource] = useState("Mock dataset · 180 records");
+  const [data, setData] = useState<ThreatRecord[]>([]);
+  const [dataSource, setDataSource] = useState("Real-time database");
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -1685,14 +1633,8 @@ export default function App() {
       if (!res.ok) throw new Error("Failed to fetch threats");
       const dbThreats: ThreatRecord[] = await res.json();
 
-      setData(prevData => {
-        const mockData = generateMockData(180);
-        // Remove mock data that matches real domains
-        const realDomains = new Set(dbThreats.map(t => t.domain.toLowerCase()));
-        const filteredMock = mockData.filter(m => !realDomains.has(m.domain.toLowerCase()));
-        return [...dbThreats, ...filteredMock];
-      });
-      setDataSource(`Real-time database + Mock dataset · ${dbThreats.length + 180} records`);
+      setData(dbThreats);
+      setDataSource(`Real-time database · ${dbThreats.length} records`);
     } catch (err) {
       console.error("Failed to load real threats:", err);
     }

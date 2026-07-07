@@ -30,9 +30,12 @@ RISKY_TLDS = ["xyz", "top", "click", "info", "online", "site", "shop",
               "live", "vip", "buzz", "icu", "cc", "win"]
 COMMON_TLDS = ["com", "net", "org", "co", "io"]
 
-MAX_DNS_WORKERS = 20
-DNS_TIMEOUT = 3.0
+MAX_DNS_WORKERS = 100
+DNS_TIMEOUT = 1.5
 REQUEST_TIMEOUT = 10
+
+# Hard cap: only ever resolve this many domains in a single run_once() call.
+MAX_DOMAINS_TO_RESOLVE = 700
 
 
 def is_official(domain: str) -> bool:
@@ -126,7 +129,20 @@ def _resolves(domain):
 
 
 def bulk_resolve(domains):
-    """Return the set of domains that currently resolve (are live)."""
+    """
+    Return the set of domains that currently resolve (are live).
+
+    Only the first MAX_DOMAINS_TO_RESOLVE domains (from the given iterable)
+    are ever checked, no matter how many are passed in. This keeps each run
+    fast and bounded instead of resolving the full candidate list.
+    """
+    domains = list(domains)[:MAX_DOMAINS_TO_RESOLVE]
+
+    if not domains:
+        return set()
+
+    print(f"[discovery] resolving {len(domains)} domain(s) (capped at {MAX_DOMAINS_TO_RESOLVE})")
+
     live = set()
     with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_DNS_WORKERS) as ex:
         futures = {ex.submit(_resolves, d): d for d in domains}
@@ -150,8 +166,11 @@ def run_once():
         all_candidates = {d for d in (perm | ct) if not is_official(d)}
 
         new_domains = [d for d in all_candidates if d not in existing]
-        print(f"[discovery] {len(new_domains)} new candidates to check")
+        print(f"[discovery] {len(new_domains)} new candidates found (only first "
+              f"{MAX_DOMAINS_TO_RESOLVE} will be resolved this run)")
 
+        # bulk_resolve() itself caps to MAX_DOMAINS_TO_RESOLVE, so this call
+        # is safe even though new_domains may be large.
         live = bulk_resolve(new_domains)
         print(f"[discovery] {len(live)} are live")
 

@@ -640,3 +640,74 @@ RuntimeError: cannot schedule new futures after interpreter shutdown
 2026-07-07 09:55:45,669 INFO Scheduler started
 2026-07-07 09:55:45,670 INFO Running job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 04:25:45 IST)" (scheduled at 2026-07-07 04:25:45.668235+05:30)
 2026-07-07 09:57:05,529 INFO Scanning domain: f1fa.com
+2026-07-07 10:13:48,401 INFO Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-07-07 10:13:48,419 INFO Added job "run_once" to job store "default"
+2026-07-07 10:13:48,419 INFO Scheduler started
+2026-07-07 10:13:48,420 INFO Running job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 04:43:48 IST)" (scheduled at 2026-07-07 04:43:48.372077+05:30)
+2026-07-07 10:18:46,117 INFO Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-07-07 10:18:46,119 INFO Added job "run_once" to job store "default"
+2026-07-07 10:18:46,119 INFO Scheduler started
+2026-07-07 10:18:46,120 INFO Running job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 04:48:46 IST)" (scheduled at 2026-07-07 04:48:46.117246+05:30)
+2026-07-07 10:24:41,482 INFO Job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 16:48:46 IST)" executed successfully
+2026-07-07 10:33:29,072 INFO Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-07-07 10:33:29,074 INFO Added job "run_once" to job store "default"
+2026-07-07 10:33:29,074 INFO Scheduler started
+2026-07-07 10:33:29,075 INFO Running job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 05:03:29 IST)" (scheduled at 2026-07-07 05:03:29.071893+05:30)
+2026-07-07 10:34:15,666 INFO Job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 17:03:29 IST)" executed successfully
+2026-07-07 10:36:02,519 INFO Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-07-07 10:36:02,519 INFO Added job "run_once" to job store "default"
+2026-07-07 10:36:02,519 INFO Scheduler started
+2026-07-07 10:36:02,520 INFO Running job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 05:06:02 IST)" (scheduled at 2026-07-07 05:06:02.518657+05:30)
+2026-07-07 10:36:55,739 INFO Job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 17:06:02 IST)" executed successfully
+2026-07-07 10:37:59,067 INFO Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-07-07 10:37:59,068 INFO Added job "run_once" to job store "default"
+2026-07-07 10:37:59,068 INFO Scheduler started
+2026-07-07 10:37:59,069 INFO Running job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 05:07:59 IST)" (scheduled at 2026-07-07 05:07:59.067178+05:30)
+2026-07-07 10:38:22,757 INFO Job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 17:07:59 IST)" executed successfully
+2026-07-07 10:38:37,797 INFO Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-07-07 10:38:37,798 INFO Added job "run_once" to job store "default"
+2026-07-07 10:38:37,798 INFO Scheduler started
+2026-07-07 10:38:37,799 INFO Running job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 05:08:37 IST)" (scheduled at 2026-07-07 05:08:37.797316+05:30)
+2026-07-07 10:39:13,805 ERROR Job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 17:08:37 IST)" raised an exception
+Traceback (most recent call last):
+  File "C:\Users\chegu\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "C:\Users\chegu\OneDrive\Desktop\fifa_current_one\CyberPitch-FIFA\backend\scripts\domain_discovery.py", line 174, in run_once
+    live = bulk_resolve(new_domains)
+  File "C:\Users\chegu\OneDrive\Desktop\fifa_current_one\CyberPitch-FIFA\backend\scripts\domain_discovery.py", line 148, in bulk_resolve
+    futures = {ex.submit(_resolves, d): d for d in domains}
+               ~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\concurrent\futures\thread.py", line 173, in submit
+    raise RuntimeError('cannot schedule new futures after '
+                       'interpreter shutdown')
+RuntimeError: cannot schedule new futures after interpreter shutdown
+2026-07-07 10:39:16,087 INFO Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-07-07 10:39:16,087 INFO Added job "run_once" to job store "default"
+2026-07-07 10:39:16,087 INFO Scheduler started
+2026-07-07 10:39:16,088 INFO Running job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 05:09:16 IST)" (scheduled at 2026-07-07 05:09:16.086192+05:30)
+2026-07-07 10:39:40,781 INFO Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-07-07 10:39:40,782 INFO Added job "run_once" to job store "default"
+2026-07-07 10:39:40,782 INFO Scheduler started
+2026-07-07 10:39:40,783 INFO Running job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 05:09:40 IST)" (scheduled at 2026-07-07 05:09:40.781021+05:30)
+2026-07-07 10:40:09,705 INFO Job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 17:09:40 IST)" executed successfully
+2026-07-07 10:58:39,003 INFO Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-07-07 10:58:39,009 INFO Added job "run_once" to job store "default"
+2026-07-07 10:58:39,009 INFO Scheduler started
+2026-07-07 10:58:39,014 INFO Running job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 05:28:38 IST)" (scheduled at 2026-07-07 05:28:38.999054+05:30)
+2026-07-07 10:59:07,991 ERROR Job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 17:28:38 IST)" raised an exception
+Traceback (most recent call last):
+  File "C:\Users\chegu\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "C:\Users\chegu\OneDrive\Desktop\fifa_current_one\CyberPitch-FIFA\backend\scripts\domain_discovery.py", line 174, in run_once
+    live = bulk_resolve(new_domains)
+  File "C:\Users\chegu\OneDrive\Desktop\fifa_current_one\CyberPitch-FIFA\backend\scripts\domain_discovery.py", line 148, in bulk_resolve
+    futures = {ex.submit(_resolves, d): d for d in domains}
+               ~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\concurrent\futures\thread.py", line 171, in submit
+    raise RuntimeError('cannot schedule new futures after shutdown')
+RuntimeError: cannot schedule new futures after shutdown
+2026-07-07 10:59:10,902 INFO Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-07-07 10:59:10,902 INFO Added job "run_once" to job store "default"
+2026-07-07 10:59:10,902 INFO Scheduler started
+2026-07-07 10:59:10,903 INFO Running job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 05:29:10 IST)" (scheduled at 2026-07-07 05:29:10.901767+05:30)
+2026-07-07 10:59:48,991 INFO Job "run_once (trigger: interval[12:00:00], next run at: 2026-07-07 17:29:10 IST)" executed successfully
