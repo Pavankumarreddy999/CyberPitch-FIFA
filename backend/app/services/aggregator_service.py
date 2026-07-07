@@ -12,7 +12,6 @@ Task 5  – Real visual similarity via pHash (playwright + imagehash)
 
 import asyncio
 import re
-import random
 from datetime import datetime
 from sqlalchemy.orm import Session
 import tldextract
@@ -168,10 +167,10 @@ async def _run_visual(domain: str, contains_fifa: int, contains_ticket: int,
         except Exception:
             pass
 
-    # Keyword-heuristic fallback (original logic)
+    # Keyword-heuristic fallback (deterministic)
     if contains_fifa and (contains_ticket or contains_reward or contains_stream):
-        return float(random.randint(80, 98))
-    return float(random.randint(5, 45))
+        return 85.0
+    return 20.0
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -337,12 +336,12 @@ async def aggregate_features(domain: str, db: Session) -> dict:
 
     redirect_count = 1 if html_data.get("redirected") else 0
 
-    # OSINT / social (unchanged — not in scope for this session)
+    # OSINT / social (deterministic)
     if contains_fifa and (contains_ticket or contains_reward or contains_stream):
-        social_mentions = random.randint(0, 3)
-        osint_reports   = random.randint(1, 5) if malware_match else random.randint(0, 2)
+        social_mentions = 2
+        osint_reports   = 3 if malware_match else 1
     else:
-        social_mentions = random.randint(5, 50)
+        social_mentions = 20
         osint_reports   = 0
 
     # ── Visual similarity (Task 5) — runs concurrently via gather above ───────

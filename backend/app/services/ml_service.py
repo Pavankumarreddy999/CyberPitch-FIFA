@@ -10,7 +10,6 @@ Task 4 – Real SHAP: shap.TreeExplainer for both RF and HGB.
 
 import os
 import json
-import random
 import joblib
 import numpy as np
 import pandas as pd
@@ -159,7 +158,7 @@ def _train_rf():
         "WHOIS Age Days":             np.random.randint(1, 90, half),
         "Is Privacy Protected":       np.random.choice([0, 1], half, p=[0.1, 0.9]),
         "SSL Status Numerical":       np.random.choice([0, 1, 2, 3], half, p=[0.4, 0.2, 0.1, 0.3]),
-        "SSL Valid Days Remaining":   [random.randint(1, 90) if s == 0 else 0
+        "SSL Valid Days Remaining":   [np.random.randint(1, 91) if s == 0 else 0
                                        for s in np.random.choice([0, 1, 2, 3], half, p=[0.4, 0.2, 0.1, 0.3])],
         "Visual Similarity Score":    np.random.uniform(65.0, 99.0, half),
         "Malware Signature Match":    np.random.choice([0, 1], half, p=[0.8, 0.2]),
@@ -386,7 +385,7 @@ def make_prediction(features: dict) -> dict:
     else:
         blacklist = features.get("Blacklist Source", "None")
         if blacklist not in (None, "None") or features.get("Malware Signature Match") == 1:
-            risk_score = random.randint(93, 100)
+            risk_score = 95  # deterministic high score for confirmed threats
         else:
             risk_score = int(prob * 100)
 
