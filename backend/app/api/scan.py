@@ -1,5 +1,5 @@
 import json
-import random
+import hashlib
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -44,8 +44,8 @@ async def scan_domain(request: DomainRequest, db: Session = Depends(get_db)):
         prediction_res = make_prediction(features)
 
         # Step 5: Construct Unified Scan Record
-        # Generate a unique Domain ID for this scan
-        domain_id = f"DOM{random.randint(10000, 99999)}"
+        # Generate a deterministic Domain ID from a hash of the domain name
+        domain_id = f"DOM{int(hashlib.sha256(domain.encode()).hexdigest(), 16) % 90000 + 10000}"
         
         # Merge features & predictions
         scan_result = {

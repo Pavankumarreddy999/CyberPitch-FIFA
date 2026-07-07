@@ -118,6 +118,24 @@ def html_lookup(domain):
 
         login_page = password_fields > 0
 
+        if not login_page:
+            for login_path in ["/login", "/signin"]:
+                try:
+                    login_url = urljoin(url, login_path)
+                    login_resp = requests.get(
+                        login_url,
+                        timeout=5,
+                        headers=headers,
+                        allow_redirects=True
+                    )
+                    if login_resp.status_code == 200:
+                        login_soup = BeautifulSoup(login_resp.text, "lxml")
+                        if login_soup.find("input", {"type": "password"}):
+                            login_page = True
+                            break
+                except Exception:
+                    continue
+
         # -----------------------
         # JavaScript Redirect
         # -----------------------

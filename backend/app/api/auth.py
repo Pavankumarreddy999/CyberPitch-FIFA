@@ -47,3 +47,20 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     
     access_token = create_access_token(data={"sub": db_user.username})
     return {"access_token": access_token, "token_type": "bearer", "username": db_user.username}
+
+class PasswordUpdate(BaseModel):
+    username: str
+    current_password: str
+    new_password: str
+
+@router.post("/update-password")
+def update_password(data: PasswordUpdate, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.username == data.username).first()
+    if not db_user or not verify_password(data.current_password, db_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect current password",
+        )
+    db_user.hashed_password = get_password_hash(data.new_password)
+    db.commit()
+    return {"success": True, "message": "Password updated successfully"}

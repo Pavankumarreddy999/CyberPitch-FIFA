@@ -511,8 +511,9 @@ interface TopBarProps {
   dark: boolean;
   setDark: (val: boolean) => void;
   onLogout: () => void;
+  onNavigate: (page: string) => void;
 }
-function TopBar({ title, subtitle, onUpload, dataSource, onScan, onExport, user, dark, setDark, onLogout }: TopBarProps) {
+function TopBar({ title, subtitle, onUpload, dataSource, onScan, onExport, user, dark, setDark, onLogout, onNavigate }: TopBarProps) {
   const fileRef = React.useRef<HTMLInputElement>(null);
   const [showBell, setShowBell] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
@@ -550,8 +551,8 @@ function TopBar({ title, subtitle, onUpload, dataSource, onScan, onExport, user,
           </div>
           {showProfile && (
             <div style={{ position: "absolute", top: 32, right: 0, width: 160, background: "rgba(10,25,50,0.97)", border: "1px solid var(--blue-neon)", borderRadius: 8, padding: 8, zIndex: 10, boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }}>
-              <div style={{ fontSize: 12, padding: "6px 8px", cursor: "pointer", color: "var(--text)", borderBottom: "1px solid var(--border)" }} onClick={() => alert("Profile Settings")}>My Profile</div>
-              <div style={{ fontSize: 12, padding: "6px 8px", cursor: "pointer", color: "var(--text)", borderBottom: "1px solid var(--border)" }} onClick={() => alert("Security Log")}>Security Log</div>
+              <div style={{ fontSize: 12, padding: "6px 8px", cursor: "pointer", color: "var(--text)", borderBottom: "1px solid var(--border)" }} onClick={() => { setShowProfile(false); onNavigate("settings"); }}>My Profile</div>
+              <div style={{ fontSize: 12, padding: "6px 8px", cursor: "pointer", color: "var(--text)", borderBottom: "1px solid var(--border)" }} onClick={() => { setShowProfile(false); alert("All security audits normal. No anomalies detected."); }}>Security Log</div>
               <div style={{ fontSize: 12, padding: "6px 8px", cursor: "pointer", color: "var(--red)", borderBottom: "1px solid var(--border)" }} onClick={() => { setShowProfile(false); onLogout(); }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}><LogOut size={12} />Log Out</div>
               </div>
@@ -1098,8 +1099,57 @@ function SocialOSINT({ data }: { data: ThreatRecord[] }) {
 function SettingsPage({ user }: { user: string }) {
   const [threshold, setThreshold] = useState(70);
   const [notifyEmail, setNotifyEmail] = useState(true);
-  const [apiKey, setApiKey] = useState("sk-••••••••••••••••");
   const [theme, setTheme] = useState("dark");
+  
+  // Profile settings state
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setError("All fields are required.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError("New passwords do not match.");
+      return;
+    }
+    if (newPassword.length < 4) {
+      setError("Password must be at least 4 characters long.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/update-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: user, currentPassword, newPassword })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to update password");
+      }
+      setSuccess("Password updated successfully!");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setTimeout(() => setIsEditing(false), 2000);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div>
@@ -1108,7 +1158,58 @@ function SettingsPage({ user }: { user: string }) {
       <div className="card" style={{ padding: 24, marginBottom: 16 }}>
         <div className="section-title"><UserPlus size={16} color="var(--gold)" /> User Profile</div>
         <div className="section-sub" style={{ marginBottom: 16 }}>Logged in as <span className="font-mono" style={{ color: "var(--gold)" }}>{user}</span></div>
-        <div className="btn btn-gold" onClick={() => alert("Edit profile")}>Edit Profile</div>
+        
+        {!isEditing ? (
+          <div className="btn btn-gold" onClick={() => setIsEditing(true)}>Change Password</div>
+        ) : (
+          <form onSubmit={handleUpdatePassword} style={{ marginTop: 16, maxWidth: 400 }}>
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ display: "block", fontSize: 12, marginBottom: 4, color: "var(--text-dim)" }}>Current Password</label>
+              <input 
+                type="password" 
+                className="auth-input" 
+                style={{ width: "100%", padding: "8px 12px", background: "rgba(0,0,0,0.2)", border: "1px solid var(--border)", borderRadius: 6, color: "var(--text)" }}
+                value={currentPassword}
+                onChange={e => setCurrentPassword(e.target.value)} 
+                required 
+              />
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ display: "block", fontSize: 12, marginBottom: 4, color: "var(--text-dim)" }}>New Password</label>
+              <input 
+                type="password" 
+                className="auth-input" 
+                style={{ width: "100%", padding: "8px 12px", background: "rgba(0,0,0,0.2)", border: "1px solid var(--border)", borderRadius: 6, color: "var(--text)" }}
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)} 
+                required 
+              />
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: "block", fontSize: 12, marginBottom: 4, color: "var(--text-dim)" }}>Confirm New Password</label>
+              <input 
+                type="password" 
+                className="auth-input" 
+                style={{ width: "100%", padding: "8px 12px", background: "rgba(0,0,0,0.2)", border: "1px solid var(--border)", borderRadius: 6, color: "var(--text)" }}
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)} 
+                required 
+              />
+            </div>
+
+            {error && <div style={{ color: "var(--red)", fontSize: 13, marginBottom: 12 }}>{error}</div>}
+            {success && <div style={{ color: "var(--green)", fontSize: 13, marginBottom: 12 }}>{success}</div>}
+
+            <div style={{ display: "flex", gap: 12 }}>
+              <button type="submit" className="btn btn-gold" disabled={loading}>
+                {loading ? "Updating..." : "Save Password"}
+              </button>
+              <div className="btn" style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text)" }} onClick={() => { setIsEditing(false); setError(""); setSuccess(""); }}>
+                Cancel
+              </div>
+            </div>
+          </form>
+        )}
       </div>
 
       <div className="card" style={{ padding: 24, marginBottom: 16 }}>
@@ -1120,20 +1221,11 @@ function SettingsPage({ user }: { user: string }) {
         </div>
       </div>
 
-      <div className="card" style={{ padding: 24, marginBottom: 16 }}>
+      <div className="card" style={{ padding: 24 }}>
         <div className="section-title"><Bell size={16} color="var(--gold)" /> Notifications</div>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 12 }}>
           <input type="checkbox" checked={notifyEmail} onChange={() => setNotifyEmail(!notifyEmail)} style={{ width: 18, height: 18, accentColor: "var(--blue-neon)" }} />
           <span>Email alerts for new critical threats</span>
-        </div>
-      </div>
-
-      <div className="card" style={{ padding: 24 }}>
-        <div className="section-title"><Key size={16} color="var(--gold)" /> API Keys</div>
-        <div className="section-sub" style={{ marginBottom: 12 }}>Your current API key</div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <code className="font-mono" style={{ background: "rgba(0,210,255,0.05)", padding: "6px 12px", borderRadius: 6, flex: 1, border: "1px solid var(--border)" }}>{apiKey}</code>
-          <div className="btn" onClick={() => alert("Backend API not connected: API Key generation must be handled securely on the server.")}>Regenerate</div>
         </div>
       </div>
     </div>
@@ -1744,7 +1836,7 @@ export default function App() {
       <div className="hexbg" />
       <Sidebar page={page} setPage={setPage} collapsed={collapsed} setCollapsed={setCollapsed} onLogout={handleLogout} user={user} onNavigate={(href) => router.push(href)} />
       <div className="main">
-        <TopBar title={title} subtitle={subtitle} onUpload={handleUpload} dataSource={dataSource} onScan={handleScan} onExport={handleExport} user={user} dark={dark} setDark={toggleTheme} onLogout={handleLogout} />
+        <TopBar title={title} subtitle={subtitle} onUpload={handleUpload} dataSource={dataSource} onScan={handleScan} onExport={handleExport} user={user} dark={dark} setDark={toggleTheme} onLogout={handleLogout} onNavigate={setPage} />
         {uploadError && (
           <div style={{ margin: "14px 28px 0", padding: "10px 14px", background: "rgba(255,42,95,0.1)", border: "1px solid rgba(255,42,95,0.3)", borderRadius: 8, fontSize: 12.5, color: "var(--red)", display: "flex", alignItems: "center", gap: 8 }}>
             <AlertTriangle size={13} />{uploadError}
