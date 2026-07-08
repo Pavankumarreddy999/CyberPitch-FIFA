@@ -40,6 +40,10 @@ async def scan_domain(request: DomainRequest, db: Session = Depends(get_db)):
         # Step 2 & 3: Run Feature Aggregator
         features = await aggregate_features(domain, db)
 
+        # Check for non-existing or completely inactive domains
+        if features.get("IP Address") == "0.0.0.0" and features.get("Registrar", "Unknown") == "Unknown":
+            raise HTTPException(status_code=404, detail="Domain does not exist, is unregistered, or is completely inactive.")
+
         # Step 4: Run ML Prediction
         prediction_res = make_prediction(features)
 

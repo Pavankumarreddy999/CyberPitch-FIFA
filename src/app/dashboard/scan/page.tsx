@@ -256,8 +256,6 @@ export default function ScanPage() {
                     <h4 className="text-xs font-bold uppercase text-gray-400 tracking-wider mb-3">Engine Calculations & Features</h4>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-center">
                       {[
-                        { label: "Phishing Prob.", val: typeof result["Phishing Probability"] === "number" ? (result["Phishing Probability"] * 100).toFixed(1) + "%" : "N/A" },
-                        { label: "Visual Match", val: typeof result["Visual Similarity Score"] === "number" ? (result["Visual Similarity Score"] * 100).toFixed(1) + "%" : "N/A" },
                         { label: "WHOIS Age", val: result["WHOIS Age Days"] !== undefined ? `${result["WHOIS Age Days"]} Days` : "Unknown" },
                         { label: "SSL Status", val: result["SSL Status"] || "Unknown" },
                         { label: "Hosting", val: result["Hosting Country"] || "Unknown" },

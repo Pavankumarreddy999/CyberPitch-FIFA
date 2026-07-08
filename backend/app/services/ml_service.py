@@ -160,7 +160,7 @@ def _train_rf():
         "SSL Status Numerical":       np.random.choice([0, 1, 2, 3], half, p=[0.4, 0.2, 0.1, 0.3]),
         "SSL Valid Days Remaining":   [np.random.randint(1, 91) if s == 0 else 0
                                        for s in np.random.choice([0, 1, 2, 3], half, p=[0.4, 0.2, 0.1, 0.3])],
-        "Visual Similarity Score":    np.random.uniform(65.0, 99.0, half),
+        "Visual Similarity Score":    np.random.uniform(10.0, 99.0, half),
         "Malware Signature Match":    np.random.choice([0, 1], half, p=[0.8, 0.2]),
         "Social Media Mentions":      np.random.choice([0, 1, 2], half, p=[0.8, 0.15, 0.05]),
         "OSINT Report Count":         np.random.randint(0, 5, half),
@@ -305,6 +305,32 @@ def make_prediction(features: dict) -> dict:
          (falls back to RF-based score if HGB model is unavailable)
       3. Real SHAP explanations (falls back to hand-rolled if shap missing)
     """
+    
+    # ── Whitelist Check for Official Domains ─────────────────────────────────
+    LEGIT_FIFA_DOMAINS = [
+        "fifa.com",
+        "fifaplus.com",
+        "fifa.org",
+        "tickets.fifa.com",
+        "store.fifa.com",
+        "digital.fifa.com",
+        "inside.fifa.com"
+    ]
+    
+    domain_str = features.get("domain", "").lower()
+    for legit in LEGIT_FIFA_DOMAINS:
+        if domain_str == legit or domain_str.endswith("." + legit):
+            return {
+                "Phishing Probability":  0.0,
+                "Risk Score":            0,
+                "Confidence Score":      1.0,
+                "Threat Type":           "Official FIFA Domain",
+                "Severity":              "Safe",
+                "Recommended Action":    "None (Verified Official)",
+                "Status":                "Verified Safe",
+                "Explanations":          ["This is a known, verified official FIFA domain."],
+                "SHAP Explanations":     [],
+            }
     # ── SSL numeric mapping ──────────────────────────────────────────────────
     ssl_str = features.get("SSL Status", "Invalid")
     ssl_num = {"Valid": 0, "Self-Signed": 1, "Expired": 2}.get(ssl_str, 3)
@@ -388,6 +414,31 @@ def make_prediction(features: dict) -> dict:
             risk_score = 95  # deterministic high score for confirmed threats
         else:
             risk_score = int(prob * 100)
+            
+    # ── Heuristic Boosts ─────────────────────────────────────────────────────
+    boost = 0
+    if features.get("WHOIS Age Days", 365) < 30:
+        boost += 20
+    
+    # If it tries to impersonate FIFA or ticketing/rewards but has invalid/no SSL
+    ssl_num_val = {"Valid": 0, "Self-Signed": 1, "Expired": 2}.get(features.get("SSL Status", "Invalid"), 3)
+    has_bad_keyword = any(features.get(k) for k in ["Contains Ticket Keyword", "Contains Reward Keyword", "Contains Stream Keyword", "Contains FIFA Keyword"])
+    if has_bad_keyword and ssl_num_val > 0:
+        boost += 30
+        
+    # If typosquatting is very close
+    if features.get("Typosquat Distance to FIFA", 4) <= 2:
+        boost += 20
+        
+    # If visual similarity is decent but not caught
+    if features.get("Visual Similarity Score", 0) > 40:
+        boost += 15
+
+    risk_score = min(risk_score + boost, 100)
+    
+    # Ensure minimum risk score if multiple bad keywords are present
+    if sum(features.get(k, 0) for k in ["Contains Ticket Keyword", "Contains Reward Keyword", "Contains Stream Keyword", "Contains FIFA Keyword"]) >= 2:
+        risk_score = max(risk_score, 75)
 
     # ── Threat type ──────────────────────────────────────────────────────────
     blacklist = features.get("Blacklist Source", "None")

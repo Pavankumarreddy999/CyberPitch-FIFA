@@ -30,8 +30,6 @@ export async function GET() {
         details: {
           whoisAge: `${item["WHOIS Age Days"]} days`,
           sslStatus: item["SSL Status"],
-          visualSimilarity: item["Visual Similarity Score"],
-          phishingProbability: item["Phishing Probability"],
           recommendedAction: item["Recommended Action"],
         },
       }));

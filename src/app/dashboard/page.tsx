@@ -748,7 +748,7 @@ function DomainIntel({ data }: { data: ThreatRecord[] }) {
               <th className="sortable" onClick={() => handleSort("ageDays")}>Age {sortKey === "ageDays" ? (sortAsc ? "↑" : "↓") : ""}</th>
               <th>SSL</th>
               <th>Country</th>
-              <th className="sortable" onClick={() => handleSort("similarityScore")}>Similarity {sortKey === "similarityScore" ? (sortAsc ? "↑" : "↓") : ""}</th>
+
               <th>Status</th>
             </tr>
           </thead>
@@ -768,7 +768,7 @@ function DomainIntel({ data }: { data: ThreatRecord[] }) {
                   <td className="font-mono" style={{ color: "var(--text-dim)" }}>{d.ageDays}d</td>
                   <td>{sslBadge(d.sslStatus)}</td>
                   <td style={{ color: "var(--text-dim)" }}>{d.country}</td>
-                  <td className="font-mono" style={{ color: "var(--text-dim)" }}>{d.similarityScore ? `${d.similarityScore}%` : "—"}</td>
+
                   <td><span className={`badge ${d.status === "Blocked" ? "badge-low" : d.status === "Active" ? "badge-high" : "badge-medium"}`}>{d.status}</span></td>
                 </tr>
                 {expanded === d.id && (
@@ -1554,18 +1554,10 @@ function ScanView({
 
             {scanError && <div style={{ color: "var(--red)", fontSize: 13 }}>{scanError}</div>}
 
-            <div className="stat-grid" style={{ gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 0 }}>
+            <div className="stat-grid" style={{ gridTemplateColumns: "1fr", gap: 12, marginBottom: 0 }}>
               <div className="card" style={{ padding: 16, textAlign: "center" }}>
                 <div className="stat-label" style={{ marginTop: 0, marginBottom: 8 }}>Risk Score</div>
                 <div className="stat-value">{scanResult["Risk Score"]}</div>
-              </div>
-              <div className="card" style={{ padding: 16, textAlign: "center" }}>
-                <div className="stat-label" style={{ marginTop: 0, marginBottom: 8 }}>Phishing Prob.</div>
-                <div className="stat-value" style={{ fontSize: 20 }}>{typeof scanResult["Phishing Probability"] === "number" ? (scanResult["Phishing Probability"] * 100).toFixed(1) + "%" : "N/A"}</div>
-              </div>
-              <div className="card" style={{ padding: 16, textAlign: "center" }}>
-                <div className="stat-label" style={{ marginTop: 0, marginBottom: 8 }}>Visual Match</div>
-                <div className="stat-value" style={{ fontSize: 20 }}>{typeof scanResult["Visual Similarity Score"] === "number" ? (scanResult["Visual Similarity Score"] * 100).toFixed(1) + "%" : "N/A"}</div>
               </div>
             </div>
 

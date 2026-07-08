@@ -144,8 +144,7 @@ export default function DomainDetailPage() {
                   <Activity className="w-5 h-5 text-purple-500" />
                   <h3 className="font-semibold text-gray-900 dark:text-white text-sm">ML & Heuristics</h3>
                 </div>
-                <MetaRow label="Phishing Probability" value={`${d["Phishing Probability"]}%`} highlight={d["Phishing Probability"] > 70 ? "text-red-500" : undefined} />
-                <MetaRow label="Visual Similarity"    value={`${d["Visual Similarity Score"]}%`} highlight={d["Visual Similarity Score"] > 75 ? "text-orange-500" : undefined} />
+
                 <MetaRow label="Typosquat Distance"   value={d["Typosquat Distance to FIFA"]} highlight={d["Typosquat Distance to FIFA"] <= 1 ? "text-red-500" : undefined} />
                 <MetaRow label="OSINT Reports"        value={d["OSINT Report Count"]} highlight={d["OSINT Report Count"] > 0 ? "text-orange-500" : undefined} />
                 <MetaRow label="Malware Match"        value={d["Malware Signature Match"] ? "Yes ⚠️" : "No"} highlight={d["Malware Signature Match"] ? "text-red-600" : undefined} />
